@@ -60,7 +60,7 @@ void Configuration(void)
 	#define	FONT_SIZE_Y	16
 	#define	START_X		0
 	
-	static	int	cur_x, cur_y;
+	static	int	cur_y;
 	
 	gScreen.FillRect( 0, 0x000400 );
 

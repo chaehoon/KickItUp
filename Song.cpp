@@ -26,7 +26,7 @@ SONG::~SONG()
 {
 }
 
-STEP	ReadSTF(char *fileName)
+STEP	ReadSTF(const char *fileName)
 {
 	STEP STP;
 
@@ -39,7 +39,7 @@ STEP	ReadSTF(char *fileName)
 
 	double tmpStart = STP.start;
 
-	unsigned int i;
+	unsigned int i = 0;
 	if(STP.tick==2) {
 		for(i=0;;i+=2) {
 			if(tmpStart<bpmcount)
@@ -69,7 +69,7 @@ STEP	ReadSTF(char *fileName)
 	return STP;
 }
 
-STEP_NEW	ReadKSF(char *fileName)
+STEP_NEW	ReadKSF(const char *fileName)
 {
 	STEP_NEW STP;
 	char TEMP[50];
@@ -219,7 +219,7 @@ STEP_NEW	ReadKSF(char *fileName)
 				STP.start3=atoi(TEMP);
 			} else if(strcmp(szStr,"STEP")==0) {
 				for(i=0;i<2048;i++) {
-					fscanf(F,"%s\n",&STP.step[i]);
+					fscanf(F,"%s\n",STP.step[i]);
 					if(strcmp(STP.step[i],"2222222222222")==0)break;
 				}
 			}
@@ -270,7 +270,7 @@ bool GetFullPathName( const char * fileName, char * outputDir, const size_t size
 
 }
 
-void SONG::ReadCrazy_1_STF(char *fileName)
+void SONG::ReadCrazy_1_STF(const char *fileName)
 {
 	STEP STP;
 
@@ -298,7 +298,7 @@ void SONG::ReadCrazy_1_STF(char *fileName)
     LoadDiskImage();
 }
 
-void SONG::ReadCrazy_1_KSF(char *fileName)
+void SONG::ReadCrazy_1_KSF(const char *fileName)
 {
 	STEP_NEW STP;
 
@@ -331,7 +331,7 @@ void SONG::ReadCrazy_1_KSF(char *fileName)
     LoadDiskImage();
 }
 
-void SONG::ReadCrazy_2_STF(char *fileName)
+void SONG::ReadCrazy_2_STF(const char *fileName)
 {
 	STEP STP;
 
@@ -356,7 +356,7 @@ void SONG::ReadCrazy_2_STF(char *fileName)
     LoadDiskImage();
 }
 
-void SONG::ReadCrazy_2_KSF(char *fileName)
+void SONG::ReadCrazy_2_KSF(const char *fileName)
 {
 	STEP_NEW STP;
 	STP=ReadKSF(fileName);
@@ -388,7 +388,7 @@ void SONG::ReadCrazy_2_KSF(char *fileName)
     LoadDiskImage();
 }
 
-void SONG::ReadHard_1_STF(char *fileName)
+void SONG::ReadHard_1_STF(const char *fileName)
 {
 	STEP STP;
 	
@@ -413,7 +413,7 @@ void SONG::ReadHard_1_STF(char *fileName)
     LoadDiskImage();
 }
 
-void SONG::ReadHard_1_KSF(char *fileName)
+void SONG::ReadHard_1_KSF(const char *fileName)
 {
 	STEP_NEW STP;
 	
@@ -446,7 +446,7 @@ void SONG::ReadHard_1_KSF(char *fileName)
     LoadDiskImage();
 }
 
-void SONG::ReadHard_2_STF(char *fileName)
+void SONG::ReadHard_2_STF(const char *fileName)
 {
 	STEP STP;
 	
@@ -471,7 +471,7 @@ void SONG::ReadHard_2_STF(char *fileName)
     LoadDiskImage();
 }
 
-void SONG::ReadHard_2_KSF(char *fileName)
+void SONG::ReadHard_2_KSF(const char *fileName)
 {
 	STEP_NEW STP;
 	
@@ -504,7 +504,7 @@ void SONG::ReadHard_2_KSF(char *fileName)
     LoadDiskImage();
 }
 
-void SONG::ReadEasy_1_STF(char *fileName)
+void SONG::ReadEasy_1_STF(const char *fileName)
 {
 	STEP STP;
 	
@@ -529,7 +529,7 @@ void SONG::ReadEasy_1_STF(char *fileName)
     LoadDiskImage();
 }
 
-void SONG::ReadEasy_1_KSF(char *fileName)
+void SONG::ReadEasy_1_KSF(const char *fileName)
 {
 	STEP_NEW STP;
 	
@@ -562,7 +562,7 @@ void SONG::ReadEasy_1_KSF(char *fileName)
     LoadDiskImage();
 }
 
-void SONG::ReadEasy_2_STF(char *fileName)
+void SONG::ReadEasy_2_STF(const char *fileName)
 {
 	STEP STP;
 	
@@ -587,7 +587,7 @@ void SONG::ReadEasy_2_STF(char *fileName)
     LoadDiskImage();
 }
 
-void SONG::ReadEasy_2_KSF(char *fileName)
+void SONG::ReadEasy_2_KSF(const char *fileName)
 {
 	STEP_NEW STP;
 	
@@ -621,7 +621,7 @@ void SONG::ReadEasy_2_KSF(char *fileName)
 }
 
 
-void SONG::ReadDouble_STF(char *fileName)
+void SONG::ReadDouble_STF(const char *fileName)
 {
 	STEP STP;
 	
@@ -646,7 +646,7 @@ void SONG::ReadDouble_STF(char *fileName)
     LoadDiskImage();
 }
 
-void SONG::ReadDouble_KSF(char *fileName)
+void SONG::ReadDouble_KSF(const char *fileName)
 {
 	STEP_NEW STP;
 	

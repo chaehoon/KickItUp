@@ -79,23 +79,23 @@ public:
 	int Easy_Diff;
 	int Double_Diff;
 
-	void ReadCrazy_1_STF(char *fileName);
-	void ReadCrazy_1_KSF(char *fileName);
-	void ReadCrazy_2_STF(char *fileName);
-	void ReadCrazy_2_KSF(char *fileName);
+	void ReadCrazy_1_STF(const char *fileName);
+	void ReadCrazy_1_KSF(const char *fileName);
+	void ReadCrazy_2_STF(const char *fileName);
+	void ReadCrazy_2_KSF(const char *fileName);
 
-	void ReadHard_1_STF(char *fileName);
-	void ReadHard_1_KSF(char *fileName);
-	void ReadHard_2_STF(char *fileName);
-	void ReadHard_2_KSF(char *fileName);
+	void ReadHard_1_STF(const char *fileName);
+	void ReadHard_1_KSF(const char *fileName);
+	void ReadHard_2_STF(const char *fileName);
+	void ReadHard_2_KSF(const char *fileName);
 	
-	void ReadEasy_1_STF(char *fileName);
-	void ReadEasy_1_KSF(char *fileName);
-	void ReadEasy_2_STF(char *fileName);
-	void ReadEasy_2_KSF(char *fileName);
+	void ReadEasy_1_STF(const char *fileName);
+	void ReadEasy_1_KSF(const char *fileName);
+	void ReadEasy_2_STF(const char *fileName);
+	void ReadEasy_2_KSF(const char *fileName);
 	
-	void ReadDouble_STF(char *fileName);
-	void ReadDouble_KSF(char *fileName);
+	void ReadDouble_STF(const char *fileName);
+	void ReadDouble_KSF(const char *fileName);
 
 	bool HaveCrazy;
 	bool HaveHard;

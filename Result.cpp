@@ -140,8 +140,6 @@ void Result(void)
 	
 	static	int Count,Phase;
 
-	static	Uint32	Perfect, Great, Good, Bad, Miss;
-	
 	static	Uint32		i;
 
 	static	char	Judge1p,Judge2p;		// 1p, 2p --'S' 'A' 'B' 'C' 'F'

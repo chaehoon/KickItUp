@@ -7,9 +7,9 @@
 class Chunk : public Sound
 {
 private:
-	FMOD::System *	m_pSystem;
-	FMOD::Sound *	m_pSound;	
-	FMOD::Channel *	m_pChannel;
+	FMOD_SYSTEM  *	m_pSystem;
+	FMOD_SOUND  *	m_pSound;
+	FMOD_CHANNEL  *	m_pChannel;
 
 public:
 	Chunk();

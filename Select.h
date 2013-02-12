@@ -1,10 +1,6 @@
 #ifndef	_KICKITUP_SELECT_H
 #define	_KICKITUP_SELECT_H
 
-#ifdef _WIN32
-#	pragma warning(disable:4996)
-#endif // _WIN32
-
 #define	HMODE_CANCEL	99
 #define HMODE_2X		1
 #define	HMODE_4X		2

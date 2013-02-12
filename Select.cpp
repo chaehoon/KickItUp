@@ -396,7 +396,7 @@ void SelectSong ( void )
 
 	static	time_t t;
 
-	static	int a,b,c;
+	static	int a,b;
 
 	static	int iMove;
 
