@@ -1,6 +1,6 @@
-#ifndef __DEAD_INCLUDE__
-#define __DEAD_INCLUDE__
+#ifndef _KICKITUP_DEAD_H
+#define _KICKITUP_DEAD_H
 
 void Dead(void);
 
-#endif
+#endif	// _DEAD_H

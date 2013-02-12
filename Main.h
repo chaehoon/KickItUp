@@ -1,18 +1,21 @@
-#ifndef __MAIN_INCLUDED__
-#define __MAIN_INCLUDED__
+#ifndef	_KICKITUP_MAIN_H
+#define	_KICKITUP_MAIN_H
 
-#include <ddraw.h>
-#include "media.h"
+#include "Surface.h"
+#include "Music.h"
 #include <stdio.h>
 
-#define NORMAL		0
+extern Music    gIntro;
+extern Music    gSong;
+
+#define	NORMAL		0
 #define	PRESS		1
 
 #define	GAMETITLE	0
-#define MODESELECT	1
-#define SELECTSONG	2
+#define	MODESELECT	1
+#define	SELECTSONG	2
 #define	STAGE1		3
-#define	DOUBLE		4
+#define	DOUBLEST    4
 #define	COUPLE		5
 #define DEAD		6
 #define CONFIG		7
@@ -27,8 +30,8 @@
 
 #define END			99
 
-#define	TRUE		1
-#define FALSE		0
+#define	true		1
+#define false		0
 
 #define MAX_DATA	2048
 
@@ -60,34 +63,31 @@
 #define	JUDGE_SIZE_X	250
 #define	JUDGE_SIZE_Y	50
 
-extern LPDIRECTDRAW			g_pDD;
-extern LPDIRECTDRAWSURFACE	g_pDDSPrimary;
-extern LPDIRECTDRAWSURFACE	g_pDDSBack;
+extern Surface gSelectBack;
+extern Surface gScreen;
 
-extern HWND hWnd;
+extern	bool	SongFlag;
 
-extern	BOOL	SongFlag;
+extern	bool	bModeMirror1p;
+extern	bool	bModeNonstep1p;
+extern	bool	bModeSynchro;
+extern	bool	bModeUnion1p;
+extern	bool	bModeRandom1p;
+extern	bool	b4dMix1p;
+extern	bool	bModeVanish1p;
+extern	bool	bModeCrazy1p;
+extern	bool	bModeSuddenR1p;
+extern	bool	bModeRandomS1p;
 
-extern	BOOL	bModeMirror1p;
-extern	BOOL	bModeNonstep1p;
-extern	BOOL	bModeSynchro;
-extern	BOOL	bModeUnion1p;
-extern	BOOL	bModeRandom1p;
-extern	BOOL	b4dMix1p;
-extern	BOOL	bModeVanish1p;
-extern	BOOL	bModeCrazy1p;
-extern	BOOL	bModeSuddenR1p;
-extern	BOOL	bModeRandomS1p;
-
-extern	BOOL	bModeMirror2p;
-extern	BOOL	bModeNonstep2p;
-extern	BOOL	bModeUnion2p;
-extern	BOOL	bModeRandom2p;
-extern	BOOL	b4dMix2p;
-extern	BOOL	bModeVanish2p;
-extern	BOOL	bModeCrazy2p;
-extern	BOOL	bModeSuddenR2p;
-extern	BOOL	bModeRandomS2p;
+extern	bool	bModeMirror2p;
+extern	bool	bModeNonstep2p;
+extern	bool	bModeUnion2p;
+extern	bool	bModeRandom2p;
+extern	bool	b4dMix2p;
+extern	bool	bModeVanish2p;
+extern	bool	bModeCrazy2p;
+extern	bool	bModeSuddenR2p;
+extern	bool	bModeRandomS2p;
 
 extern	int		HighSpeed1p;
 extern	int		HighSpeed2p;
@@ -113,31 +113,31 @@ extern	int		Gauge2p;
 extern long		Score1p;
 extern long		Score2p;
 
-extern	DWORD	Combo1p;
-extern	DWORD	Combo2p;
-extern	DWORD	MaxCombo1p;
-extern	DWORD	MaxCombo2p;
+extern	Uint32	Combo1p;
+extern	Uint32	Combo2p;
+extern	Uint32	MaxCombo1p;
+extern	Uint32	MaxCombo2p;
 
 extern	char	Judgement1p;
 extern	char	Judgement2p;
-extern	DWORD	dwState;
-extern	DWORD	dwState2;
-extern	BOOL	Start1p;
-extern	BOOL	Start2p;
-extern	DWORD	cMaxCombo1p;
+extern	Uint32	dwState;
+extern	Uint32	dwState2;
+extern	bool	Start1p;
+extern	bool	Start2p;
+extern	Uint32	cMaxCombo1p;
 
-extern	DWORD	cPerfect1p;
-extern	DWORD	cGreat1p;
-extern	DWORD	cGood1p;
-extern	DWORD	cBad1p;
-extern	DWORD	cMiss1p;
+extern	Uint32	cPerfect1p;
+extern	Uint32	cGreat1p;
+extern	Uint32	cGood1p;
+extern	Uint32	cBad1p;
+extern	Uint32	cMiss1p;
 
-extern	DWORD	cPerfect2p;
-extern	DWORD	cGreat2p;
-extern	DWORD	cGood2p;
-extern	DWORD	cBad2p;
-extern	DWORD	cMiss2p;
-extern	DWORD	cMaxCombo2p;
+extern	Uint32	cPerfect2p;
+extern	Uint32	cGreat2p;
+extern	Uint32	cGood2p;
+extern	Uint32	cBad2p;
+extern	Uint32	cMiss2p;
+extern	Uint32	cMaxCombo2p;
 
 extern char				g_ProgramState;
 
@@ -151,48 +151,37 @@ extern	double			Data_y1[MAX_DATA+1];
 
 extern char				Data_Double[MAX_DATA+1][14];
 extern char				Data_Double_Judge[MAX_DATA+1][14];
-extern double			Data_Double_y[MAX_DATA+1];//¡∑∫∏ µ•¿Ã≈Õ¿« Y∞™¿ª ∞°¡ˆ∞Ì ¿÷¥¬ πËø≠
+extern double			Data_Double_y[MAX_DATA+1];//Ï°±Î≥¥ Îç∞Ïù¥ÌÑ∞Ïùò YÍ∞íÏùÑ Í∞ÄÏßÄÍ≥† ÏûàÎäî Î∞∞Ïó¥
 
 extern	char				ArrowState1p[10];
 extern	char				ArrowState2p[10];
 extern	char				ArrowState_Joy[10];
 
 
-extern	DWORD				PressedKey1p[10];
-extern	DWORD				PressedKey2p[10];
-extern	DWORD				PressedKey_Joy[10];
+extern	Uint32				PressedKey1p[10];
+extern	Uint32				PressedKey2p[10];
+extern	Uint32				PressedKey_Joy[10];
 
 extern	int				ALPHA;
 extern	int				inc;
-extern	DWORD	CKey_CFont;
-
-extern	CMedia	*intro;
-extern	CMedia	*song;
+extern	
 
 void			DebugPrintf(char *str,...);
 
-void			DisplayStageCount(DWORD Count);
+void			DisplayStageCount(const int count);
 void			GameOver1(void);
-void			DrawArrow1p(DWORD cur);
-void			DrawArrow2p(DWORD cur);
+void			DrawArrow1p(Uint32 cur);
+void			DrawArrow2p(Uint32 cur);
 void			DrawJudge1p(void);
 void			DrawJudge2p(void);
 void			DrawScore1p(void);
 void			DrawScore2p(void);
-void			DisplayMessage(int x, int y, char *message);
-HRESULT			ClpBlt(int x ,int y ,LPDIRECTDRAWSURFACE ds,LPRECT srect,DWORD mode);
+void			DisplayMessage(int x, int y, const char *message);
+bool			ClpBlt(int x ,int y ,Surface & surface, const SDL_Rect & srect);
 void			StageTitle(void);
-HRESULT			RestoreAll(void);
-void			Flipp(void);
-void		ReleaseAllObjects(void);
 void			UpdateFrame(void);
-long FAR PASCAL WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
-HRESULT			InitDI(HINSTANCE hInstance);
-HRESULT			InitDD(void);
-HRESULT			KLoadImage(void);
-HRESULT			InitFail(HWND hWnd, HRESULT hRet, LPCTSTR szError,...);
-HRESULT			InitWin(HINSTANCE hInstance, DWORD Width, DWORD Height, int nCmdShow);
-int PASCAL		WinMain(HINSTANCE hInstance,HINSTANCE hPrevInstance, LPSTR lpCmdLine,int nCmdShow);
-HRESULT TransAlphaImproved(LPDIRECTDRAWSURFACE src, LPDIRECTDRAWSURFACE dest, 
-				   LONG lDestX, LONG lDestY, RECT srcRect, WORD ALPHA, DWORD ColorKey, WORD BPP);
-#endif
+bool			KLoadImage(void);
+
+void			ERRCHECK(FMOD_RESULT result);
+
+#endif // _MAIN_H

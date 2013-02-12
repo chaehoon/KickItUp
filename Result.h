@@ -1,6 +1,7 @@
-#ifndef __RESULT_INCLUDE__
-#define __RESULT_INCLUDE__
+#ifndef	_KICKITUP_RESULT_H
+#define	_KICKITUP_RESULT_H
 
 void	Result(void);
 void	DisplayNumber(int x, int y, char *message);
-#endif
+
+#endif	// _RESULT_H

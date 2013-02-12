@@ -10,84 +10,69 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#include <dsound.h>
-#include "SONG.h"
+#include "Song.h"
 #include <stdio.h>
-#include <io.h>
-#include <windows.h>
-
+// #include <direct.h>
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
 SONG::SONG()
 {
-	
+    mpDiskImage = & mThisSongDiskImage;
 }
 
 SONG::~SONG()
 {
-
 }
 
-STEP	ReadSTF(char *Filename)
+STEP	ReadSTF(char *fileName)
 {
 	STEP STP;
-	FILE *F;
 
-	char TempStep[MAX_DATA][14];
-	double TempStart, bpmcount;
-	unsigned int i,j;
+	char tmpStep[MAX_DATA][14];
 
-	F=fopen(Filename,"rb");
+	FILE *F = fopen(fileName,"rb");
 	fread(&STP,sizeof(STP),1,F);
 
-	bpmcount=60/STP.BPM;
-	bpmcount*=100;
+	double bpmcount = 60 / STP.BPM * 100;
 
-	TempStart=STP.start;
+	double tmpStart = STP.start;
 
-	if(STP.tick==2)
-	{
-		for(i=0;;i+=2)
-		{
-			if(TempStart<bpmcount)break;
-			TempStart-=bpmcount;
-			strcpy(TempStep[i],"0000000000000");
-			strcpy(TempStep[i+1],"0000000000000");
+	unsigned int i;
+	if(STP.tick==2) {
+		for(i=0;;i+=2) {
+			if(tmpStart<bpmcount)
+				break;
+			tmpStart-=bpmcount;
+			strcpy(tmpStep[i],"0000000000000");
+			strcpy(tmpStep[i+1],"0000000000000");
 		}
-	}
-	else if(STP.tick==4)
-	{
-		for(i=0;;i+=4)
-		{
-			if(TempStart<bpmcount)break;
-			TempStart-=bpmcount;
-			strcpy(TempStep[i],"0000000000000");
-			strcpy(TempStep[i+1],"0000000000000");
-			strcpy(TempStep[i+2],"0000000000000");
-			strcpy(TempStep[i+3],"0000000000000");
+	} else if(STP.tick==4) {
+		for(i=0;;i+=4) {
+			if(tmpStart<bpmcount)break;
+			tmpStart-=bpmcount;
+			strcpy(tmpStep[i],"0000000000000");
+			strcpy(tmpStep[i+1],"0000000000000");
+			strcpy(tmpStep[i+2],"0000000000000");
+			strcpy(tmpStep[i+3],"0000000000000");
 		}
 	}
 	
-	for(j=0;j<MAX_DATA-i;j++)
-	{
-		strcpy(TempStep[i+j],STP.step[j]);
+	for(unsigned int j = 0 ; j < (MAX_DATA - i) ; j++) {
+		strcpy(tmpStep[i+j], STP.step[j]);
 	}
 
-	STP.start=(int)TempStart;
-	memcpy(&STP.step,&TempStep,sizeof(STP.step));
+	STP.start = (int)tmpStart;
+	memcpy(&STP.step, &tmpStep,sizeof(STP.step));
 	
 	return STP;
 }
 
-STEP_NEW	ReadKSF(char *Filename)
+STEP_NEW	ReadKSF(char *fileName)
 {
 	STEP_NEW STP;
-	FILE *F;
 	char TEMP[50];
-
-	char	szStr[256];
 
 	char TempStep[MAX_DATA][14];
 	
@@ -106,185 +91,134 @@ STEP_NEW	ReadKSF(char *Filename)
 		strcpy(STP.step[i],"0000000000000");
 
 	
-	F=fopen(Filename,"rt");
-	if(F==NULL)
-	{
-		MessageBox(NULL,Filename,"SONG",NULL);
+	FILE *F = fopen(fileName,"rt");
+	if(F==NULL)	{
+		MsgBox( fileName,"SONG",NULL);
 	}
-	for(;;)
-	{
-		if(feof(F))break;
-		if(fgetc(F)=='#')
-		{
-			for(i=0;;i++)
-			{
+
+	char	szStr[256];
+	for(;;) {
+		if(feof(F))
+			break;
+		if(fgetc(F)=='#'){
+			for(i=0;;i++) {
 				szStr[i]=fgetc(F);
-				if(szStr[i]==':')
-				{
+				if(szStr[i]==':') {
 					szStr[i]='\0';
 					break;
 				}
 			}
-			if(strcmp(szStr,"TITLE")==0)
-			{
-				for(i=0;;i++)
-				{
+
+			// #TITLE:Title Name;
+			if(strcmp(szStr,"TITLE")==0) {
+				for(i=0;;i++) {
 					STP.name[i]=fgetc(F);
-					if(STP.name[i]==';')
-					{
+					if(STP.name[i]==';') {
 						STP.name[i]='\0';
 						break;
 					}
 				}
-			}
-			else if(strcmp(szStr,"TICKCOUNT")==0)
-			{
-				for(i=0;;i++)
-				{
+			} else if(strcmp(szStr,"TICKCOUNT")==0) {	// #TICKCOUNT:100;
+				for(i=0;;i++) {
 					TEMP[i]=fgetc(F);
-					if(TEMP[i]==';')
-					{
+					if(TEMP[i]==';') {
 						TEMP[i]='\0';
 						break;
 					}
 				}
 				STP.tick=atoi(TEMP);
-			}
-			else if(strcmp(szStr,"BUNKI")==0)
-			{
-
-				for(i=0;;i++)
-				{
+			} else if(strcmp(szStr,"BUNKI")==0) {	// #BUNKI:100;
+				for(i=0;;i++) {
 					TEMP[i]=fgetc(F);
-					if(TEMP[i]==';')
-					{
+					if(TEMP[i]==';') {
 						TEMP[i]='\0';
 						break;
 					}
 				}
 				STP.bunki=atoi(TEMP);
-			}
-			else if(strcmp(szStr,"BUNKI2")==0)
-			{
-				for(i=0;;i++)
-				{
+			} else if(strcmp(szStr,"BUNKI2")==0) {	// #BUNKI2:100;
+				for(i=0;;i++) {
 					TEMP[i]=fgetc(F);
-					if(TEMP[i]==';')
-					{
+					if(TEMP[i]==';') {
 						TEMP[i]='\0';
 						break;
 					}
 				}
 				STP.bunki2=atoi(TEMP);
-			}
-			else if(strcmp(szStr,"BPM")==0)
-			{
-					for(i=0;;i++)
-					{
-						TEMP[i]=fgetc(F);
-						if(TEMP[i]==';')
-						{
-							TEMP[i]='\0';
-							break;
-						}
-					}
-					STP.BPM=(float)atof(TEMP);
-			}
-			else if(strcmp(szStr,"BPM2")==0)
-			{
-				for(i=0;;i++)
-				{
+			} else if(strcmp(szStr,"BPM")==0) {		// #BPM:100;
+				for(i=0;;i++) {
 					TEMP[i]=fgetc(F);
-					if(TEMP[i]==';')
-					{
+					if(TEMP[i]==';') {
+						TEMP[i]='\0';
+						break;
+					}
+				}
+				STP.BPM=(float)atof(TEMP);
+			} else if(strcmp(szStr,"BPM2")==0) {	// #BPM2:100;
+				for(i=0;;i++) {
+					TEMP[i]=fgetc(F);
+					if(TEMP[i]==';') {
 						TEMP[i]='\0';
 						break;
 					}
 				}
 				STP.BPM2=(float)atof(TEMP);
-			}
-			else if(strcmp(szStr,"BPM3")==0)
-			{
-				for(i=0;;i++)
-				{
+			} else if(strcmp(szStr,"BPM3")==0) {
+				for(i=0;;i++) {
 					TEMP[i]=fgetc(F);
-					if(TEMP[i]==';')
-					{
+					if(TEMP[i]==';') {
 						TEMP[i]='\0';
 						break;
 					}
 				}
 				STP.BPM3=(float)atof(TEMP);
-			}
-			else if(strcmp(szStr,"DIFFCULTY")==0)
-			{
-				for(i=0;;i++)
-				{
+			} else if(strcmp(szStr,"DIFFCULTY")==0) {
+				for(i=0;;i++) {
 					TEMP[i]=fgetc(F);
-					if(TEMP[i]==';')
-					{
+					if(TEMP[i]==';') {
 						TEMP[i]='\0';
 						break;
 					}
 				}
 				STP._dummy=atoi(TEMP);
-			}
-			else if(strcmp(szStr,"MADI")==0)
-			{
-				for(i=0;;i++)
-				{
+			} else if(strcmp(szStr,"MADI")==0) {
+				for(i=0;;i++) {
 					TEMP[i]=fgetc(F);
-					if(TEMP[i]==';')
-					{
+					if(TEMP[i]==';') {
 						TEMP[i]='\0';
 						break;
 					}
 				}
 				STP.madi=atoi(TEMP);
-			}
-			else if(strcmp(szStr,"STARTTIME")==0)
-			{
-				for(i=0;;i++)
-				{
+			} else if(strcmp(szStr,"STARTTIME")==0) {
+				for(i=0;;i++) {
 					TEMP[i]=fgetc(F);
-					if(TEMP[i]==';')
-					{
+					if(TEMP[i]==';') {
 						TEMP[i]='\0';
 						break;
 					}
 				}
 				STP.start=atoi(TEMP);
-			}
-			else if(strcmp(szStr,"STARTTIME2")==0)
-			{
-				for(i=0;;i++)
-				{
+			} else if(strcmp(szStr,"STARTTIME2")==0) {
+				for(i=0;;i++) {
 					TEMP[i]=fgetc(F);
-					if(TEMP[i]==';')
-					{
+					if(TEMP[i]==';') {
 						TEMP[i]='\0';
 						break;
 					}
 				}
 				STP.start2=atoi(TEMP);
-			}
-			else if(strcmp(szStr,"STARTTIME3")==0)
-			{
-				for(i=0;;i++)
-				{
+			} else if(strcmp(szStr,"STARTTIME3")==0) {
+				for(i=0;;i++) {
 					TEMP[i]=fgetc(F);
-					if(TEMP[i]==';')
-					{
+					if(TEMP[i]==';') {
 						TEMP[i]='\0';
 						break;
 					}
 				}
 				STP.start3=atoi(TEMP);
-			}
-			else if(strcmp(szStr,"STEP")==0)
-			{
-				for(i=0;i<2048;i++)
-				{
+			} else if(strcmp(szStr,"STEP")==0) {
+				for(i=0;i<2048;i++) {
 					fscanf(F,"%s\n",&STP.step[i]);
 					if(strcmp(STP.step[i],"2222222222222")==0)break;
 				}
@@ -297,20 +231,15 @@ STEP_NEW	ReadKSF(char *Filename)
 
 	TempStart=STP.start;
 
-	if(STP.tick==2)
-	{
-		for(i=0;;i+=2)
-		{
+	if(STP.tick==2) {
+		for(i=0;;i+=2) {
 			if(TempStart<bpmcount)break;
 			TempStart-=bpmcount;
 			strcpy(TempStep[i],"0000000000000");
 			strcpy(TempStep[i+1],"0000000000000");
 		}
-	}
-	else if(STP.tick==4)
-	{
-		for(i=0;;i+=4)
-		{
+	} else if(STP.tick==4) {
+		for(i=0;;i+=4) {
 			if(TempStart<bpmcount)break;
 			TempStart-=bpmcount;
 			strcpy(TempStep[i],"0000000000000");
@@ -320,8 +249,7 @@ STEP_NEW	ReadKSF(char *Filename)
 		}
 	}
 	
-	for(j=0;j<MAX_DATA-i;j++)
-	{
+	for(j=0;j<MAX_DATA-i;j++) {
 		strcpy(TempStep[i+j],STP.step[j]);
 	}
 
@@ -331,14 +259,24 @@ STEP_NEW	ReadKSF(char *Filename)
 	return STP;
 }
 
-void SONG::ReadCrazy_1_STF(char *Filename)
+bool GetFullPathName( const char * fileName, char * outputDir, const size_t size )
+{
+    char    buff[PATH_LEN+1] = { 0, };
+    if( getcwd( buff, sizeof( buff ) ) == NULL )
+        return false;
+
+    snprintf( outputDir, size, "%s/%s", buff, fileName );
+    return true;
+
+}
+
+void SONG::ReadCrazy_1_STF(char *fileName)
 {
 	STEP STP;
-	LPTSTR  lpPart;
 
-	STP=ReadSTF(Filename);
+	STP=ReadSTF(fileName);
 
-	HaveCrazy=TRUE;
+	HaveCrazy=true;
 	bpm=STP.BPM;
 
 	Crazy_Start=STP.start;
@@ -347,26 +285,26 @@ void SONG::ReadCrazy_1_STF(char *Filename)
 	sprintf(SongTitle,"%s",STP.name);
 	memcpy(&Data_Crazy,&STP.step,sizeof(STP.step));
 
-	GetFullPathName("Title.bmp",MAX_PATH,TitleImgPath,&lpPart);
-	GetFullPathName("Back.bmp",MAX_PATH,BgImgPath,&lpPart);
-	GetFullPathName("Song.wav",MAX_PATH,PlayWavPath,&lpPart);
-	GetFullPathName("Song.mp3",MAX_PATH,PlayMp3Path,&lpPart);
-	GetFullPathName("Song.mpg",MAX_PATH,PlayMpgPath,&lpPart);
-	GetFullPathName("Intro.wav",MAX_PATH,IntroWavPath,&lpPart);
-	GetFullPathName("Intro.mp3",MAX_PATH,IntroMp3Path,&lpPart);
-	DiskImage=DDLoadBitmap(g_pDD,"Disc.bmp",0,0);
-	if(DiskImage!=NULL)DDSetColorKey(DiskImage,CLR_INVALID);
-	else DiskImage=NoDISC;
+    char    buff[PATH_LEN-1] = { 0, };
+    getcwd( buff, sizeof( buff ) );
+
+	GetFullPathName("Title.bmp",TitleImgPath,PATH_LEN);
+	GetFullPathName("Back.bmp",BgImgPath,PATH_LEN);
+	GetFullPathName("Song.wav",PlayWavPath,PATH_LEN);
+	GetFullPathName("Song.mp3",PlayMp3Path,PATH_LEN);
+	GetFullPathName("Song.mpg",PlayMpgPath,PATH_LEN);
+	GetFullPathName("Intro.wav",IntroWavPath,PATH_LEN);
+	GetFullPathName("Intro.mp3",IntroMp3Path,PATH_LEN);
+    LoadDiskImage();
 }
 
-void SONG::ReadCrazy_1_KSF(char *Filename)
+void SONG::ReadCrazy_1_KSF(char *fileName)
 {
 	STEP_NEW STP;
-	LPTSTR  lpPart;
 
-	STP=ReadKSF(Filename);
+	STP=ReadKSF(fileName);
 
-	HaveCrazy=TRUE;
+	HaveCrazy=true;
 	bpm=STP.BPM;
 	bpm2=STP.BPM2;
 	bpm3=STP.BPM3;
@@ -383,26 +321,23 @@ void SONG::ReadCrazy_1_KSF(char *Filename)
 	sprintf(SongTitle,"%s",STP.name);
 	memcpy(&Data_Crazy,&STP.step,sizeof(STP.step));
 
-	GetFullPathName("Title.bmp",MAX_PATH,TitleImgPath,&lpPart);
-	GetFullPathName("Back.bmp",MAX_PATH,BgImgPath,&lpPart);
-	GetFullPathName("Song.wav",MAX_PATH,PlayWavPath,&lpPart);
-	GetFullPathName("Song.mp3",MAX_PATH,PlayMp3Path,&lpPart);
-	GetFullPathName("Song.mpg",MAX_PATH,PlayMpgPath,&lpPart);
-	GetFullPathName("Intro.wav",MAX_PATH,IntroWavPath,&lpPart);
-	GetFullPathName("Intro.mp3",MAX_PATH,IntroMp3Path,&lpPart);
-	DiskImage=DDLoadBitmap(g_pDD,"Disc.bmp",0,0);
-	if(DiskImage!=NULL)DDSetColorKey(DiskImage,CLR_INVALID);
-	else DiskImage=NoDISC;
+	GetFullPathName("Title.bmp",TitleImgPath,PATH_LEN);
+	GetFullPathName("Back.bmp",BgImgPath,PATH_LEN);
+	GetFullPathName("Song.wav",PlayWavPath,PATH_LEN);
+	GetFullPathName("Song.mp3",PlayMp3Path,PATH_LEN);
+	GetFullPathName("Song.mpg",PlayMpgPath,PATH_LEN);
+	GetFullPathName("Intro.wav",IntroWavPath,PATH_LEN);
+	GetFullPathName("Intro.mp3",IntroMp3Path,PATH_LEN);
+    LoadDiskImage();
 }
 
-void SONG::ReadCrazy_2_STF(char *Filename)
+void SONG::ReadCrazy_2_STF(char *fileName)
 {
 	STEP STP;
-	LPTSTR  lpPart;
 
-	STP=ReadSTF(Filename);
+	STP=ReadSTF(fileName);
 
-	HaveCouple=TRUE;
+	HaveCouple=true;
 	bpm=STP.BPM;
 
 	Crazy_Start=STP.start;
@@ -411,26 +346,22 @@ void SONG::ReadCrazy_2_STF(char *Filename)
 	sprintf(SongTitle,"%s",STP.name);
 	memcpy(&Data_Crazy1,&STP.step,sizeof(STP.step));
 
-	GetFullPathName("Title.bmp",MAX_PATH,TitleImgPath,&lpPart);
-	GetFullPathName("Back.bmp",MAX_PATH,BgImgPath,&lpPart);
-	GetFullPathName("Song.wav",MAX_PATH,PlayWavPath,&lpPart);
-	GetFullPathName("Song.mp3",MAX_PATH,PlayMp3Path,&lpPart);
-	GetFullPathName("Song.mpg",MAX_PATH,PlayMpgPath,&lpPart);
-	GetFullPathName("Intro.wav",MAX_PATH,IntroWavPath,&lpPart);
-	GetFullPathName("Intro.mp3",MAX_PATH,IntroMp3Path,&lpPart);
-	DiskImage=DDLoadBitmap(g_pDD,"Disc.bmp",0,0);
-	if(DiskImage!=NULL)DDSetColorKey(DiskImage,CLR_INVALID);
-	else DiskImage=NoDISC;
+	GetFullPathName("Title.bmp",TitleImgPath,PATH_LEN);
+	GetFullPathName("Back.bmp",BgImgPath,PATH_LEN);
+	GetFullPathName("Song.wav",PlayWavPath,PATH_LEN);
+	GetFullPathName("Song.mp3",PlayMp3Path,PATH_LEN);
+	GetFullPathName("Song.mpg",PlayMpgPath,PATH_LEN);
+	GetFullPathName("Intro.wav",IntroWavPath,PATH_LEN);
+	GetFullPathName("Intro.mp3",IntroMp3Path,PATH_LEN);
+    LoadDiskImage();
 }
 
-void SONG::ReadCrazy_2_KSF(char *Filename)
+void SONG::ReadCrazy_2_KSF(char *fileName)
 {
 	STEP_NEW STP;
-	LPTSTR  lpPart;
+	STP=ReadKSF(fileName);
 
-	STP=ReadKSF(Filename);
-
-	HaveCouple=TRUE;
+	HaveCouple=true;
 	bpm=STP.BPM;
 	bpm2=STP.BPM2;
 	bpm3=STP.BPM3;
@@ -447,26 +378,23 @@ void SONG::ReadCrazy_2_KSF(char *Filename)
 	sprintf(SongTitle,"%s",STP.name);
 	memcpy(&Data_Crazy1,&STP.step,sizeof(STP.step));
 
-	GetFullPathName("Title.bmp",MAX_PATH,TitleImgPath,&lpPart);
-	GetFullPathName("Back.bmp",MAX_PATH,BgImgPath,&lpPart);
-	GetFullPathName("Song.wav",MAX_PATH,PlayWavPath,&lpPart);
-	GetFullPathName("Song.mp3",MAX_PATH,PlayMp3Path,&lpPart);
-	GetFullPathName("Song.mpg",MAX_PATH,PlayMpgPath,&lpPart);
-	GetFullPathName("Intro.wav",MAX_PATH,IntroWavPath,&lpPart);
-	GetFullPathName("Intro.mp3",MAX_PATH,IntroMp3Path,&lpPart);
-	DiskImage=DDLoadBitmap(g_pDD,"Disc.bmp",0,0);
-	if(DiskImage!=NULL)DDSetColorKey(DiskImage,CLR_INVALID);
-	else DiskImage=NoDISC;
+	GetFullPathName("Title.bmp",TitleImgPath,PATH_LEN);
+	GetFullPathName("Back.bmp",BgImgPath,PATH_LEN);
+	GetFullPathName("Song.wav",PlayWavPath,PATH_LEN);
+	GetFullPathName("Song.mp3",PlayMp3Path,PATH_LEN);
+	GetFullPathName("Song.mpg",PlayMpgPath,PATH_LEN);
+	GetFullPathName("Intro.wav",IntroWavPath,PATH_LEN);
+	GetFullPathName("Intro.mp3",IntroMp3Path,PATH_LEN);
+    LoadDiskImage();
 }
 
-void SONG::ReadHard_1_STF(char *Filename)
+void SONG::ReadHard_1_STF(char *fileName)
 {
 	STEP STP;
-	LPTSTR  lpPart;
+	
+	STP=ReadSTF(fileName);
 
-	STP=ReadSTF(Filename);
-
-	HaveHard=TRUE;
+	HaveHard=true;
 	bpm=STP.BPM;
 
 	Hard_Start=STP.start;
@@ -475,26 +403,23 @@ void SONG::ReadHard_1_STF(char *Filename)
 	sprintf(SongTitle,"%s",STP.name);
 	memcpy(&Data_Hard,&STP.step,sizeof(STP.step));
 
-	GetFullPathName("Title.bmp",MAX_PATH,TitleImgPath,&lpPart);
-	GetFullPathName("Back.bmp",MAX_PATH,BgImgPath,&lpPart);
-	GetFullPathName("Song.wav",MAX_PATH,PlayWavPath,&lpPart);
-	GetFullPathName("Song.mp3",MAX_PATH,PlayMp3Path,&lpPart);
-	GetFullPathName("Song.mpg",MAX_PATH,PlayMpgPath,&lpPart);
-	GetFullPathName("Intro.wav",MAX_PATH,IntroWavPath,&lpPart);
-	GetFullPathName("Intro.mp3",MAX_PATH,IntroMp3Path,&lpPart);
-	DiskImage=DDLoadBitmap(g_pDD,"Disc.bmp",0,0);
-	if(DiskImage!=NULL)DDSetColorKey(DiskImage,CLR_INVALID);
-	else DiskImage=NoDISC;
+	GetFullPathName("Title.bmp",TitleImgPath,PATH_LEN);
+	GetFullPathName("Back.bmp",BgImgPath,PATH_LEN);
+	GetFullPathName("Song.wav",PlayWavPath,PATH_LEN);
+	GetFullPathName("Song.mp3",PlayMp3Path,PATH_LEN);
+	GetFullPathName("Song.mpg",PlayMpgPath,PATH_LEN);
+	GetFullPathName("Intro.wav",IntroWavPath,PATH_LEN);
+	GetFullPathName("Intro.mp3",IntroMp3Path,PATH_LEN);
+    LoadDiskImage();
 }
 
-void SONG::ReadHard_1_KSF(char *Filename)
+void SONG::ReadHard_1_KSF(char *fileName)
 {
 	STEP_NEW STP;
-	LPTSTR  lpPart;
+	
+	STP=ReadKSF(fileName);
 
-	STP=ReadKSF(Filename);
-
-	HaveHard=TRUE;
+	HaveHard=true;
 	bpm=STP.BPM;
 	bpm2=STP.BPM2;
 	bpm3=STP.BPM3;
@@ -511,26 +436,23 @@ void SONG::ReadHard_1_KSF(char *Filename)
 	sprintf(SongTitle,"%s",STP.name);
 	memcpy(&Data_Hard,&STP.step,sizeof(STP.step));
 
-	GetFullPathName("Title.bmp",MAX_PATH,TitleImgPath,&lpPart);
-	GetFullPathName("Back.bmp",MAX_PATH,BgImgPath,&lpPart);
-	GetFullPathName("Song.wav",MAX_PATH,PlayWavPath,&lpPart);
-	GetFullPathName("Song.mp3",MAX_PATH,PlayMp3Path,&lpPart);
-	GetFullPathName("Song.mpg",MAX_PATH,PlayMpgPath,&lpPart);
-	GetFullPathName("Intro.wav",MAX_PATH,IntroWavPath,&lpPart);
-	GetFullPathName("Intro.mp3",MAX_PATH,IntroMp3Path,&lpPart);
-	DiskImage=DDLoadBitmap(g_pDD,"Disc.bmp",0,0);
-	if(DiskImage!=NULL)DDSetColorKey(DiskImage,CLR_INVALID);
-	else DiskImage=NoDISC;
+	GetFullPathName("Title.bmp",TitleImgPath,PATH_LEN);
+	GetFullPathName("Back.bmp",BgImgPath,PATH_LEN);
+	GetFullPathName("Song.wav",PlayWavPath,PATH_LEN);
+	GetFullPathName("Song.mp3",PlayMp3Path,PATH_LEN);
+	GetFullPathName("Song.mpg",PlayMpgPath,PATH_LEN);
+	GetFullPathName("Intro.wav",IntroWavPath,PATH_LEN);
+	GetFullPathName("Intro.mp3",IntroMp3Path,PATH_LEN);
+    LoadDiskImage();
 }
 
-void SONG::ReadHard_2_STF(char *Filename)
+void SONG::ReadHard_2_STF(char *fileName)
 {
 	STEP STP;
-	LPTSTR  lpPart;
+	
+	STP=ReadSTF(fileName);
 
-	STP=ReadSTF(Filename);
-
-	HaveCouple=TRUE;
+	HaveCouple=true;
 	bpm=STP.BPM;
 
 	Hard_Start=STP.start;
@@ -539,26 +461,23 @@ void SONG::ReadHard_2_STF(char *Filename)
 	sprintf(SongTitle,"%s",STP.name);
 	memcpy(&Data_Hard1,&STP.step,sizeof(STP.step));
 
-	GetFullPathName("Title.bmp",MAX_PATH,TitleImgPath,&lpPart);
-	GetFullPathName("Back.bmp",MAX_PATH,BgImgPath,&lpPart);
-	GetFullPathName("Song.wav",MAX_PATH,PlayWavPath,&lpPart);
-	GetFullPathName("Song.mp3",MAX_PATH,PlayMp3Path,&lpPart);
-	GetFullPathName("Song.mpg",MAX_PATH,PlayMpgPath,&lpPart);
-	GetFullPathName("Intro.wav",MAX_PATH,IntroWavPath,&lpPart);
-	GetFullPathName("Intro.mp3",MAX_PATH,IntroMp3Path,&lpPart);
-	DiskImage=DDLoadBitmap(g_pDD,"Disc.bmp",0,0);
-	if(DiskImage!=NULL)DDSetColorKey(DiskImage,CLR_INVALID);
-	else DiskImage=NoDISC;
+	GetFullPathName("Title.bmp",TitleImgPath,PATH_LEN);
+	GetFullPathName("Back.bmp",BgImgPath,PATH_LEN);
+	GetFullPathName("Song.wav",PlayWavPath,PATH_LEN);
+	GetFullPathName("Song.mp3",PlayMp3Path,PATH_LEN);
+	GetFullPathName("Song.mpg",PlayMpgPath,PATH_LEN);
+	GetFullPathName("Intro.wav",IntroWavPath,PATH_LEN);
+	GetFullPathName("Intro.mp3",IntroMp3Path,PATH_LEN);
+    LoadDiskImage();
 }
 
-void SONG::ReadHard_2_KSF(char *Filename)
+void SONG::ReadHard_2_KSF(char *fileName)
 {
 	STEP_NEW STP;
-	LPTSTR  lpPart;
+	
+	STP=ReadKSF(fileName);
 
-	STP=ReadKSF(Filename);
-
-	HaveCouple=TRUE;
+	HaveCouple=true;
 	bpm=STP.BPM;
 	bpm2=STP.BPM2;
 	bpm3=STP.BPM3;
@@ -575,26 +494,23 @@ void SONG::ReadHard_2_KSF(char *Filename)
 	sprintf(SongTitle,"%s",STP.name);
 	memcpy(&Data_Hard1,&STP.step,sizeof(STP.step));
 
-	GetFullPathName("Title.bmp",MAX_PATH,TitleImgPath,&lpPart);
-	GetFullPathName("Back.bmp",MAX_PATH,BgImgPath,&lpPart);
-	GetFullPathName("Song.wav",MAX_PATH,PlayWavPath,&lpPart);
-	GetFullPathName("Song.mp3",MAX_PATH,PlayMp3Path,&lpPart);
-	GetFullPathName("Song.mpg",MAX_PATH,PlayMpgPath,&lpPart);
-	GetFullPathName("Intro.wav",MAX_PATH,IntroWavPath,&lpPart);
-	GetFullPathName("Intro.mp3",MAX_PATH,IntroMp3Path,&lpPart);
-	DiskImage=DDLoadBitmap(g_pDD,"Disc.bmp",0,0);
-	if(DiskImage!=NULL)DDSetColorKey(DiskImage,CLR_INVALID);
-	else DiskImage=NoDISC;
+	GetFullPathName("Title.bmp",TitleImgPath,PATH_LEN);
+	GetFullPathName("Back.bmp",BgImgPath,PATH_LEN);
+	GetFullPathName("Song.wav",PlayWavPath,PATH_LEN);
+	GetFullPathName("Song.mp3",PlayMp3Path,PATH_LEN);
+	GetFullPathName("Song.mpg",PlayMpgPath,PATH_LEN);
+	GetFullPathName("Intro.wav",IntroWavPath,PATH_LEN);
+	GetFullPathName("Intro.mp3",IntroMp3Path,PATH_LEN);
+    LoadDiskImage();
 }
 
-void SONG::ReadEasy_1_STF(char *Filename)
+void SONG::ReadEasy_1_STF(char *fileName)
 {
 	STEP STP;
-	LPTSTR  lpPart;
+	
+	STP=ReadSTF(fileName);
 
-	STP=ReadSTF(Filename);
-
-	HaveEasy=TRUE;
+	HaveEasy=true;
 	bpm=STP.BPM;
 
 	Easy_Start=STP.start;
@@ -603,26 +519,23 @@ void SONG::ReadEasy_1_STF(char *Filename)
 	sprintf(SongTitle,"%s",STP.name);
 	memcpy(&Data_Easy,&STP.step,sizeof(STP.step));
 
-	GetFullPathName("Title.bmp",MAX_PATH,TitleImgPath,&lpPart);
-	GetFullPathName("Back.bmp",MAX_PATH,BgImgPath,&lpPart);
-	GetFullPathName("Song.wav",MAX_PATH,PlayWavPath,&lpPart);
-	GetFullPathName("Song.mp3",MAX_PATH,PlayMp3Path,&lpPart);
-	GetFullPathName("Song.mpg",MAX_PATH,PlayMpgPath,&lpPart);
-	GetFullPathName("Intro.wav",MAX_PATH,IntroWavPath,&lpPart);
-	GetFullPathName("Intro.mp3",MAX_PATH,IntroMp3Path,&lpPart);
-	DiskImage=DDLoadBitmap(g_pDD,"Disc.bmp",0,0);
-	if(DiskImage!=NULL)DDSetColorKey(DiskImage,CLR_INVALID);
-	else DiskImage=NoDISC;
+	GetFullPathName("Title.bmp",TitleImgPath,PATH_LEN);
+	GetFullPathName("Back.bmp",BgImgPath,PATH_LEN);
+	GetFullPathName("Song.wav",PlayWavPath,PATH_LEN);
+	GetFullPathName("Song.mp3",PlayMp3Path,PATH_LEN);
+	GetFullPathName("Song.mpg",PlayMpgPath,PATH_LEN);
+	GetFullPathName("Intro.wav",IntroWavPath,PATH_LEN);
+	GetFullPathName("Intro.mp3",IntroMp3Path,PATH_LEN);
+    LoadDiskImage();
 }
 
-void SONG::ReadEasy_1_KSF(char *Filename)
+void SONG::ReadEasy_1_KSF(char *fileName)
 {
 	STEP_NEW STP;
-	LPTSTR  lpPart;
+	
+	STP=ReadKSF(fileName);
 
-	STP=ReadKSF(Filename);
-
-	HaveEasy=TRUE;
+	HaveEasy=true;
 	bpm=STP.BPM;
 	bpm2=STP.BPM2;
 	bpm3=STP.BPM3;
@@ -639,27 +552,23 @@ void SONG::ReadEasy_1_KSF(char *Filename)
 	sprintf(SongTitle,"%s",STP.name);
 	memcpy(&Data_Easy,&STP.step,sizeof(STP.step));
 
-	GetFullPathName("Title.bmp",MAX_PATH,TitleImgPath,&lpPart);
-	GetFullPathName("Back.bmp",MAX_PATH,BgImgPath,&lpPart);
-	GetFullPathName("Song.wav",MAX_PATH,PlayWavPath,&lpPart);
-	GetFullPathName("Song.mp3",MAX_PATH,PlayMp3Path,&lpPart);
-	GetFullPathName("Song.mpg",MAX_PATH,PlayMpgPath,&lpPart);
-	GetFullPathName("Intro.wav",MAX_PATH,IntroWavPath,&lpPart);
-	GetFullPathName("Intro.mp3",MAX_PATH,IntroMp3Path,&lpPart);
-	DiskImage=DDLoadBitmap(g_pDD,"Disc.bmp",0,0);
-	if(DiskImage!=NULL)DDSetColorKey(DiskImage,CLR_INVALID);
-	else DiskImage=NoDISC;
-
+	GetFullPathName("Title.bmp",TitleImgPath,PATH_LEN);
+	GetFullPathName("Back.bmp",BgImgPath,PATH_LEN);
+	GetFullPathName("Song.wav",PlayWavPath,PATH_LEN);
+	GetFullPathName("Song.mp3",PlayMp3Path,PATH_LEN);
+	GetFullPathName("Song.mpg",PlayMpgPath,PATH_LEN);
+	GetFullPathName("Intro.wav",IntroWavPath,PATH_LEN);
+	GetFullPathName("Intro.mp3",IntroMp3Path,PATH_LEN);
+    LoadDiskImage();
 }
 
-void SONG::ReadEasy_2_STF(char *Filename)
+void SONG::ReadEasy_2_STF(char *fileName)
 {
 	STEP STP;
-	LPTSTR  lpPart;
+	
+	STP=ReadSTF(fileName);
 
-	STP=ReadSTF(Filename);
-
-	HaveCouple=TRUE;
+	HaveCouple=true;
 	bpm=STP.BPM;
 
 	Easy_Start=STP.start;
@@ -668,26 +577,23 @@ void SONG::ReadEasy_2_STF(char *Filename)
 	sprintf(SongTitle,"%s",STP.name);
 	memcpy(&Data_Easy1,&STP.step,sizeof(STP.step));
 
-	GetFullPathName("Title.bmp",MAX_PATH,TitleImgPath,&lpPart);
-	GetFullPathName("Back.bmp",MAX_PATH,BgImgPath,&lpPart);
-	GetFullPathName("Song.wav",MAX_PATH,PlayWavPath,&lpPart);
-	GetFullPathName("Song.mp3",MAX_PATH,PlayMp3Path,&lpPart);
-	GetFullPathName("Song.mpg",MAX_PATH,PlayMpgPath,&lpPart);
-	GetFullPathName("Intro.wav",MAX_PATH,IntroWavPath,&lpPart);
-	GetFullPathName("Intro.mp3",MAX_PATH,IntroMp3Path,&lpPart);
-	DiskImage=DDLoadBitmap(g_pDD,"Disc.bmp",0,0);
-	if(DiskImage!=NULL)DDSetColorKey(DiskImage,CLR_INVALID);
-	else DiskImage=NoDISC;
+	GetFullPathName("Title.bmp",TitleImgPath,PATH_LEN);
+	GetFullPathName("Back.bmp",BgImgPath,PATH_LEN);
+	GetFullPathName("Song.wav",PlayWavPath,PATH_LEN);
+	GetFullPathName("Song.mp3",PlayMp3Path,PATH_LEN);
+	GetFullPathName("Song.mpg",PlayMpgPath,PATH_LEN);
+	GetFullPathName("Intro.wav",IntroWavPath,PATH_LEN);
+	GetFullPathName("Intro.mp3",IntroMp3Path,PATH_LEN);
+    LoadDiskImage();
 }
 
-void SONG::ReadEasy_2_KSF(char *Filename)
+void SONG::ReadEasy_2_KSF(char *fileName)
 {
 	STEP_NEW STP;
-	LPTSTR  lpPart;
+	
+	STP=ReadKSF(fileName);
 
-	STP=ReadKSF(Filename);
-
-	HaveCouple=TRUE;
+	HaveCouple=true;
 	bpm=STP.BPM;
 	bpm2=STP.BPM2;
 	bpm3=STP.BPM3;
@@ -704,27 +610,24 @@ void SONG::ReadEasy_2_KSF(char *Filename)
 	sprintf(SongTitle,"%s",STP.name);
 	memcpy(&Data_Easy1,&STP.step,sizeof(STP.step));
 	
-	GetFullPathName("Title.bmp",MAX_PATH,TitleImgPath,&lpPart);
-	GetFullPathName("Back.bmp",MAX_PATH,BgImgPath,&lpPart);
-	GetFullPathName("Song.wav",MAX_PATH,PlayWavPath,&lpPart);
-	GetFullPathName("Song.mp3",MAX_PATH,PlayMp3Path,&lpPart);
-	GetFullPathName("Song.mpg",MAX_PATH,PlayMpgPath,&lpPart);
-	GetFullPathName("Intro.wav",MAX_PATH,IntroWavPath,&lpPart);
-	GetFullPathName("Intro.mp3",MAX_PATH,IntroMp3Path,&lpPart);
-	DiskImage=DDLoadBitmap(g_pDD,"Disc.bmp",0,0);
-	if(DiskImage!=NULL)DDSetColorKey(DiskImage,CLR_INVALID);
-	else DiskImage=NoDISC;
+	GetFullPathName("Title.bmp",TitleImgPath,PATH_LEN);
+	GetFullPathName("Back.bmp",BgImgPath,PATH_LEN);
+	GetFullPathName("Song.wav",PlayWavPath,PATH_LEN);
+	GetFullPathName("Song.mp3",PlayMp3Path,PATH_LEN);
+	GetFullPathName("Song.mpg",PlayMpgPath,PATH_LEN);
+	GetFullPathName("Intro.wav",IntroWavPath,PATH_LEN);
+	GetFullPathName("Intro.mp3",IntroMp3Path,PATH_LEN);
+    LoadDiskImage();
 }
 
 
-void SONG::ReadDouble_STF(char *Filename)
+void SONG::ReadDouble_STF(char *fileName)
 {
 	STEP STP;
-	LPTSTR  lpPart;
+	
+	STP=ReadSTF(fileName);
 
-	STP=ReadSTF(Filename);
-
-	HaveDouble=TRUE;
+	HaveDouble=true;
 	bpm=STP.BPM;
 
 	Double_Start=STP.start;
@@ -733,26 +636,23 @@ void SONG::ReadDouble_STF(char *Filename)
 	sprintf(SongTitle,"%s",STP.name);
 	memcpy(&Data_Double,&STP.step,sizeof(STP.step));
 
-	GetFullPathName("Title.bmp",MAX_PATH,TitleImgPath,&lpPart);
-	GetFullPathName("Back.bmp",MAX_PATH,BgImgPath,&lpPart);
-	GetFullPathName("Song.wav",MAX_PATH,PlayWavPath,&lpPart);
-	GetFullPathName("Song.mp3",MAX_PATH,PlayMp3Path,&lpPart);
-	GetFullPathName("Song.mpg",MAX_PATH,PlayMpgPath,&lpPart);
-	GetFullPathName("Intro.wav",MAX_PATH,IntroWavPath,&lpPart);
-	GetFullPathName("Intro.mp3",MAX_PATH,IntroMp3Path,&lpPart);
-	DiskImage=DDLoadBitmap(g_pDD,"Disc.bmp",0,0);
-	if(DiskImage!=NULL)DDSetColorKey(DiskImage,CLR_INVALID);
-	else DiskImage=NoDISC;
+	GetFullPathName("Title.bmp",TitleImgPath,PATH_LEN);
+	GetFullPathName("Back.bmp",BgImgPath,PATH_LEN);
+	GetFullPathName("Song.wav",PlayWavPath,PATH_LEN);
+	GetFullPathName("Song.mp3",PlayMp3Path,PATH_LEN);
+	GetFullPathName("Song.mpg",PlayMpgPath,PATH_LEN);
+	GetFullPathName("Intro.wav",IntroWavPath,PATH_LEN);
+	GetFullPathName("Intro.mp3",IntroMp3Path,PATH_LEN);
+    LoadDiskImage();
 }
 
-void SONG::ReadDouble_KSF(char *Filename)
+void SONG::ReadDouble_KSF(char *fileName)
 {
 	STEP_NEW STP;
-	LPTSTR  lpPart;
+	
+	STP=ReadKSF(fileName);
 
-	STP=ReadKSF(Filename);
-
-	HaveDouble=TRUE;
+	HaveDouble=true;
 	bpm=STP.BPM;
 	bpm2=STP.BPM2;
 	bpm3=STP.BPM3;
@@ -769,15 +669,25 @@ void SONG::ReadDouble_KSF(char *Filename)
 	sprintf(SongTitle,"%s",STP.name);
 	memcpy(&Data_Double,&STP.step,sizeof(STP.step));
 	
-	GetFullPathName("Title.bmp",MAX_PATH,TitleImgPath,&lpPart);
-	GetFullPathName("Back.bmp",MAX_PATH,BgImgPath,&lpPart);
-	GetFullPathName("Song.wav",MAX_PATH,PlayWavPath,&lpPart);
-	GetFullPathName("Song.mp3",MAX_PATH,PlayMp3Path,&lpPart);
-	GetFullPathName("Song.mpg",MAX_PATH,PlayMpgPath,&lpPart);
-	GetFullPathName("Intro.wav",MAX_PATH,IntroWavPath,&lpPart);
-	GetFullPathName("Intro.mp3",MAX_PATH,IntroMp3Path,&lpPart);
-	DiskImage=DDLoadBitmap(g_pDD,"Disc.bmp",0,0);
-	if(DiskImage!=NULL)DDSetColorKey(DiskImage,CLR_INVALID);
-	else DiskImage=NoDISC;
+	GetFullPathName("Title.bmp",TitleImgPath,PATH_LEN);
+	GetFullPathName("Back.bmp",BgImgPath,PATH_LEN);
+	GetFullPathName("Song.wav",PlayWavPath,PATH_LEN);
+	GetFullPathName("Song.mp3",PlayMp3Path,PATH_LEN);
+	GetFullPathName("Song.mpg",PlayMpgPath,PATH_LEN);
+	GetFullPathName("Intro.wav",IntroWavPath,PATH_LEN);
+	GetFullPathName("Intro.mp3",IntroMp3Path,PATH_LEN);
+    
+    LoadDiskImage();
 }
 
+
+void SONG::LoadDiskImage()
+{
+    if( mThisSongDiskImage.LoadBmp( "Disc.bmp" ) ) {
+        mThisSongDiskImage.SetColorKey();
+        mpDiskImage = &mThisSongDiskImage;
+    }
+    else {
+        mpDiskImage = & gNoDISC;
+    }
+}

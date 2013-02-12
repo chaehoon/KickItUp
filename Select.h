@@ -1,7 +1,9 @@
-#ifndef __SELECT_INCLUDED__
-#pragma warning(disable:4996)
+#ifndef	_KICKITUP_SELECT_H
+#define	_KICKITUP_SELECT_H
 
-#define __SELECT_INCLUDED__
+#ifdef _WIN32
+#	pragma warning(disable:4996)
+#endif // _WIN32
 
 #define	HMODE_CANCEL	99
 #define HMODE_2X		1
@@ -27,4 +29,4 @@ int	ScanHiddenMode1p(void);
 int	ScanHiddenMode2p(void);
 void DrawMode(int x, int y, int Mode);
 
-#endif
+#endif	// _SELECT_H

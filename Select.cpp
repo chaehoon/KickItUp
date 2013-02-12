@@ -10,22 +10,18 @@
 */
 
 #include <stdio.h>
-#include <windows.h>
-#include <direct.h>
 #include <string.h>
-#include <io.h>
 #include <time.h>
-#include <dsound.h>
+#include <sstream>
 
-#include "media.h"
-#include "main.h"
-#include "input.h"
-#include "select.h"
-#include "result.h"
+#include "Common.h"
+#include "Main.h"
+#include "Input.h"
+#include "Select.h"
+#include "Result.h"
 
-#include "song.h"
-//#include "sound.h"
-#include "dsutil.h"
+#include "Song.h"
+#include "Surface.h"
 
 #define DISCSIZE_X	300
 #define DISCSIZE_Y	200
@@ -33,272 +29,445 @@
 #define	STILL_DRAWING	100
 
 extern SONG					CSONG[512];
-extern LPDIRECTDRAWSURFACE	 SelectBack;
-extern LPDIRECTDRAWSURFACE	SelectFont;
-extern LPDIRECTDRAWSURFACE	SongTitle;
-extern	LPDIRECTDRAWSURFACE	NumberFont;
 
-extern LPDIRECTDRAWSURFACE	SongBack;
-extern LPDIRECTDRAWSURFACE	Background;
-extern LPDIRECTDRAWSURFACE	ShiftLeft;
-extern LPDIRECTDRAWSURFACE	ShiftRight;
-extern	LPDIRECTDRAWSURFACE	ModeIcon;
-extern	LPDIRECTDRAWSURFACE	g_cFont;
-extern	LPDIRECTDRAWSURFACE	Diff;
-extern	LPDIRECTDRAWSURFACE	DoubleIcon;
-extern	LPDIRECTDRAWSURFACE	CrazyIcon;
-extern	LPDIRECTDRAWSURFACE	HardIcon;
-extern	LPDIRECTDRAWSURFACE	EasyIcon;
+extern Surface gSongBack;
+extern Surface gSongTitle;
+extern Surface gSelectBack;
+extern Surface gStateComment;
+extern Surface gShiftLeft;
+extern Surface gShiftRight;
+extern Surface	gModeIcon;
+
+extern	Surface	gDoubleIcon;
+extern	Surface	gCrazyIcon;
+extern	Surface	gHardIcon;
+extern	Surface	gEasyIcon;
 
 extern double				bpm,bpm2,bpm3;
 extern int					start,start2,start3;
 extern	int					tick;
-extern	DWORD					bunki,bunki2;
+extern	Uint32					bunki,bunki2;
 
-extern char					SongName[MAX_PATH+1];
-extern char					SongName2[MAX_PATH+1];
-extern char					SongName3[MAX_PATH+1];
-extern char					Title[MAX_PATH+1];
+extern char					SongName[PATH_LEN+1];
+extern char					SongName2[PATH_LEN+1];
+extern char					SongName3[PATH_LEN+1];
+extern char					Title[PATH_LEN+1];
 extern	int					start1;
 
 extern	char				GameMode;
 
 extern	char				Couple;
 extern	char				Double;
-// Ä¿ÇÃ µ¥ÀÌÅÍ ³¡
+// End of the COUPLE DATA
 
 
-//extern CWAVE				*WavePrimary;
-extern	LPDIRECTSOUND		lpds;
-
-extern LPDIRECTSOUNDBUFFER			g_dsMode;
-extern LPDIRECTSOUNDBUFFER			g_dsCancel;
-extern LPDIRECTSOUNDBUFFER			g_dsMove;
-extern LPDIRECTSOUNDBUFFER			g_dsSelectSong;
+#include "Chunk.h"
+extern Chunk			gMode;
+extern Chunk            gCancel;
+extern Chunk			gMove;
+extern Chunk			gSelectSong;
 
 extern char First;
 
-DWORD	startTimer, curTimer;
+Uint32	startTimer, curTimer;
 
-extern BOOL	IntroFlag;
+extern bool	IntroFlag;
 
-HRESULT	ClpBlt3(int x ,int y ,LPDIRECTDRAWSURFACE ds,LPRECT srect,DWORD mode)
+bool	ClpBlt3 ( int x ,int y ,Surface & surface, const SDL_Rect & srect )
 {
-	static RECT sRect;
-	HRESULT	hRet;
+	SDL_Rect sRect;
 
-	memcpy(&sRect,srect,sizeof(sRect));
-	
-	if(x>640 || y>480) return DD_OK;
+	sRect = srect;
 
-	if(y+(srect->bottom-srect->top)>480)srect->bottom=srect->bottom-(y+(srect->bottom-srect->top)-480);
-	if(y<0)
+	if ( 640 < x || 480 < y )
+		return true;
+
+	if ( sRect.h < -y || sRect.w < -x )     // ?ï¿½ï¿½?ì§€ ?ï¿½ê¸°ë³´ë‹¤ ?ï¿½ë¡œ ?ï¿½ë¼ê°€ï¿½??ï¿½ëƒ„.
+		return true;
+
+	if ( 480 < ( y + sRect.h ) )
+		sRect.h = 480 - y;
+
+	if ( y < 0 )
 	{
-		srect->top-=y;
-		y=0;
+		sRect.y -= y;
+		sRect.h += y;
+		y = 0;
 	}
 
-	if(x+(srect->right-srect->left)>640)srect->right=srect->right-(x+(srect->right-srect->left)-640);
-	if(x<0)
+	if ( 640 < x + sRect.w )
+		sRect.w = 640 - x;
+
+	if ( x < 0 )
 	{
-		srect->left-=x;
-		x=0;
+		sRect.x -= x;
+		sRect.w += x;
+		x = 0;
 	}
-	
-	hRet=g_pDDSBack->BltFast(x,y,ds,srect,mode);
 
-	memcpy(srect,&sRect,sizeof(sRect));
-	
-	return hRet;
+	surface.BltFast ( x, y, gScreen, &sRect );
 
+	return true;
+
+}
+
+#ifdef _WIN32
+
+#include <Windows.h>
+void Read()
+{
+	HANDLE	hFind;
+	Uint32	Count=0;
+	WIN32_FIND_DATA lpData;
+
+	char    cPathStr[PATH_LEN+1];;
+
+	hFind= ( HANDLE ) FindFirstFile ( "*.*",&lpData );
+	strncpy ( cPathStr, lpData.cFileName, sizeof ( cPathStr ) );
+	if ( stricmp ( cPathStr,"SONG" ) !=0 )
+	{
+		for ( ;; )
+		{
+			if ( FindNextFile ( hFind,&lpData ) ==false ) break;
+			strncpy ( cPathStr, lpData.cFileName, sizeof ( cPathStr ) );
+			if ( stricmp ( cPathStr,"SONG" ) ==0 ) break;
+		}
+	}
+	if ( lpData.dwFileAttributes==FILE_ATTRIBUTE_DIRECTORY )
+	{
+		SetCurrentDirectory ( cPathStr );
+		hFind=FindFirstFile ( "*.*",&lpData );
+		if ( lpData.cFileName[0]!='.' && lpData.dwFileAttributes==FILE_ATTRIBUTE_DIRECTORY )
+		{
+			SetCurrentDirectory ( lpData.cFileName );
+
+			if ( access ( "Crazy_2.stf",04 ) ==0 ) CSONG[Count].ReadCrazy_2_STF ( "Crazy_2.stf" );
+			else if ( access ( "Crazy_2.ksf",04 ) ==0 ) CSONG[Count].ReadCrazy_2_KSF ( "Crazy_2.ksf" );
+
+			if ( access ( "Crazy_1.stf",04 ) ==0 ) CSONG[Count].ReadCrazy_1_STF ( "Crazy_1.stf" ),Count++;
+			else if ( access ( "Crazy_1.ksf",04 ) ==0 ) CSONG[Count].ReadCrazy_1_KSF ( "Crazy_1.ksf" ),Count++;
+
+			if ( access ( "Hard_2.stf",04 ) ==0 ) CSONG[Count].ReadHard_2_STF ( "Hard_2.stf" );
+			else if ( access ( "Hard_2.ksf",04 ) ==0 ) CSONG[Count].ReadHard_2_KSF ( "Hard_2.ksf" );
+
+			if ( access ( "Hard_1.stf",04 ) ==0 ) CSONG[Count].ReadHard_1_STF ( "Hard_1.stf" ),Count++;
+			else if ( access ( "Hard_1.ksf",04 ) ==0 ) CSONG[Count].ReadHard_1_KSF ( "Hard_1.ksf" ),Count++;
+
+			if ( access ( "Easy_2.stf",04 ) ==0 ) CSONG[Count].ReadEasy_2_STF ( "Easy_2.stf" );
+			else if ( access ( "Easy_2.ksf",04 ) ==0 ) CSONG[Count].ReadEasy_2_KSF ( "Easy_2.ksf" );
+
+			if ( access ( "Easy_1.stf",04 ) ==0 ) CSONG[Count].ReadEasy_1_STF ( "Easy_1.stf" ),Count++;
+			else if ( access ( "Easy_1.ksf",04 ) ==0 ) CSONG[Count].ReadEasy_1_KSF ( "Easy_1.ksf" ),Count++;
+
+			if ( access ( "Double.stf",04 ) ==0 ) CSONG[Count].ReadDouble_STF ( "Double.stf" ),Count++;
+			else if ( access ( "Double.ksf",04 ) ==0 ) CSONG[Count].ReadDouble_KSF ( "Double.ksf" );
+
+			//if(CSONG[Count].bpm!=0)Count++;
+			SetCurrentDirectory ( "..\\" );
+		}
+
+		for ( ;; )
+		{
+			if ( FindNextFile ( hFind,&lpData ) ==false ) break;
+			else
+			{
+				if ( lpData.cFileName[0]!='.' && lpData.dwFileAttributes==FILE_ATTRIBUTE_DIRECTORY )
+				{
+					SetCurrentDirectory ( lpData.cFileName );
+
+					if ( access ( "Crazy_2.stf",04 ) ==0 ) CSONG[Count].ReadCrazy_2_STF ( "Crazy_2.stf" );
+					else if ( access ( "Crazy_2.ksf",04 ) ==0 ) CSONG[Count].ReadCrazy_2_KSF ( "Crazy_2.ksf" );
+
+					if ( access ( "Crazy_1.stf",04 ) ==0 ) CSONG[Count].ReadCrazy_1_STF ( "Crazy_1.stf" ),Count++;
+					else if ( access ( "Crazy_1.ksf",04 ) ==0 ) CSONG[Count].ReadCrazy_1_KSF ( "Crazy_1.ksf" ),Count++;
+
+					if ( access ( "Hard_2.stf",04 ) ==0 ) CSONG[Count].ReadHard_2_STF ( "Hard_2.stf" );
+					else if ( access ( "Hard_2.ksf",04 ) ==0 ) CSONG[Count].ReadHard_2_KSF ( "Hard_2.ksf" );
+
+					if ( access ( "Hard_1.stf",04 ) ==0 ) CSONG[Count].ReadHard_1_STF ( "Hard_1.stf" ),Count++;
+					else if ( access ( "Hard_1.ksf",04 ) ==0 ) CSONG[Count].ReadHard_1_KSF ( "Hard_1.ksf" ),Count++;
+
+					if ( access ( "Easy_2.stf",04 ) ==0 ) CSONG[Count].ReadEasy_2_STF ( "Easy_2.stf" );
+					else if ( access ( "Easy_2.ksf",04 ) ==0 ) CSONG[Count].ReadEasy_2_KSF ( "Easy_2.ksf" );
+
+					if ( access ( "Easy_1.stf",04 ) ==0 ) CSONG[Count].ReadEasy_1_STF ( "Easy_1.stf" ),Count++;
+					else if ( access ( "Easy_1.ksf",04 ) ==0 ) CSONG[Count].ReadEasy_1_KSF ( "Easy_1.ksf" ),Count++;
+
+					if ( access ( "Double.stf",04 ) ==0 ) CSONG[Count].ReadDouble_STF ( "Double.stf" ),Count++;
+					else if ( access ( "Double.ksf",04 ) ==0 ) CSONG[Count].ReadDouble_KSF ( "Double.ksf" ),Count++;
+
+					//if(CSONG[Count].bpm!=0)Count++;
+					SetCurrentDirectory ( "..\\" );
+				}
+			}
+		}
+		SetCurrentDirectory ( "..\\" );
+	}
+	FindClose ( hFind );
+
+	if ( CSONG[0].bpm==0 )
+		MsgBox ( "Song directory not found or No song data.","KICKITUP ERROR",MB_OK );
+}
+
+#else // _WIN32
+
+#include <sys/types.h>
+#include <dirent.h>
+#include <strings.h>
+
+/**
+ * íŒŒì¼ì´ë‚˜ ë””ë ‰í† ë¦¬ëª…ì„ ëŒ€ì†Œë¬¸ìž êµ¬ë¶„ì—†ì´ ì°¾ì•„ íŒŒì¼ëª…ì„ ë°˜í™˜í•œë‹¤.
+ * @param	filename	ì°¾ì„ íŒŒì¼ëª…ì´ë‚˜ ë””ë ‰í† ë¦¬ëª….
+ * @param	buff		ë°˜í™˜í•  ì°¾ì€ íŒŒì¼ëª….
+ * @param	size		buff size.
+ * @return	í•´ë‹¹ íŒŒì¼ì´ë‚˜ ë””ë ‰í† ë¦¬ëª…ì´ ìžˆëŠ”ì§€.
+ */
+bool FindFile ( const char * filename, char * buff, size_t size )
+{
+	struct dirent * item;
+
+	DIR * dp = opendir ( "." );
+	bool	bFound = false;
+	if ( dp != NULL )
+	{
+		while ( true )
+		{
+			item = readdir ( dp );
+			if ( item == NULL )
+				break;
+
+			if ( strcasecmp ( item->d_name, filename ) == 0 )
+			{
+				strncpy ( buff, item->d_name, size );
+				bFound = true;
+				break;
+			}
+		}
+	}
+
+	closedir ( dp );
+
+	if ( !bFound )
+	{
+		std::stringstream	str ( filename );
+		str << "directory or file is not found :" << filename;
+		MsgBox ( str.str().c_str(),"KICKITUP ERROR",MB_OK );
+		return false;
+	}
+	return true;
+}
+
+#include <vector>
+#include <string>
+#include <sys/stat.h>
+using std::string;
+using std::vector;
+
+/**
+ * í˜„ìž¬ ë””ë ‰í† ë¦¬ ë¦¬ìŠ¤íŠ¸ë¥¼ ì–»ëŠ”ë‹¤.
+ * @param	dirs	ë””ë ‰í† ë¦¬ ë¦¬ìŠ¤íŠ¸.
+ * @return	ë””ë ‰í† ë¦¬ ë¦¬ìŠ¤íŠ¸ê°€ ìžˆëŠ”ì§€ ì—†ëŠ”ì§€.
+ */
+bool GetDirs ( vector<string> & dirs )
+{
+	struct dirent * item;
+	DIR * dp;
+	char    cPathStr[PATH_LEN+1] = { 0, };
+
+	dp = opendir ( "." );
+
+	while ( dp != NULL )
+	{
+		item = readdir ( dp );
+		if ( item == NULL )
+			break;
+
+		if ( item->d_name[0] == '.' )
+			continue;
+
+		// is dir?
+		struct stat stat_p;
+		if ( lstat ( item->d_name, &stat_p ) == -1 )
+			continue;
+		if ( !S_ISDIR ( stat_p.st_mode ) )
+			continue;
+
+		string	dirname ( item->d_name );
+		dirs.push_back ( dirname );
+	}
+	closedir ( dp );
+
+	if ( dirs.empty() ) {
+		std::stringstream	str;
+		str << "GetDirs() - directory or file is not found";
+		MsgBox ( str.str().c_str(),"KICKITUP ERROR",MB_OK );
+		return false;
+	}
+	return true;
 }
 
 void Read()
 {
-	HANDLE	hFind;
-	DWORD	Count=0;
-	WIN32_FIND_DATA lpData;
+	char  cPathStr[PATH_LEN+1] = { 0, };
+	int	Count=0;
 
-	char* cPathStr;
-
-	hFind=(HANDLE)FindFirstFile("*.*",&lpData);
-	cPathStr=_strupr(_strdup(lpData.cFileName));
-	if(strcmp(cPathStr,"SONG")!=0)
+	if ( !FindFile ( "song", cPathStr, sizeof ( cPathStr ) ) )
+		return;
+	chdir ( cPathStr );
+	vector<string> dirs;
+	if ( !GetDirs ( dirs ) )
 	{
-		for(;;)
-		{
-			if(FindNextFile(hFind,&lpData)==FALSE)break;
-			cPathStr=_strupr(_strdup(lpData.cFileName));
-			if(strcmp(cPathStr,"SONG")==0)break;
-		}
+		chdir ( ".." );
+		return;
 	}
-	if(lpData.dwFileAttributes==FILE_ATTRIBUTE_DIRECTORY)
+
+	for ( vector<string>::iterator i = dirs.begin() ;
+	        i != dirs.end();
+	        ++i )
 	{
-		SetCurrentDirectory(cPathStr);
-		hFind=FindFirstFile("*.*",&lpData);
-		if(lpData.cFileName[0]!='.' && lpData.dwFileAttributes==FILE_ATTRIBUTE_DIRECTORY)
-		{
-			SetCurrentDirectory(lpData.cFileName);
+		string dirName = *i;
+		chdir ( dirName.c_str() );
 
-			if(access("Crazy_2.stf",04)==0)CSONG[Count].ReadCrazy_2_STF("Crazy_2.stf");
-			else if(access("Crazy_2.ksf",04)==0)CSONG[Count].ReadCrazy_2_KSF("Crazy_2.ksf");
+		if ( FindFile ( "crazy_2.stf", cPathStr, sizeof ( cPathStr ) ) )
+			CSONG[Count].ReadCrazy_2_STF ( cPathStr );
+		else if ( FindFile ( "crazy_2.ksf", cPathStr, sizeof ( cPathStr ) ) )
+			CSONG[Count].ReadCrazy_2_KSF ( cPathStr );
 
-			if(access("Crazy_1.stf",04)==0)CSONG[Count].ReadCrazy_1_STF("Crazy_1.stf"),Count++;
-			else if(access("Crazy_1.ksf",04)==0)CSONG[Count].ReadCrazy_1_KSF("Crazy_1.ksf"),Count++;
-
-			if(access("Hard_2.stf",04)==0)CSONG[Count].ReadHard_2_STF("Hard_2.stf");
-			else if(access("Hard_2.ksf",04)==0)CSONG[Count].ReadHard_2_KSF("Hard_2.ksf");
-
-			if(access("Hard_1.stf",04)==0)CSONG[Count].ReadHard_1_STF("Hard_1.stf"),Count++;
-			else if(access("Hard_1.ksf",04)==0)CSONG[Count].ReadHard_1_KSF("Hard_1.ksf"),Count++;
-
-			if(access("Easy_2.stf",04)==0)CSONG[Count].ReadEasy_2_STF("Easy_2.stf");
-			else if(access("Easy_2.ksf",04)==0)CSONG[Count].ReadEasy_2_KSF("Easy_2.ksf");
-
-			if(access("Easy_1.stf",04)==0)CSONG[Count].ReadEasy_1_STF("Easy_1.stf"),Count++;
-			else if(access("Easy_1.ksf",04)==0)CSONG[Count].ReadEasy_1_KSF("Easy_1.ksf"),Count++;
-
-			if(access("Double.stf",04)==0)CSONG[Count].ReadDouble_STF("Double.stf"),Count++;
-			else if(access("Double.ksf",04)==0)CSONG[Count].ReadDouble_KSF("Double.ksf");
-
-			//if(CSONG[Count].bpm!=0)Count++;
-			SetCurrentDirectory("..\\");
+		if ( FindFile ( "crazy_1.stf", cPathStr, sizeof ( cPathStr ) ) ) {
+			CSONG[Count].ReadCrazy_1_STF ( cPathStr );
+			++Count;
+		}
+		else if ( FindFile ( "crazy_1.ksf", cPathStr, sizeof ( cPathStr ) ) ) {
+			CSONG[Count].ReadCrazy_1_KSF ( cPathStr );
+			++Count;
 		}
 
-		for(;;)
-		{
-			if(FindNextFile(hFind,&lpData)==FALSE)break;
-			else
-			{
-				if(lpData.cFileName[0]!='.' && lpData.dwFileAttributes==FILE_ATTRIBUTE_DIRECTORY)
-				{
-					SetCurrentDirectory(lpData.cFileName);
+		if ( FindFile ( "hard_2.stf", cPathStr, sizeof ( cPathStr ) ) )
+			CSONG[Count].ReadHard_2_STF ( cPathStr );
+		else if ( FindFile ( "hard_2.ksf", cPathStr, sizeof ( cPathStr ) ) )
+			CSONG[Count].ReadHard_2_KSF ( cPathStr );
 
-					if(access("Crazy_2.stf",04)==0)CSONG[Count].ReadCrazy_2_STF("Crazy_2.stf");
-					else if(access("Crazy_2.ksf",04)==0)CSONG[Count].ReadCrazy_2_KSF("Crazy_2.ksf");
-
-					if(access("Crazy_1.stf",04)==0)CSONG[Count].ReadCrazy_1_STF("Crazy_1.stf"),Count++;
-					else if(access("Crazy_1.ksf",04)==0)CSONG[Count].ReadCrazy_1_KSF("Crazy_1.ksf"),Count++;
-
-					if(access("Hard_2.stf",04)==0)CSONG[Count].ReadHard_2_STF("Hard_2.stf");
-					else if(access("Hard_2.ksf",04)==0)CSONG[Count].ReadHard_2_KSF("Hard_2.ksf");
-
-					if(access("Hard_1.stf",04)==0)CSONG[Count].ReadHard_1_STF("Hard_1.stf"),Count++;
-					else if(access("Hard_1.ksf",04)==0)CSONG[Count].ReadHard_1_KSF("Hard_1.ksf"),Count++;
-
-					if(access("Easy_2.stf",04)==0)CSONG[Count].ReadEasy_2_STF("Easy_2.stf");
-					else if(access("Easy_2.ksf",04)==0)CSONG[Count].ReadEasy_2_KSF("Easy_2.ksf");
-
-					if(access("Easy_1.stf",04)==0)CSONG[Count].ReadEasy_1_STF("Easy_1.stf"),Count++;
-					else if(access("Easy_1.ksf",04)==0)CSONG[Count].ReadEasy_1_KSF("Easy_1.ksf"),Count++;
-
-					if(access("Double.stf",04)==0)CSONG[Count].ReadDouble_STF("Double.stf"),Count++;
-					else if(access("Double.ksf",04)==0)CSONG[Count].ReadDouble_KSF("Double.ksf"),Count++;
-				
-					//if(CSONG[Count].bpm!=0)Count++;
-					SetCurrentDirectory("..\\");
-				}
-			}
+		if ( FindFile ( "hard_1.stf", cPathStr, sizeof ( cPathStr ) ) ) {
+			CSONG[Count].ReadHard_1_STF ( cPathStr );
+			++Count;
 		}
-		SetCurrentDirectory("..\\");
-	}
-	FindClose(hFind);
+		else if ( FindFile ( "hard_1.ksf", cPathStr, sizeof ( cPathStr ) ) ) {
+			CSONG[Count].ReadHard_1_KSF ( cPathStr );
+			++Count;
+		}
 
-	if(CSONG[0].bpm==0)
-	{
-		MessageBox(hWnd,"Song directory not found or No song data.","KICKITUP ERROR",MB_OK);
-//		ReleaseAllObjects();
+		if ( FindFile ( "easy_2.stf", cPathStr, sizeof ( cPathStr ) ) )
+			CSONG[Count].ReadEasy_2_STF ( cPathStr );
+		else if ( FindFile ( "easy_2.ksf", cPathStr, sizeof ( cPathStr ) ) )
+			CSONG[Count].ReadEasy_2_KSF ( cPathStr );
 
-		PostQuitMessage(0);
+		if ( FindFile ( "easy_1.stf", cPathStr, sizeof ( cPathStr ) ) ) {
+			CSONG[Count].ReadEasy_1_STF ( cPathStr );
+			++Count;
+		}
+		else if ( FindFile ( "easy_1.ksf", cPathStr, sizeof ( cPathStr ) ) ) {
+			CSONG[Count].ReadEasy_1_KSF ( cPathStr );
+			++Count;
+		}
+
+		if ( FindFile ( "double.stf", cPathStr, sizeof ( cPathStr ) ) ) {
+			CSONG[Count].ReadDouble_STF ( cPathStr );
+			++Count;
+		}
+		else if ( FindFile ( "double.ksf", cPathStr, sizeof ( cPathStr ) ) ) {
+			CSONG[Count].ReadDouble_KSF ( cPathStr );
+			++Count;
+		}
+
+		chdir ( ".." );
 	}
+	chdir ( ".." );
 }
+#endif // _WIN32
 
-void SelectSong(void)
+void SelectSong ( void )
 {
-	DWORD count,i;
-	static DWORD current;
-	static DWORD SelectCurrent;
+	Uint32 count,i;
+	static Uint32 current;
+	static Uint32 SelectCurrent;
 	static int Selected, zoom,toggle,speed;
 
-	RECT	lRect;
 	int ModeTemp1p, ModeTemp2p;
-	
+
 	static	time_t t;
-	
+
 	static	int a,b,c;
 
 	static	int iMove;
 
-	RECT DiscSize,Screen;
+	SDL_Rect Screen;
+	SDL_Rect DiscSize;
 
 	char s[50];
 
-	if(First==0)
+	if ( First==0 )
 	{
-		startTimer=timeGetTime();
-		if(Start1p==FALSE)
+		startTimer=SDL_GetTicks();
+		if ( Start1p==false )
 		{
 			HighSpeed1p=1;
-			bModeMirror1p=FALSE;
-			bModeNonstep1p=FALSE;
-			bModeSynchro=FALSE;
-			bModeUnion1p=FALSE;
-			bModeRandom1p=FALSE;
-			b4dMix1p=FALSE;
+			bModeMirror1p=false;
+			bModeNonstep1p=false;
+			bModeSynchro=false;
+			bModeUnion1p=false;
+			bModeRandom1p=false;
+			b4dMix1p=false;
 			HighSpeed1p_1=1;
 			HighSpeed1p_3=1;
 			HighSpeed1p_5=1;
 			HighSpeed1p_7=1;
 			HighSpeed1p_9=1;
-			bModeVanish1p=FALSE;
-			bModeSuddenR1p=FALSE;
-			bModeRandomS1p=FALSE;
+			bModeVanish1p=false;
+			bModeSuddenR1p=false;
+			bModeRandomS1p=false;
 
 		}
-		if(Start2p==FALSE)
+		if ( Start2p==false )
 		{
 			HighSpeed2p=1;
-			bModeMirror2p=FALSE;
-			bModeNonstep2p=FALSE;
-			bModeUnion2p=FALSE;
-			bModeRandom2p=FALSE;
-			b4dMix2p=FALSE;
+			bModeMirror2p=false;
+			bModeNonstep2p=false;
+			bModeUnion2p=false;
+			bModeRandom2p=false;
+			b4dMix2p=false;
 			HighSpeed2p_1=1;
 			HighSpeed2p_3=1;
 			HighSpeed2p_5=1;
 			HighSpeed2p_7=1;
 			HighSpeed2p_9=1;
-			bModeVanish2p=FALSE;
-			bModeSuddenR1p=FALSE;
-			bModeRandomS1p=FALSE;
+			bModeVanish2p=false;
+			bModeSuddenR1p=false;
+			bModeRandomS1p=false;
 		}
 		// paint the background black.
-		DDFillSurface(g_pDDSPrimary,0);
-		DDFillSurface(g_pDDSBack,0);
-		
+		gScreen.FillRect ( 0, 0 );
+
 		// Draw BackGround as select image.
-		g_pDDSBack->BltFast(0,0, SelectBack, NULL, DDBLTFAST_NOCOLORKEY);
-		
+		gSelectBack.BltFast ( 0, 0, gScreen );
+
 		a=Start1p;b=Start2p;
 		First++;
-
-		if(g_dsSelectSong)
-			g_dsSelectSong->Play(0,0,DSBPLAY_LOOPING);
+		gSelectSong.Play ( true );
 	}
 
-	DiscSize.top=0;
-	DiscSize.left=0;
-	DiscSize.right=300;
-	DiscSize.bottom=200;
+	DiscSize.y = 0;
+	DiscSize.x = 0;
+	DiscSize.w = 300;
+	DiscSize.h = 200;
 
-	for(count=0;;count++)
+	for ( count=0;;count++ )
 	{
-		if(count!=0)
+		if ( count!=0 )
 			CSONG[count].Prev=count-1;
-		
+
 		CSONG[count].Next=count+1;
-		
-		if(CSONG[count].bpm==0)
+
+		if ( CSONG[count].bpm==0 )
 		{
 			CSONG[count].Prev=0;
 			count--;
@@ -308,240 +477,248 @@ void SelectSong(void)
 		}
 	}
 
-	if(speed==1) //ÀÏ´ÜÀº º¯¼ö¸¦ ÀÌ¿ëÇÕ´Ï´Ù. °ð Å¸ÀÌ¸Ó Çü½ÄÀ¸·Î ¹Ù²Ùµµ·Ï ÇÕ½Ã´Ù. 
+	if ( speed==1 ) //?ï¿½ë‹¨?ï¿½ ë³€?ï¿½ï¿½? ?ï¿½ìš©?ï¿½ë‹ˆ?? ï¿½??ï¿½?ï¿½ë¨¸ ?ï¿½ì‹?ï¿½ë¡œ ë°”ê¾¸?ï¿½ë¡ ?ï¿½ì‹œ??
 	{
 		speed=0;
-		if(toggle==0)
+		if ( toggle==0 )
 		{
-			if(zoom==10)
+			if ( zoom==10 )
 				toggle=1;
 			else
 				zoom++;
 		}
-		else if(toggle==1)
+		else if ( toggle==1 )
 		{
-			if(zoom==0)
+			if ( zoom==0 )
 				toggle=0;
 			else
 				zoom--;
 		}
 	}
 	else
-		speed++; 
+		speed++;
 
 	ReadGameInput();
 
-	if(PressedKey1p[5]==TRUE)
+	if ( PressedKey1p[5]==true )
 	{
-		if(Start1p==FALSE)
+		if ( Start1p==false )
 		{
-			Start1p=TRUE;
+			Start1p=true;
 		}
 	}
-	if(PressedKey2p[5]==TRUE)
+	if ( PressedKey2p[5]==true )
 	{
-		if(Start2p==FALSE)
+		if ( Start2p==false )
 		{
-			Start2p=TRUE;
+			Start2p=true;
 		}
 	}
 
 	// Get 1Player hidden mode.
 	ModeTemp1p=ScanHiddenMode1p();
 
-	if(ModeTemp1p) {
-		if(IntroFlag){
-			intro->OnMediaStop();
-			delete intro;
-			IntroFlag=FALSE;
+	if ( ModeTemp1p )
+	{
+		if ( IntroFlag )
+		{
+			gIntro.Halt();
+			IntroFlag=false;
 		}
 	}
 
-	switch(ModeTemp1p)
+	switch ( ModeTemp1p )
 	{
 		case HMODE_SUDDENR:
-			bModeSuddenR1p=TRUE;
-			bModeVanish1p=FALSE;
-
-			if(g_dsMode){g_dsMode->Stop();g_dsMode->SetCurrentPosition(0);g_dsMode->Play(0,0,0);}
+			bModeSuddenR1p=true;
+			bModeVanish1p=false;
+			gMode.Play();
 			break;
 		case HMODE_RANDOMS:
-			bModeRandomS1p=TRUE;
+			bModeRandomS1p=true;
 			HighSpeed1p=1;
-
-			if(g_dsMode){g_dsMode->Stop();g_dsMode->SetCurrentPosition(0);g_dsMode->Play(0,0,0);}
+			gMode.Play();
 			break;
 		case HMODE_2X:
 			HighSpeed1p=2;
-			if(g_dsMode){g_dsMode->Stop();g_dsMode->SetCurrentPosition(0);g_dsMode->Play(0,0,0);}
+			gMode.Play();
 			break;
 		case HMODE_4X:
 			HighSpeed1p=4;
-			if(g_dsMode){g_dsMode->Stop();g_dsMode->SetCurrentPosition(0);g_dsMode->Play(0,0,0);}
+			gMode.Play();
 			break;
 		case HMODE_8X:
 			HighSpeed1p=8;
-			if(g_dsMode){g_dsMode->Stop();g_dsMode->SetCurrentPosition(0);g_dsMode->Play(0,0,0);}
+			gMode.Play();
 			break;
 		case HMODE_MIRROR:
-			bModeMirror1p=TRUE;
-			if(g_dsMode){g_dsMode->Stop();g_dsMode->SetCurrentPosition(0);g_dsMode->Play(0,0,0);}
+			bModeMirror1p=true;
+			gMode.Play();
 			break;
 		case HMODE_NONSTEP:
-			bModeNonstep1p=TRUE;
-			if(g_dsMode){g_dsMode->Stop();g_dsMode->SetCurrentPosition(0);g_dsMode->Play(0,0,0);}
+			bModeNonstep1p=true;
+			gMode.Play();
 			break;
 		case HMODE_SYNCHRO:
-			bModeSynchro=TRUE;
-			if(g_dsMode){g_dsMode->Stop();g_dsMode->SetCurrentPosition(0);g_dsMode->Play(0,0,0);}
+			bModeSynchro=true;
+			gMode.Play();
 			break;
 		case HMODE_UNION:
-			bModeUnion1p=TRUE;
-			if(g_dsMode){g_dsMode->Stop();g_dsMode->SetCurrentPosition(0);g_dsMode->Play(0,0,0);}
+			bModeUnion1p=true;
+			gMode.Play();
 			break;
 		case HMODE_RANDOM:
-			bModeRandom1p=TRUE;
-			if(g_dsMode){g_dsMode->Stop();g_dsMode->SetCurrentPosition(0);g_dsMode->Play(0,0,0);}
+			bModeRandom1p=true;
+			gMode.Play();
 			break;
 		case HMODE_4DMIX:
-			srand((unsigned) time(&t));
+			srand ( ( unsigned ) time ( &t ) );
 
-			HighSpeed1p_1=1+rand()%8;
-			HighSpeed1p_3=1+rand()%8;
-			HighSpeed1p_5=1+rand()%8;
-			HighSpeed1p_7=1+rand()%8;
-			HighSpeed1p_9=1+rand()%8;
+			HighSpeed1p_1=1+rand() %8;
+			HighSpeed1p_3=1+rand() %8;
+			HighSpeed1p_5=1+rand() %8;
+			HighSpeed1p_7=1+rand() %8;
+			HighSpeed1p_9=1+rand() %8;
 
-			b4dMix1p=TRUE;
-			if(g_dsMode){g_dsMode->Stop();g_dsMode->SetCurrentPosition(0);g_dsMode->Play(0,0,0);}
+			b4dMix1p=true;
+			gMode.Play();
 			break;
 		case HMODE_VANISH:
-			bModeVanish1p=TRUE;
-			bModeSuddenR2p=FALSE;
-			if(g_dsMode){g_dsMode->Stop();g_dsMode->SetCurrentPosition(0);g_dsMode->Play(0,0,0);}
+			bModeVanish1p=true;
+			bModeSuddenR2p=false;
+			gMode.Play();
 			break;
-/*		case HMODE_NONSTOPDOUBLE:
-			if(Start1p&&Start2p)break;
-			Double=TRUE;
-			if(g_dsMode){g_dsMode->Stop();g_dsMode->SetCurrentPosition(0);g_dsMode->Play(0,0,0);}
-			break;*/
+			/*		case HMODE_NONSTOPDOUBLE:
+						if(Start1p&&Start2p)break;
+						Double=true;
+						gMode.Play();
+						break;*/
 		case HMODE_CANCEL:
-			if(g_dsCancel)g_dsCancel->Play(0,0,0);
+			gCancel.Play();
 			HighSpeed1p=1;
-			bModeMirror1p=FALSE;
-			bModeNonstep1p=FALSE;
-			bModeSynchro=FALSE;
-			bModeUnion1p=FALSE;
-			bModeRandom1p=FALSE;
-			b4dMix1p=FALSE;
+			bModeMirror1p=false;
+			bModeNonstep1p=false;
+			bModeSynchro=false;
+			bModeUnion1p=false;
+			bModeRandom1p=false;
+			b4dMix1p=false;
 			HighSpeed1p_1=1;
 			HighSpeed1p_3=1;
 			HighSpeed1p_5=1;
 			HighSpeed1p_7=1;
 			HighSpeed1p_9=1;
-			bModeVanish1p=FALSE;
-			bModeSuddenR1p=FALSE;
-			bModeRandomS1p=FALSE;
-			Double=FALSE;
+			bModeVanish1p=false;
+			bModeSuddenR1p=false;
+			bModeRandomS1p=false;
+			Double=false;
 			break;
-	default:
+		default:
 			break;
 	}
 
 	// Get 2Player hidden mode.
 	ModeTemp2p=ScanHiddenMode2p();
-	if(ModeTemp2p)if(IntroFlag){intro->OnMediaStop();delete intro;IntroFlag=FALSE;}
-	
-	switch(ModeTemp2p)
+	if ( ModeTemp2p )
+		if ( IntroFlag )
+		{
+			gIntro.Halt();
+			IntroFlag=false;
+		}
+
+	switch ( ModeTemp2p )
 	{
 		case HMODE_SUDDENR:
-			bModeSuddenR2p=TRUE;
-			bModeVanish2p=FALSE;
+			bModeSuddenR2p=true;
+			bModeVanish2p=false;
 
-			if(g_dsMode){g_dsMode->Stop();g_dsMode->SetCurrentPosition(0);g_dsMode->Play(0,0,0);}
+			gMode.Play();
 			break;
 		case HMODE_RANDOMS:
-			bModeRandomS2p=TRUE;
+			bModeRandomS2p=true;
 			HighSpeed2p=1;
 
-			if(g_dsMode){g_dsMode->Stop();g_dsMode->SetCurrentPosition(0);g_dsMode->Play(0,0,0);}
+			gMode.Play();
 			break;
 		case HMODE_2X:
 			HighSpeed2p=2;
-			if(g_dsMode){g_dsMode->Stop();g_dsMode->SetCurrentPosition(0);g_dsMode->Play(0,0,0);}
+			gMode.Play();
 			break;
 		case HMODE_4X:
 			HighSpeed2p=4;
-			if(g_dsMode){g_dsMode->Stop();g_dsMode->SetCurrentPosition(0);g_dsMode->Play(0,0,0);}
+			gMode.Play();
 			break;
 		case HMODE_8X:
 			HighSpeed2p=8;
-			if(g_dsMode){g_dsMode->Stop();g_dsMode->SetCurrentPosition(0);g_dsMode->Play(0,0,0);}
+			gMode.Play();
 			break;
 		case HMODE_MIRROR:
-			bModeMirror2p=TRUE;
-			if(g_dsMode){g_dsMode->Stop();g_dsMode->SetCurrentPosition(0);g_dsMode->Play(0,0,0);}
+			bModeMirror2p=true;
+			gMode.Play();
 			break;
 		case HMODE_NONSTEP:
-			bModeNonstep2p=TRUE;
-			if(g_dsMode){g_dsMode->Stop();g_dsMode->SetCurrentPosition(0);g_dsMode->Play(0,0,0);}
+			bModeNonstep2p=true;
+			gMode.Play();
 			break;
 		case HMODE_SYNCHRO:
-			bModeSynchro=TRUE;
-			if(g_dsMode){g_dsMode->Stop();g_dsMode->SetCurrentPosition(0);g_dsMode->Play(0,0,0);}
+			bModeSynchro=true;
+			gMode.Play();
 			break;
 		case HMODE_UNION:
-			bModeUnion2p=TRUE;
-			if(g_dsMode){g_dsMode->Stop();g_dsMode->SetCurrentPosition(0);g_dsMode->Play(0,0,0);}
+			bModeUnion2p=true;
+			gMode.Play();
 			break;
 		case HMODE_RANDOM:
-			bModeRandom2p=TRUE;
-			if(g_dsMode){g_dsMode->Stop();g_dsMode->SetCurrentPosition(0);g_dsMode->Play(0,0,0);}
+			bModeRandom2p=true;
+			gMode.Play();
 			break;
 		case HMODE_4DMIX:
 
-			srand((unsigned) time(&t));
+			srand ( ( unsigned ) time ( &t ) );
 
-			HighSpeed2p_1 = 1+rand()%8;
-			HighSpeed2p_3 = 1+rand()%8;
-			HighSpeed2p_5 = 1+rand()%8;
-			HighSpeed2p_7 = 1+rand()%8;
-			HighSpeed2p_9 = 1+rand()%8;
+			HighSpeed2p_1 = 1+rand() %8;
+			HighSpeed2p_3 = 1+rand() %8;
+			HighSpeed2p_5 = 1+rand() %8;
+			HighSpeed2p_7 = 1+rand() %8;
+			HighSpeed2p_9 = 1+rand() %8;
 
-			b4dMix2p=TRUE;
-			if(g_dsMode){g_dsMode->Stop();g_dsMode->SetCurrentPosition(0);g_dsMode->Play(0,0,0);}
+			b4dMix2p=true;
+			gMode.Play();
 			break;
 		case HMODE_VANISH:
-			bModeVanish2p=TRUE;
-			bModeSuddenR2p=FALSE;
-			if(g_dsMode){g_dsMode->Stop();g_dsMode->SetCurrentPosition(0);g_dsMode->Play(0,0,0);}
+			bModeVanish2p=true;
+			bModeSuddenR2p=false;
+			gMode.Play();
 			break;
 
 		case HMODE_CANCEL:
-			if(g_dsCancel)g_dsCancel->Play(0,0,0);
+			gCancel.Play();
 			HighSpeed2p=1;
-			bModeMirror2p=FALSE;
-			bModeNonstep2p=FALSE;
-			bModeUnion2p=FALSE;
-			bModeRandom2p=FALSE;
-			b4dMix2p=FALSE;
+			bModeMirror2p=false;
+			bModeNonstep2p=false;
+			bModeUnion2p=false;
+			bModeRandom2p=false;
+			b4dMix2p=false;
 			HighSpeed2p_1=1;
 			HighSpeed2p_3=1;
 			HighSpeed2p_5=1;
 			HighSpeed2p_7=1;
 			HighSpeed2p_9=1;
-			bModeVanish2p=FALSE;
-			bModeSuddenR2p=FALSE;
-			bModeRandomS2p=FALSE;
-			Double=FALSE;
+			bModeVanish2p=false;
+			bModeSuddenR2p=false;
+			bModeRandomS2p=false;
+			Double=false;
 			break;
 	}
 
 	// change screen to left.
-	if((Start1p && PressedKey1p[1]) || (Start2p && PressedKey2p[1]))
+	if ( ( Start1p && PressedKey1p[1] ) || ( Start2p && PressedKey2p[1] ) )
 	{
-		if(IntroFlag){intro->OnMediaStop();delete intro;IntroFlag=FALSE;}
-		if(g_dsMove){g_dsMove->Stop();g_dsMove->SetCurrentPosition(0);g_dsMove->Play(0,0,0);}
+		if ( IntroFlag )
+		{
+			gIntro.Halt();
+			IntroFlag=false;
+		}
+		gMove.Play();
 
 		Selected=0;
 
@@ -550,22 +727,26 @@ void SelectSong(void)
 	}
 
 	// change screen to right.
-	if((Start1p && PressedKey1p[3]) || (Start2p && PressedKey2p[3]))
+	if ( ( Start1p && PressedKey1p[3] ) || ( Start2p && PressedKey2p[3] ) )
 	{
-		if(IntroFlag){intro->OnMediaStop();delete intro;IntroFlag=FALSE;}
-		if(g_dsMove){g_dsMove->Stop();g_dsMove->SetCurrentPosition(0);g_dsMove->Play(0,0,0);}
+		if ( IntroFlag )
+		{
+			gIntro.Halt();
+			IntroFlag=false;
+		}
+		gMove.Play();
 
 		Selected=0;
 
 		iMove=-1;
 		current = CSONG[CSONG[current].Next].Next;
 	}
-	
+
 	// select the left song.
-	if((Start1p && PressedKey1p[7]) || (Start2p && PressedKey2p[7]))
+	if ( ( Start1p && PressedKey1p[7] ) || ( Start2p && PressedKey2p[7] ) )
 	{
 		// if 7button pressed twice then move to the next stage.
-		if(Selected==7)
+		if ( Selected==7 )
 		{
 			SelectCurrent=current;
 			PressedKey1p[0]=3;
@@ -574,40 +755,39 @@ void SelectSong(void)
 		else
 		{
 			// if intro music is playing then stop.
-			if(IntroFlag){
-				intro->OnMediaStop();delete intro;IntroFlag=FALSE;
+			if ( IntroFlag )
+			{
+				gIntro.Halt();
+				IntroFlag=false;
 			}
 
 			// if moving music is playing then stop.
-			if(g_dsMove){
-				g_dsMove->Stop();g_dsMove->SetCurrentPosition(0);g_dsMove->Play(0,0,0);
-			}
+			gMove.Play();
 
 			// start New intro music.
-			if(access(CSONG[current].IntroWavPath,04)==0)
+			gIntro.Halt();
+			if ( access ( CSONG[current].IntroWavPath,04 ) ==0 )
 			{
-				IntroFlag=TRUE;
-				intro= new CMedia;
-				intro->OpenMediaFile(CSONG[current].IntroWavPath);
-				intro->OnMediaPlay();
+				IntroFlag=true;
+				gIntro.Load ( CSONG[current].IntroWavPath );
+				gIntro.Play ( true );
 			}
-			else if(access(CSONG[current].IntroMp3Path,04)==0)
+			else if ( access ( CSONG[current].IntroMp3Path,04 ) ==0 )
 			{
-				IntroFlag=TRUE;
-				intro= new CMedia;
-				intro->OpenMediaFile(CSONG[current].IntroMp3Path);
-				intro->OnMediaPlay();
+				IntroFlag=true;
+				gIntro.Load ( CSONG[current].IntroMp3Path );
+				gIntro.Play ( true );
 			}
 
 			Selected=7;
 		}
 	}
-	
+
 	// select the right song.
-	if((Start1p && PressedKey1p[9]) || (Start2p && PressedKey2p[9]))
+	if ( ( Start1p && PressedKey1p[9] ) || ( Start2p && PressedKey2p[9] ) )
 	{
 		// if 9button pressed twice then move to the next stage.
-		if(Selected==9)
+		if ( Selected==9 )
 		{
 			SelectCurrent=CSONG[current].Next;
 			PressedKey1p[0]=3;
@@ -616,29 +796,28 @@ void SelectSong(void)
 		else
 		{
 			// intro sound stop.
-			if(IntroFlag){
-				intro->OnMediaStop();delete intro;IntroFlag=FALSE;
+			if ( IntroFlag )
+			{
+				gIntro.Halt();
+				IntroFlag=false;
 			}
 
 			// moving sound stop.
-			if(g_dsMove){
-				g_dsMove->Stop();g_dsMove->SetCurrentPosition(0);g_dsMove->Play(0,0,0);
-			}
-			
+			gMove.Play();
+
 			// selected song intro sound start.
-			if(access(CSONG[CSONG[current].Next].IntroWavPath,04)==0)
+			gIntro.Halt();
+			if ( access ( CSONG[CSONG[current].Next].IntroWavPath,04 ) ==0 )
 			{
-				IntroFlag=TRUE;
-				intro= new CMedia;
-				intro->OpenMediaFile(CSONG[CSONG[current].Next].IntroWavPath);
-				intro->OnMediaPlay();
+				IntroFlag=true;
+				gIntro.Load ( CSONG[CSONG[current].Next].IntroWavPath );
+				gIntro.Play ( true );
 			}
-			else if(access(CSONG[CSONG[current].Next].IntroMp3Path,04)==0)
+			else if ( access ( CSONG[CSONG[current].Next].IntroMp3Path,04 ) ==0 )
 			{
-				IntroFlag=TRUE;
-				intro= new CMedia;
-				intro->OpenMediaFile(CSONG[CSONG[current].Next].IntroMp3Path);
-				intro->OnMediaPlay();
+				IntroFlag=true;
+				gIntro.Load ( CSONG[CSONG[current].Next].IntroMp3Path );
+				gIntro.Play ( true );
 			}
 
 			Selected=9;
@@ -646,86 +825,64 @@ void SelectSong(void)
 	}
 
 	// Game Start( Change the Next Stage. )
-	if(PressedKey1p[0]==3)
+	if ( PressedKey1p[0]==3 )
 	{
 		PressedKey1p[0]=0;
 
 		// Game Mode setting.
-		if(CSONG[SelectCurrent].HaveCrazy==TRUE)GameMode=MODE_CRAZY,Double=FALSE;
-	   	else if(CSONG[SelectCurrent].HaveDouble==TRUE)GameMode=MODE_DOUBLE,Double=TRUE;
-	   	else if(CSONG[SelectCurrent].HaveEasy==TRUE)GameMode=MODE_EASY,Double=FALSE;
-	   	else if(CSONG[SelectCurrent].HaveHard==TRUE)GameMode=MODE_HARD,Double=FALSE;
+		if ( CSONG[SelectCurrent].HaveCrazy==true ) GameMode=MODE_CRAZY,Double=false;
+		else if ( CSONG[SelectCurrent].HaveDouble==true ) GameMode=MODE_DOUBLE,Double=true;
+		else if ( CSONG[SelectCurrent].HaveEasy==true ) GameMode=MODE_EASY,Double=false;
+		else if ( CSONG[SelectCurrent].HaveHard==true ) GameMode=MODE_HARD,Double=false;
 		else return;
 
 		// Couple mode setting.
-		if(Start1p && Start2p)
+		if ( Start1p && Start2p )
 		{
-			Couple=TRUE;
-			if(CSONG[SelectCurrent].HaveCouple==FALSE)
-				bModeSynchro=TRUE;
-		} else
-			Couple=FALSE;
+			Couple=true;
+			if ( CSONG[SelectCurrent].HaveCouple==false )
+				bModeSynchro=true;
+		}
+		else
+			Couple=false;
 
 		// Cancel sound restart.
-		if(g_dsCancel)
-		{
-			g_dsCancel->Stop();
-			g_dsCancel->Play(0,0,0);
-		}
-
+		gCancel.Play();
 
 		// selected song background setting.
-		if(SongBack)
-		{
-			SongBack->Release();
-			SongBack=NULL;
-		}
-
-		SongBack = DDLoadBitmap(g_pDD,CSONG[SelectCurrent].BgImgPath,0,0);
+		gSongBack.LoadBmp ( CSONG[SelectCurrent].BgImgPath );
 
 		// selected song title setting.
-		if(SongTitle)
-		{
-			SongTitle->Release();
-			SongTitle=NULL;
-		}
-		
-		SongTitle = DDLoadBitmap(g_pDD,CSONG[SelectCurrent].TitleImgPath,0,0);
+		gSongTitle.LoadBmp ( CSONG[SelectCurrent].TitleImgPath );
 
 		// if background is not set then background set title image.
-		if(SongBack == NULL)
+		if ( !gSongBack.IsLoaded() )
 		{
-			if(SongTitle)
-				SongBack=DDLoadBitmap(g_pDD,CSONG[SelectCurrent].TitleImgPath,0,0);
-			else	// default background image.
-				SongBack=DDLoadBitmap(g_pDD, "Images\\Back.bmp",0,0);
+			if ( gSongTitle.IsLoaded() )
+				gSongBack.LoadBmp ( CSONG[SelectCurrent].TitleImgPath );
+			else
+				gSongBack.LoadBmp ( "Images/Back.bmp" );
 		}
-		if(SongTitle == NULL)
-		{
-			SongTitle=DDLoadBitmap(g_pDD,"Images\\NoTitle.bmp",0,0);
-		}
+
+		if ( !gSongTitle.IsLoaded() )
+			gSongTitle.LoadBmp ( "Images/NoTitle.bmp" );
 
 		// draw title image.
-		g_pDDSPrimary->BltFast(0,0,SongTitle,NULL,DDBLTFAST_NOCOLORKEY);
+		gSongTitle.BltFast ( 0, 0, gScreen );
 
 		// double mode
-		if(GameMode == MODE_DOUBLE)
-		{
-			memcpy(&Data_Double, &CSONG[SelectCurrent].Data_Double, sizeof(CSONG[SelectCurrent].Data_Double));
+		if ( GameMode == MODE_DOUBLE ) {
+			memcpy ( &Data_Double, &CSONG[SelectCurrent].Data_Double, sizeof ( CSONG[SelectCurrent].Data_Double ) );
 		}
 		// couple mode
-		else if(Couple==TRUE)
-		{
-			switch(GameMode)
-			{
+		else if ( Couple==true ) {
+			switch ( GameMode )		{
 				case MODE_CRAZY:
-					if(bModeSynchro)
-					{
-						memcpy(&Data,  &CSONG[SelectCurrent].Data_Crazy, sizeof(CSONG[SelectCurrent].Data_Crazy));
-						memcpy(&Data1, &CSONG[SelectCurrent].Data_Crazy, sizeof(CSONG[SelectCurrent].Data_Crazy));
+					if ( bModeSynchro )	{
+						memcpy ( &Data,  &CSONG[SelectCurrent].Data_Crazy, sizeof ( CSONG[SelectCurrent].Data_Crazy ) );
+						memcpy ( &Data1, &CSONG[SelectCurrent].Data_Crazy, sizeof ( CSONG[SelectCurrent].Data_Crazy ) );
 
-						for(i=0;i<MAX_DATA;i++)
-						{
+						for ( i=0;i<MAX_DATA;i++ )	{
 							Data1[i][5] = Data1[i][0];
 							Data1[i][6] = Data1[i][1];
 							Data1[i][7] = Data1[i][2];
@@ -733,20 +890,18 @@ void SelectSong(void)
 							Data1[i][9] = Data1[i][4];
 						}
 					}
-					else
-					{
-						memcpy(&Data, &CSONG[SelectCurrent].Data_Crazy1, sizeof(CSONG[SelectCurrent].Data_Crazy1));
-						memcpy(&Data1,&CSONG[SelectCurrent].Data_Crazy1, sizeof(CSONG[SelectCurrent].Data_Crazy1));
+					else	{
+						memcpy ( &Data, &CSONG[SelectCurrent].Data_Crazy1, sizeof ( CSONG[SelectCurrent].Data_Crazy1 ) );
+						memcpy ( &Data1,&CSONG[SelectCurrent].Data_Crazy1, sizeof ( CSONG[SelectCurrent].Data_Crazy1 ) );
 					}
 					break;
 
 				case MODE_EASY:
-					if(bModeSynchro)
-					{
-						memcpy(&Data, &CSONG[SelectCurrent].Data_Easy, sizeof(CSONG[SelectCurrent].Data_Easy));
-						memcpy(&Data1,&CSONG[SelectCurrent].Data_Easy, sizeof(CSONG[SelectCurrent].Data_Easy));
-						
-						for(i=0;i<MAX_DATA;i++)
+					if ( bModeSynchro )	{
+						memcpy ( &Data, &CSONG[SelectCurrent].Data_Easy, sizeof ( CSONG[SelectCurrent].Data_Easy ) );
+						memcpy ( &Data1,&CSONG[SelectCurrent].Data_Easy, sizeof ( CSONG[SelectCurrent].Data_Easy ) );
+
+						for ( i=0;i<MAX_DATA;i++ )
 						{
 							Data1[i][5] = Data1[i][0];
 							Data1[i][6] = Data1[i][1];
@@ -755,21 +910,18 @@ void SelectSong(void)
 							Data1[i][9] = Data1[i][4];
 						}
 					}
-					else
-					{
-						memcpy(&Data, &CSONG[SelectCurrent].Data_Easy1, sizeof(CSONG[SelectCurrent].Data_Easy1));
-						memcpy(&Data1,&CSONG[SelectCurrent].Data_Easy1, sizeof(CSONG[SelectCurrent].Data_Easy1));
+					else	{
+						memcpy ( &Data, &CSONG[SelectCurrent].Data_Easy1, sizeof ( CSONG[SelectCurrent].Data_Easy1 ) );
+						memcpy ( &Data1,&CSONG[SelectCurrent].Data_Easy1, sizeof ( CSONG[SelectCurrent].Data_Easy1 ) );
 					}
 					break;
 
 				case MODE_HARD:
-					if(bModeSynchro)
-					{
-						memcpy(&Data, &CSONG[SelectCurrent].Data_Hard, sizeof(CSONG[SelectCurrent].Data_Hard));
-						memcpy(&Data1,&CSONG[SelectCurrent].Data_Hard, sizeof(CSONG[SelectCurrent].Data_Hard));
-						
-						for(i=0;i<MAX_DATA;i++)
-						{
+					if ( bModeSynchro )	{
+						memcpy ( &Data, &CSONG[SelectCurrent].Data_Hard, sizeof ( CSONG[SelectCurrent].Data_Hard ) );
+						memcpy ( &Data1,&CSONG[SelectCurrent].Data_Hard, sizeof ( CSONG[SelectCurrent].Data_Hard ) );
+
+						for ( i=0;i<MAX_DATA;i++ )	{
 							Data1[i][5]=Data1[i][0];
 							Data1[i][6]=Data1[i][1];
 							Data1[i][7]=Data1[i][2];
@@ -777,28 +929,23 @@ void SelectSong(void)
 							Data1[i][9]=Data1[i][4];
 						}
 					}
-					else
-					{
-						memcpy(&Data,&CSONG[SelectCurrent].Data_Hard1,sizeof(CSONG[SelectCurrent].Data_Hard1));
-						memcpy(&Data1,&CSONG[SelectCurrent].Data_Hard1,sizeof(CSONG[SelectCurrent].Data_Hard1));
+					else	{
+						memcpy ( &Data,&CSONG[SelectCurrent].Data_Hard1,sizeof ( CSONG[SelectCurrent].Data_Hard1 ) );
+						memcpy ( &Data1,&CSONG[SelectCurrent].Data_Hard1,sizeof ( CSONG[SelectCurrent].Data_Hard1 ) );
 					}
 					break;
 			}
 		}
 		// single mode.
-		else 
-		{
-			switch(GameMode)
-			{
+		else	{
+			switch ( GameMode )	{
 				case MODE_CRAZY:
-					if(Start1p)
-						memcpy(&Data, CSONG[SelectCurrent].Data_Crazy, sizeof(Data));
-					else	// 2p play
-					{
-						memcpy(&Data, CSONG[SelectCurrent].Data_Crazy, sizeof(Data));
-						memcpy(&Data1,CSONG[SelectCurrent].Data_Crazy, sizeof(Data));
-						for(i=0;i<MAX_DATA;i++)
-						{
+					if ( Start1p )
+						memcpy ( &Data, CSONG[SelectCurrent].Data_Crazy, sizeof ( Data ) );
+					else	{// 2p play
+						memcpy ( &Data, CSONG[SelectCurrent].Data_Crazy, sizeof ( Data ) );
+						memcpy ( &Data1,CSONG[SelectCurrent].Data_Crazy, sizeof ( Data ) );
+						for ( i=0;i<MAX_DATA;i++ )	{
 							Data1[i][5] = Data[i][0];
 							Data1[i][6] = Data[i][1];
 							Data1[i][7] = Data[i][2];
@@ -809,14 +956,12 @@ void SelectSong(void)
 					break;
 
 				case MODE_EASY:
-					if(Start1p)
-						memcpy(&Data,CSONG[SelectCurrent].Data_Easy,sizeof(Data));
-					else
-					{
-						memcpy(&Data,  CSONG[SelectCurrent].Data_Easy, sizeof(Data));
-						memcpy(&Data1, CSONG[SelectCurrent].Data_Easy, sizeof(Data));
-						for(i=0;i<MAX_DATA;i++)
-						{
+					if ( Start1p )
+						memcpy ( &Data,CSONG[SelectCurrent].Data_Easy,sizeof ( Data ) );
+					else	{
+						memcpy ( &Data,  CSONG[SelectCurrent].Data_Easy, sizeof ( Data ) );
+						memcpy ( &Data1, CSONG[SelectCurrent].Data_Easy, sizeof ( Data ) );
+						for ( i=0;i<MAX_DATA;i++ )	{
 							Data1[i][5] = Data[i][0];
 							Data1[i][6] = Data[i][1];
 							Data1[i][7] = Data[i][2];
@@ -827,14 +972,12 @@ void SelectSong(void)
 					break;
 
 				case MODE_HARD:
-					if(Start1p)
-						memcpy(&Data,CSONG[SelectCurrent].Data_Hard,sizeof(Data));
-					else	// 2p play
-					{
-						memcpy(&Data,  CSONG[SelectCurrent].Data_Hard, sizeof(Data));
-						memcpy(&Data1, CSONG[SelectCurrent].Data_Hard, sizeof(Data));
-						for(i=0;i<MAX_DATA;i++)
-						{
+					if ( Start1p )
+						memcpy ( &Data,CSONG[SelectCurrent].Data_Hard,sizeof ( Data ) );
+					else	{// 2p play
+						memcpy ( &Data,  CSONG[SelectCurrent].Data_Hard, sizeof ( Data ) );
+						memcpy ( &Data1, CSONG[SelectCurrent].Data_Hard, sizeof ( Data ) );
+						for ( i=0;i<MAX_DATA;i++ )	{
 							Data1[i][5] = Data[i][0];
 							Data1[i][6] = Data[i][1];
 							Data1[i][7] = Data[i][2];
@@ -851,16 +994,15 @@ void SelectSong(void)
 		bpm3=CSONG[SelectCurrent].bpm3;
 		bunki=CSONG[SelectCurrent].Bunki;
 		bunki2=CSONG[SelectCurrent].Bunki2;
-		
-		switch(GameMode)
-		{
-			/*	idia
-			Song a;
-			a.setMode( GameMode );
-			start = a.GetStart();
-			start2 = a.GetStart2();
-			..
-			*/
+
+		switch ( GameMode )	{
+				/*	idia
+				Song a;
+				a.setMode( GameMode );
+				start = a.GetStart();
+				start2 = a.GetStart2();
+				..
+				*/
 			case MODE_CRAZY:
 				start = CSONG[SelectCurrent].Crazy_Start;
 				start2= CSONG[SelectCurrent].Crazy_Start2;
@@ -888,60 +1030,55 @@ void SelectSong(void)
 				start3 = CSONG[SelectCurrent].Double_Start3;
 				tick   = CSONG[SelectCurrent].Double_Tick;
 				break;
-				
+
 			default:
-				{
-					char	buff[256] = { 0, };
-					sprintf( buff, "MODE ERROR" __FILE__ " line:%d\n", __LINE__ );
-					DisplayMessage(0, 0, buff );
-				}		
-				break;
+			{
+				char	buff[256] = { 0, };
+				sprintf ( buff, "MODE ERROR" __FILE__ " line:%d\n", __LINE__ );
+				DisplayMessage ( 0, 0, buff );
+			}
+			break;
 		}
 
-		strcpy(SongName,  CSONG[SelectCurrent].PlayWavPath);
-		strcpy(SongName2, CSONG[SelectCurrent].PlayMp3Path);
-		strcpy(SongName3, CSONG[SelectCurrent].PlayMpgPath);
-		strcpy(Title,     CSONG[SelectCurrent].SongTitle);
+		strcpy ( SongName,  CSONG[SelectCurrent].PlayWavPath );
+		strcpy ( SongName2, CSONG[SelectCurrent].PlayMp3Path );
+		strcpy ( SongName3, CSONG[SelectCurrent].PlayMpgPath );
+		strcpy ( Title,     CSONG[SelectCurrent].SongTitle );
 
 		Judgement1p=NONE;
 		Judgement2p=NONE;
 
-		if(GameMode==MODE_DOUBLE)
-			g_ProgramState=DOUBLE;
+		if ( GameMode==MODE_DOUBLE )
+			g_ProgramState=DOUBLEST;
 		else
 			g_ProgramState=STAGE1;
-		
-		if(GameMode==MODE_DOUBLE)
-		{
-			if(Start1p && Start2p)
-				Start2p=FALSE;
+
+		if ( GameMode==MODE_DOUBLE )	{
+			if ( Start1p && Start2p )
+				Start2p=false;
 		}
 		Selected=0;
-		
-		if(g_dsSelectSong)
-			g_dsSelectSong->Stop();
-		if(IntroFlag){
-			intro->OnMediaStop();delete intro;IntroFlag=FALSE;
+
+		gSelectSong.Halt();
+		if ( IntroFlag )	{
+			gIntro.Halt();
+			IntroFlag=false;
 		}
-		
+
 		// open play song.
-		if(access(SongName,04)==0)
-		{
-			SongFlag=TRUE;
-			song=new CMedia;
-			song->OpenMediaFile(SongName);
+		if ( access ( SongName,04 ) ==0 )	{
+			SongFlag=true;
+			gSong.Load ( SongName );
 		}
-		else if(access(SongName2,04)==0)
-		{
-			SongFlag=TRUE;
-			song=new CMedia;
-			song->OpenMediaFile(SongName2);
+		else if ( access ( SongName2,04 ) ==0 )	{
+			SongFlag=true;
+			gSong.Load ( SongName2 );
 		}
 		else
-			SongFlag=FALSE;
+			SongFlag=false;
 
 		// paint background black.
-		DDFillSurface(g_pDDSBack, 0);
+		gScreen.FillRect ( 0, 0 );
 
 		First=0;
 		Combo1p=0;
@@ -971,359 +1108,347 @@ void SelectSong(void)
 		SelectCurrent=0;
 
 		return;
-		
+
 	}
 
 	// Draw background select image.
-	g_pDDSBack->BltFast(0, 0, SelectBack, NULL, DDBLTFAST_NOCOLORKEY);
+	gSelectBack.BltFast ( 0, 0, gScreen );
 
-	curTimer = timeGetTime();
+	curTimer = SDL_GetTicks();
 
 	int i2;
 
-	i2=(int)(curTimer-startTimer)/1000;
-	sprintf(s,"%02d", (40 - i2));
+	i2= ( int ) ( curTimer-startTimer ) /1000;
+	sprintf ( s,"%02d", ( 40 - i2 ) );
 
-	if(40 <= i2)
+	if ( 40 <= i2 )
 	{
-		if(Selected == 7)
+		if ( Selected == 7 )
 			SelectCurrent = current, PressedKey1p[0]=3;
-		else if(Selected == 9)
+		else if ( Selected == 9 )
 			SelectCurrent = CSONG[current].Next, PressedKey1p[0]=3;
 		else
 			SelectCurrent = current,PressedKey1p[0]=3;
 	}
-		
-	DisplayNumber(560,8,s);
-	
+
+	DisplayNumber ( 560,8,s );
+
 	// selected left song.
-	if(Selected == 7)
-	{
-			Screen.top = 50 - zoom;
-			Screen.bottom = 50 + DISCSIZE_Y + zoom;
-			Screen.left = 10 - zoom;
-			Screen.right = 10 + DISCSIZE_X + zoom;
+	if ( Selected == 7 )	{
+		Screen.y = 50 - zoom;
+		Screen.h = DISCSIZE_Y;
+		Screen.x = 10 - zoom;
+		Screen.w = DISCSIZE_X + zoom + zoom;
 	}
 	// unselected left song.
-	else
-	{
-		Screen.top = 50;
-		Screen.bottom = 50 + DISCSIZE_Y;
-		Screen.left = 10;
-		Screen.right = 10 + DISCSIZE_X;
+	else	{
+		Screen.y = 50;
+		Screen.h = DISCSIZE_Y;
+		Screen.x = 10;
+		Screen.w = DISCSIZE_X;
 	}
-	
+
 	// change right screen.
-	if(iMove<0)
-	{
-		if(iMove<=-640)
+	if ( iMove<0 )	{
+		if ( iMove<=-640 )
 			iMove=0;
-		else 
-		{
+		else	{
 			iMove-=8;
 
-			ClpBlt3(10+iMove,50,CSONG[CSONG[CSONG[current].Prev].Prev].DiskImage, &DiscSize,DDBLTFAST_SRCCOLORKEY);
-			ClpBlt3(650+iMove,50,CSONG[current].DiskImage, &DiscSize,DDBLTFAST_SRCCOLORKEY);
+			ClpBlt3 ( 10+iMove,50, *CSONG[CSONG[CSONG[current].Prev].Prev].mpDiskImage, DiscSize );
+			ClpBlt3 ( 650+iMove,50, *CSONG[current].mpDiskImage, DiscSize );
 		}
 	}
 	// change left screen.
-	else if(iMove>0)
-	{
-		if(iMove>=640)
+	else if ( iMove>0 )	{
+		if ( iMove>=640 )
 			iMove=0;
-		else
-		{
+		else	{
 			iMove+=8;
-		
-			ClpBlt3(-630+iMove,50,CSONG[current].DiskImage, &DiscSize, DDBLTFAST_SRCCOLORKEY);
-			ClpBlt3(10+iMove,50,CSONG[CSONG[CSONG[current].Next].Next].DiskImage, &DiscSize, DDBLTFAST_SRCCOLORKEY);
+
+			ClpBlt3 ( -630+iMove,50, *CSONG[current].mpDiskImage, DiscSize );
+			ClpBlt3 ( 10+iMove,50, *CSONG[CSONG[CSONG[current].Next].Next].mpDiskImage, DiscSize );
 		}
 	}
-	else if(iMove==0)
-		g_pDDSBack->Blt(&Screen,CSONG[current].DiskImage, &DiscSize, DDBLT_KEYSRC,NULL);
-	
+	else if ( iMove==0 )
+		CSONG[current].mpDiskImage->BltFast ( Screen.x, Screen.y, gScreen, &DiscSize );
+
 	// selected right song.
-	if(Selected == 9)
-	{
+	if ( Selected == 9 )	{
 		// zoom the diskImage.
-		Screen.top = 50 - zoom;
-		Screen.bottom = 50 + DISCSIZE_Y + zoom;
-		Screen.left = 330 - zoom;
-		Screen.right = 330 + DISCSIZE_X + zoom;
+		Screen.y = 50 - zoom;
+		Screen.h = DISCSIZE_Y + zoom + zoom;
+		Screen.x = 330 - zoom;
+		Screen.w = DISCSIZE_X + zoom + zoom;
 	}
 	// unselected right song.
-	else
-	{
+	else	{
 		// make normal size the diskImage.
-		Screen.top = 50;
-		Screen.bottom = 50 + DISCSIZE_Y;
-		Screen.left = 330;
-		Screen.right = 330 + DISCSIZE_X;
+		Screen.y = 50;
+		Screen.h = DISCSIZE_Y;
+		Screen.x = 330;
+		Screen.w = DISCSIZE_X;
 	}
 
 	// draw left disk image.
-	if(iMove<0)
-	{
-		if(iMove<=-640)
+	if ( iMove<0 )	{
+		if ( iMove<=-640 )
 			iMove=0;
-		else
-		{
+		else	{
 			iMove-=8;
 
-			ClpBlt3(330+iMove,50,CSONG[CSONG[CSONG[CSONG[current].Prev].Prev].Next].DiskImage, &DiscSize,DDBLTFAST_SRCCOLORKEY);
-			ClpBlt3(970+iMove,50,CSONG[CSONG[current].Next].DiskImage, &DiscSize,DDBLTFAST_SRCCOLORKEY);
+			ClpBlt3 ( 330+iMove,50, *CSONG[CSONG[CSONG[CSONG[current].Prev].Prev].Next].mpDiskImage, DiscSize );
+			ClpBlt3 ( 970+iMove,50, *CSONG[CSONG[current].Next].mpDiskImage, DiscSize );
 		}
 	}
 	// draw right disk image.
-	else if(iMove>0)
-	{
-		if(iMove>=640)
+	else if ( iMove>0 )	{
+		if ( iMove>=640 )
 			iMove=0;
-		else
-		{
+		else	{
 			iMove+=8;
-		
-			ClpBlt3(-310+iMove,50,CSONG[CSONG[current].Next].DiskImage, &DiscSize, DDBLTFAST_SRCCOLORKEY);
-			ClpBlt3(330+iMove,50,CSONG[CSONG[CSONG[CSONG[current].Next].Next].Next].DiskImage, &DiscSize,DDBLTFAST_SRCCOLORKEY);
+			ClpBlt3 ( -310+iMove,50, *CSONG[CSONG[current].Next].mpDiskImage, DiscSize );
+			ClpBlt3 ( 330+iMove,50, *CSONG[CSONG[CSONG[CSONG[current].Next].Next].Next].mpDiskImage, DiscSize );
 		}
 	}
-	else if(iMove==0)
-		g_pDDSBack->Blt(&Screen,CSONG[CSONG[current].Next].DiskImage, &DiscSize, DDBLT_KEYSRC,NULL);
+	else if ( iMove==0 )
+		CSONG[CSONG[current].Next].mpDiskImage->BltFast ( Screen.x, Screen.y, gScreen, &DiscSize );
 
 	// draw shiftleft image.
-	g_pDDSBack->BltFast(0, 250, ShiftLeft, NULL, DDBLTFAST_SRCCOLORKEY);
-	
+	gShiftLeft.BltFast ( 0, 250, gScreen );
+
 	// draw shiftright image.
-	g_pDDSBack->BltFast(320, 250,ShiftRight,NULL, DDBLTFAST_SRCCOLORKEY);
+	gShiftRight.BltFast ( 320, 250, gScreen );
 
 	// print song title to the screen.
-	if(Selected == 7)
-		DisplayMessage(200, 300, CSONG[current].SongTitle);
-	else if(Selected==9)
-		DisplayMessage(200, 300, CSONG[CSONG[current].Next].SongTitle);
+	if ( Selected == 7 )
+		DisplayMessage ( 200, 300, CSONG[current].SongTitle );
+	else if ( Selected==9 )
+		DisplayMessage ( 200, 300, CSONG[CSONG[current].Next].SongTitle );
 
 	// draw 1p mode pictures.
-	if(bModeMirror1p)
-		DrawMode(0,200,HMODE_MIRROR);
-	if(bModeNonstep1p)
-		DrawMode(0,240,HMODE_NONSTEP);
-	if(bModeSynchro)
-		DrawMode(0,280,HMODE_SYNCHRO);
-	if(bModeUnion1p)
-		DrawMode(0,320,HMODE_UNION);
-	if(bModeRandom1p)
-		DrawMode(0,360,HMODE_RANDOM);
-	if(bModeVanish1p)
-		DrawMode(0,400,HMODE_VANISH);
-	if(HighSpeed1p>1)
-		DrawMode(0,160,HMODE_2X);
+	if ( bModeMirror1p )
+		DrawMode ( 0,200,HMODE_MIRROR );
+	if ( bModeNonstep1p )
+		DrawMode ( 0,240,HMODE_NONSTEP );
+	if ( bModeSynchro )
+		DrawMode ( 0,280,HMODE_SYNCHRO );
+	if ( bModeUnion1p )
+		DrawMode ( 0,320,HMODE_UNION );
+	if ( bModeRandom1p )
+		DrawMode ( 0,360,HMODE_RANDOM );
+	if ( bModeVanish1p )
+		DrawMode ( 0,400,HMODE_VANISH );
+	if ( HighSpeed1p>1 )
+		DrawMode ( 0,160,HMODE_2X );
 
 	// draw 2p mode pictures.
-	if(bModeMirror2p)
-		DrawMode(600,200,HMODE_MIRROR);
-	if(bModeNonstep2p)
-		DrawMode(600,240,HMODE_NONSTEP);
-	if(bModeUnion2p)
-		DrawMode(600,320,HMODE_UNION);
-	if(bModeRandom2p)
-		DrawMode(600,360,HMODE_RANDOM);
-	if(bModeVanish2p)
-		DrawMode(600,400,HMODE_VANISH);
-	if(HighSpeed2p>1)
-		DrawMode(600,160,HMODE_2X);
+	if ( bModeMirror2p )
+		DrawMode ( 600,200,HMODE_MIRROR );
+	if ( bModeNonstep2p )
+		DrawMode ( 600,240,HMODE_NONSTEP );
+	if ( bModeUnion2p )
+		DrawMode ( 600,320,HMODE_UNION );
+	if ( bModeRandom2p )
+		DrawMode ( 600,360,HMODE_RANDOM );
+	if ( bModeVanish2p )
+		DrawMode ( 600,400,HMODE_VANISH );
+	if ( HighSpeed2p>1 )
+		DrawMode ( 600,160,HMODE_2X );
 
 	// Draw level icon to next to the title image.
-	if(CSONG[current].HaveDouble && iMove==0 )
-		g_pDDSBack->BltFast(0,50, DoubleIcon,NULL, DDBLTFAST_SRCCOLORKEY);
-	if(CSONG[CSONG[current].Next].HaveDouble && iMove==0 )
-		g_pDDSBack->BltFast(320,50, DoubleIcon, NULL, DDBLTFAST_SRCCOLORKEY);
+	if ( CSONG[current].HaveDouble && iMove==0 )
+		gDoubleIcon.BltFast ( 0,50, gScreen );
+	if ( CSONG[CSONG[current].Next].HaveDouble && iMove==0 )
+		gDoubleIcon.BltFast ( 320,50, gScreen );
 
-	if(CSONG[current].HaveCrazy && iMove==0 )
-		g_pDDSBack->BltFast(0,50, CrazyIcon,NULL, DDBLTFAST_SRCCOLORKEY);
-	if(CSONG[CSONG[current].Next].HaveCrazy && iMove==0 )
-		g_pDDSBack->BltFast(320,50, CrazyIcon, NULL, DDBLTFAST_SRCCOLORKEY);
+	if ( CSONG[current].HaveCrazy && iMove==0 )
+		gCrazyIcon.BltFast ( 0,50, gScreen );
+	if ( CSONG[CSONG[current].Next].HaveCrazy && iMove==0 )
+		gCrazyIcon.BltFast ( 320,50, gScreen );
 
-	if(CSONG[current].HaveHard && iMove==0 )
-		g_pDDSBack->BltFast(0,50, HardIcon,NULL, DDBLTFAST_SRCCOLORKEY);
-	if(CSONG[CSONG[current].Next].HaveHard && iMove==0 )
-		g_pDDSBack->BltFast(320,50, HardIcon, NULL, DDBLTFAST_SRCCOLORKEY);
+	if ( CSONG[current].HaveHard && iMove==0 )
+		gHardIcon.BltFast ( 0,50, gScreen );
+	if ( CSONG[CSONG[current].Next].HaveHard && iMove==0 )
+		gHardIcon.BltFast ( 320,50, gScreen );
 
-	if(CSONG[current].HaveEasy && iMove==0 )
-		g_pDDSBack->BltFast(0,50, EasyIcon,NULL, DDBLTFAST_SRCCOLORKEY);
-	if(CSONG[CSONG[current].Next].HaveEasy && iMove==0 )
-		g_pDDSBack->BltFast(320,50, EasyIcon, NULL, DDBLTFAST_SRCCOLORKEY);
+	if ( CSONG[current].HaveEasy && iMove==0 )
+		gEasyIcon.BltFast ( 0,50, gScreen );
+	if ( CSONG[CSONG[current].Next].HaveEasy && iMove==0 )
+		gEasyIcon.BltFast ( 320,50, gScreen );
 
 	// Draw to screen "FREE PLAY!"
-	lRect.top=46;
-	lRect.left=0;
-	lRect.right=220;
-	lRect.bottom=69;
+	SDL_Rect	sRect;
+	sRect.x = 0;
+	sRect.y = 46;
+	sRect.w = 220;
+	sRect.h = 69-46;
+	gStateComment.SetAlpha ( 255 );
+	gStateComment.BltFast ( 210, 450, gScreen, &sRect );
 
-	g_pDDSBack->BltFast(210,450,g_cFont, &lRect, DDBLTFAST_SRCCOLORKEY);
 
-	if(Start1p)
+	if ( Start1p )
 	{
-		if(a==0)
+		if ( a==0 )
 		{
 			a++;
-			if(Start1p && Start2p)Couple=TRUE;
-			else Couple=FALSE;
+			if ( Start1p && Start2p ) Couple=true;
+			else Couple=false;
 		}
 	}
-	if(Start2p)
+	if ( Start2p )
 	{
-		if(b==0)
+		if ( b==0 )
 		{
 			b++;
-			if(Start1p && Start2p)Couple=TRUE;
-			else Couple=FALSE;
+			if ( Start1p && Start2p )
+				Couple=true;
+			else
+				Couple=false;
 		}
 	}
 
-	if(Start1p==FALSE)
+	if ( Start1p==false )
 	{
+		// Draw to screen (410, 450) "PRESS CENTER BUTTON"
+		sRect.x = 0;
+		sRect.y = 0;
+		sRect.w = 220;
+		sRect.h = 23;
 
-		// Draw "PRESS CENTER BUTTON"
-		lRect.top=0;
-		lRect.left=0;
-		lRect.right=220;
-		lRect.bottom=23;
-
-		TransAlphaImproved(g_cFont, g_pDDSBack, 10, 450, lRect, ALPHA, CKey_CFont, 16);
+		gStateComment.SetAlpha ( ALPHA );
+		gStateComment.BltFast ( 10, 450, gScreen, &sRect );
 	}
 
-	if(Start2p==FALSE)
+	if ( Start2p==false )
 	{
-		// Draw "PRESS CENTER BUTTON"
-		lRect.top=0;
-		lRect.left=0;
-		lRect.right=220;
-		lRect.bottom=23;
+		// Draw to screen (410, 450) "PRESS CENTER BUTTON"
+		sRect.x = 0;
+		sRect.y = 0;
+		sRect.w = 220;
+		sRect.h = 23;
 
-		TransAlphaImproved(g_cFont, g_pDDSBack, 410, 450, lRect, ALPHA, CKey_CFont, 16);
+		gStateComment.SetAlpha ( ALPHA );
+		gStateComment.BltFast ( 410, 450, gScreen, &sRect );
 	}
 
-
-	// Alpha 
+	// Alpha
 	ALPHA += inc;
-	if (ALPHA > 256)
+	if ( ALPHA > 256 )
 	{
 		ALPHA = 256;
 		inc = -10;
 	}
-	else if (ALPHA < 0)
+	else if ( ALPHA < 0 )
 	{
 		ALPHA = 0;
 		inc = 10;
 	}
-
-	Flipp();
-
 }
 
-int	ScanHiddenMode1p(void)
+int	ScanHiddenMode1p ( void )
 {
 	static char IntKey1p[10];
 	int i;
 
-	if(PressedKey1p[1] || PressedKey1p[3] || PressedKey1p[5] || PressedKey1p[7] || PressedKey1p[9])
-		for(i=0;i<7;i++)IntKey1p[i]=IntKey1p[i+1];
-	
-	if(PressedKey1p[1])IntKey1p[7]='1';
-	if(PressedKey1p[3])IntKey1p[7]='3';
-	if(PressedKey1p[5])IntKey1p[7]='5';
-	if(PressedKey1p[7])IntKey1p[7]='7';
-	if(PressedKey1p[9])IntKey1p[7]='9';
+	if ( PressedKey1p[1] || PressedKey1p[3] || PressedKey1p[5] || PressedKey1p[7] || PressedKey1p[9] )
+		for ( i=0;i<7;i++ ) IntKey1p[i]=IntKey1p[i+1];
 
-	// 2¹è¼Ó ÀÔ´Ï´Ù.
-	if(strcmp(IntKey1p,"55755595")==0)
+	if ( PressedKey1p[1] ) IntKey1p[7]='1';
+	if ( PressedKey1p[3] ) IntKey1p[7]='3';
+	if ( PressedKey1p[5] ) IntKey1p[7]='5';
+	if ( PressedKey1p[7] ) IntKey1p[7]='7';
+	if ( PressedKey1p[9] ) IntKey1p[7]='9';
+
+	// 2ë°°ì† ?ï¿½ë‹ˆ??
+	if ( strcmp ( IntKey1p,"55755595" ) ==0 )
 	{
 		IntKey1p[7]='0';
 		return HMODE_2X;
 	}
-	// 4¹è¼Ó ÀÔ´Ï´Ù.
-	else if(strcmp(IntKey1p,"55355755")==0)
+	// 4ë°°ì† ?ï¿½ë‹ˆ??
+	else if ( strcmp ( IntKey1p,"55355755" ) ==0 )
 	{
 		IntKey1p[7]='0';
 		return HMODE_4X;
 	}
-	// 8¹è¼Ó ÀÔ´Ï´Ù.
-	else if(strcmp(IntKey1p,"55153555")==0)
+	// 8ë°°ì† ?ï¿½ë‹ˆ??
+	else if ( strcmp ( IntKey1p,"55153555" ) ==0 )
 	{
 		IntKey1p[7]='0';
 		return HMODE_8X;
 	}
-	// ¹è´Ï½¬ ÀÔ´Ï´Ù.
-	else if(strcmp(IntKey1p,"55975315")==0)
+	// ë°°ë‹ˆ???ï¿½ë‹ˆ??
+	else if ( strcmp ( IntKey1p,"55975315" ) ==0 )
 	{
 		IntKey1p[7]='0';
 		return HMODE_VANISH;
 	}
-	// ¹Ì·¯¸ðµå ÀÔ´Ï´Ù.
-	else if(strcmp(IntKey1p,"55159357")==0)
+	// ë¯¸ëŸ¬ëª¨ë“œ ?ï¿½ë‹ˆ??
+	else if ( strcmp ( IntKey1p,"55159357" ) ==0 )
 	{
 		IntKey1p[7]='0';
 		return HMODE_MIRROR;
 	}
-	// ·£´ý¸ðµå ÀÔ´Ï´Ù.
-	else if(strcmp(IntKey1p,"51535957")==0)
+	// ?ï¿½ë¤ëª¨ë“œ ?ï¿½ë‹ˆ??
+	else if ( strcmp ( IntKey1p,"51535957" ) ==0 )
 	{
 		IntKey1p[7]='0';
 		return HMODE_RANDOM;
 	}
-/*	// Ä¿ÇÃ¸ðµå ÀÔ´Ï´Ù.
-	else if(strcmp(IntKey1p,"55979755")==0)
-	{
-		IntKey1p[7]='0';
-		return HMODE_COUPLE;
-	}
-*/	// ½ÌÅ©·Î ¸ðµåÀÔ´Ï´Ù.
-	else if(strcmp(IntKey1p,"55797955")==0)
+	/*	// ì»¤í”Œëª¨ë“œ ?ï¿½ë‹ˆ??
+		else if(strcmp(IntKey1p,"55979755")==0)
+		{
+			IntKey1p[7]='0';
+			return HMODE_COUPLE;
+		}
+	*/	// ?ï¿½í¬ï¿½?ëª¨ë“œ?ï¿½ë‹ˆ??
+	else if ( strcmp ( IntKey1p,"55797955" ) ==0 )
 	{
 		IntKey1p[7]='0';
 		return HMODE_SYNCHRO;
 	}
-	// ³í½ºÅÜ¸ðµå ÀÔ´Ï´Ù.
-	else if(strcmp(IntKey1p,"79579579")==0)
+	// ?ï¿½ìŠ¤?ï¿½ëª¨???ï¿½ë‹ˆ??
+	else if ( strcmp ( IntKey1p,"79579579" ) ==0 )
 	{
 		IntKey1p[7]='0';
 		return HMODE_NONSTEP;
 	}
-/*	// ³í½ºÅé´õºí ÀÔ´Ï´Ù.
-	else if(strcmp(IntKey1p,"17159395")==0)
-	{
-		IntKey1p[7]='0';
-		return HMODE_NONSTOPDOUBLE;
-	}*/
-	// À¯´Ï¿Â¸ðµå ÀÔ´Ï´Ù.
-	else if(strcmp(IntKey1p,"13573159")==0)
+	/*	// ?ï¿½ìŠ¤?ï¿½ë”ï¿½??ï¿½ë‹ˆ??
+		else if(strcmp(IntKey1p,"17159395")==0)
+		{
+			IntKey1p[7]='0';
+			return HMODE_NONSTOPDOUBLE;
+		}*/
+	// ?ï¿½ë‹ˆ?ï¿½ëª¨???ï¿½ë‹ˆ??
+	else if ( strcmp ( IntKey1p,"13573159" ) ==0 )
 	{
 		IntKey1p[7]='0';
 		return HMODE_UNION;
 	}
-/*	// ¼¿·ºÆ®¿Ã ÀÔ´Ï´Ù. 
-	else if(strcmp(IntKey1p,"95197537")==0)
-	{
-		IntKey1p[7]='0';
-		return HMODE_SELECTALL;
-	}*/
-	// Äµ½½ ÀÔ´Ï´Ù.
-	else if(strcmp(IntKey1p,"55555555")==0)
+	/*	// ?ï¿½?ï¿½íŠ¸???ï¿½ë‹ˆ??
+		else if(strcmp(IntKey1p,"95197537")==0)
+		{
+			IntKey1p[7]='0';
+			return HMODE_SELECTALL;
+		}*/
+	// ìº”ìŠ¬ ?ï¿½ë‹ˆ??
+	else if ( strcmp ( IntKey1p,"55555555" ) ==0 )
 	{
 		IntKey1p[7]='0';
 		return HMODE_CANCEL;
 	}
-	else if(strcmp(IntKey1p,"55955575")==0)
+	else if ( strcmp ( IntKey1p,"55955575" ) ==0 )
 	{
 		IntKey1p[7]='0';
 		return HMODE_4DMIX;
 	}
-	else if(strcmp(IntKey1p,"79513579")==0)
+	else if ( strcmp ( IntKey1p,"79513579" ) ==0 )
 	{
 		IntKey1p[7]='0';
 		return HMODE_SUDDENR;
 	}
-	else if(strcmp(IntKey1p,"17931793")==0)
+	else if ( strcmp ( IntKey1p,"17931793" ) ==0 )
 	{
 		IntKey1p[7]='0';
 		return HMODE_RANDOMS;
@@ -1332,97 +1457,98 @@ int	ScanHiddenMode1p(void)
 		return HMODE_NONE;
 }
 
-int	ScanHiddenMode2p(void)
+int	ScanHiddenMode2p ( void )
 {
 	static char IntKey2p[10];
 	int i;
 
-	if(PressedKey2p[1] || PressedKey2p[3] || PressedKey2p[5] || PressedKey2p[7] || PressedKey2p[9])
-		for(i=0;i<7;i++)IntKey2p[i]=IntKey2p[i+1];
-	
-	if(PressedKey2p[1])IntKey2p[7]='1';
-	if(PressedKey2p[3])IntKey2p[7]='3';
-	if(PressedKey2p[5])IntKey2p[7]='5';
-	if(PressedKey2p[7])IntKey2p[7]='7';
-	if(PressedKey2p[9])IntKey2p[7]='9';
+	if ( PressedKey2p[1] || PressedKey2p[3] || PressedKey2p[5] || PressedKey2p[7] || PressedKey2p[9] )
+		for ( i=0;i<7;i++ ) IntKey2p[i]=IntKey2p[i+1];
 
-	if(strcmp(IntKey2p,"55755595")==0)
+	if ( PressedKey2p[1] ) IntKey2p[7]='1';
+	if ( PressedKey2p[3] ) IntKey2p[7]='3';
+	if ( PressedKey2p[5] ) IntKey2p[7]='5';
+	if ( PressedKey2p[7] ) IntKey2p[7]='7';
+	if ( PressedKey2p[9] ) IntKey2p[7]='9';
+
+	if ( strcmp ( IntKey2p,"55755595" ) ==0 )
 	{
 		IntKey2p[7]='0';
 		return HMODE_2X;
-	} // 2¹è¼Ó ÀÔ´Ï´Ù.
-	else if(strcmp(IntKey2p,"55355755")==0)
+	} // 2ë°°ì† ?ï¿½ë‹ˆ??
+	else if ( strcmp ( IntKey2p,"55355755" ) ==0 )
 	{
 		IntKey2p[7]='0';
 		return HMODE_4X;
-	} // 4¹è¼Ó ÀÔ´Ï´Ù.
-	else if(strcmp(IntKey2p,"55153555")==0)
+	} // 4ë°°ì† ?ï¿½ë‹ˆ??
+	else if ( strcmp ( IntKey2p,"55153555" ) ==0 )
 	{
 		IntKey2p[7]='0';
 		return HMODE_8X;
-	} // 8¹è¼Ó ÀÔ´Ï´Ù.
-	else if(strcmp(IntKey2p,"55975315")==0)
+	} // 8ë°°ì† ?ï¿½ë‹ˆ??
+	else if ( strcmp ( IntKey2p,"55975315" ) ==0 )
 	{
 		IntKey2p[7]='0';
 		return HMODE_VANISH;
-	} // ¹è´Ï½¬ ÀÔ´Ï´Ù.
-	else if(strcmp(IntKey2p,"55159357")==0)
+	} // ë°°ë‹ˆ???ï¿½ë‹ˆ??
+	else if ( strcmp ( IntKey2p,"55159357" ) ==0 )
 	{
 		IntKey2p[7]='0';
 		return HMODE_MIRROR;
-	} // ¹Ì·¯¸ðµå ÀÔ´Ï´Ù.
-	else if(strcmp(IntKey2p,"51535957")==0)
+	} // ë¯¸ëŸ¬ëª¨ë“œ ?ï¿½ë‹ˆ??
+	else if ( strcmp ( IntKey2p,"51535957" ) ==0 )
 	{
 		IntKey2p[7]='0';
 		return HMODE_RANDOM;
-	} // ·£´ý¸ðµå ÀÔ´Ï´Ù.
-/*	else if(strcmp(IntKey2p,"55979755")==0)
-	{
-		IntKey2p[7]='0';
-		return HMODE_COUPLE;
-	} // Ä¿ÇÃ¸ðµå ÀÔ´Ï´Ù.
-*/	else if(strcmp(IntKey2p,"55797955")==0)
+	} // ?ï¿½ë¤ëª¨ë“œ ?ï¿½ë‹ˆ??
+	/*	else if(strcmp(IntKey2p,"55979755")==0)
+		{
+			IntKey2p[7]='0';
+			return HMODE_COUPLE;
+		} // ì»¤í”Œëª¨ë“œ ?ï¿½ë‹ˆ??
+	*/
+	else if ( strcmp ( IntKey2p,"55797955" ) ==0 )
 	{
 		IntKey2p[7]='0';
 		return HMODE_SYNCHRO;
-	} // ½ÌÅ©·Î ¸ðµåÀÔ´Ï´Ù.
-	else if(strcmp(IntKey2p,"79579579")==0)
+	} // ?ï¿½í¬ï¿½?ëª¨ë“œ?ï¿½ë‹ˆ??
+	else if ( strcmp ( IntKey2p,"79579579" ) ==0 )
 	{
 		IntKey2p[7]='0';
 		return HMODE_NONSTEP;
-	} // ³í½ºÅÜ¸ðµå ÀÔ´Ï´Ù.
-/*	else if(strcmp(IntKey2p,"17159395")==0)
-	{
-		IntKey2p[7]='0';
-		return HMODE_NONSTOPDOUBLE;
-	} // ³í½ºÅé´õºí ÀÔ´Ï´Ù.*/
-	else if(strcmp(IntKey2p,"13573159")==0)
+	} // ?ï¿½ìŠ¤?ï¿½ëª¨???ï¿½ë‹ˆ??
+	/*	else if(strcmp(IntKey2p,"17159395")==0)
+		{
+			IntKey2p[7]='0';
+			return HMODE_NONSTOPDOUBLE;
+		} // ?ï¿½ìŠ¤?ï¿½ë”ï¿½??ï¿½ë‹ˆ??*/
+	else if ( strcmp ( IntKey2p,"13573159" ) ==0 )
 	{
 		IntKey2p[7]='0';
 		return HMODE_UNION;
-	} // À¯´Ï¿Â¸ðµå ÀÔ´Ï´Ù.
-/*	else if(strcmp(IntKey2p,"95197537")==0)
-	{
-		IntKey2p[7]='0';
-		return HMODE_SELECTALL;
-	} // ¼¿·ºÆ®¿Ã ÀÔ´Ï´Ù. */
-	else if(strcmp(IntKey2p,"55555555")==0)
+	} // ?ï¿½ë‹ˆ?ï¿½ëª¨???ï¿½ë‹ˆ??
+	/*	else if(strcmp(IntKey2p,"95197537")==0)
+		{
+			IntKey2p[7]='0';
+			return HMODE_SELECTALL;
+		} // ?ï¿½?ï¿½íŠ¸???ï¿½ë‹ˆ?? */
+	else if ( strcmp ( IntKey2p,"55555555" ) ==0 )
 	{
 		IntKey2p[7]='0';
 		return HMODE_CANCEL;
-	} // Äµ½½ ÀÔ´Ï´Ù.
+	} // ìº”ìŠ¬ ?ï¿½ë‹ˆ??
 
-	else if(strcmp(IntKey2p,"55955575")==0)
+	else if ( strcmp ( IntKey2p,"55955575" ) ==0 )
 	{
 		IntKey2p[7]='0';
 		return HMODE_4DMIX;
 	}
-	else if(strcmp(IntKey2p,"79513579")==0)
+	else if ( strcmp ( IntKey2p,"79513579" ) ==0 )
 	{
 		IntKey2p[7]='0';
 		return HMODE_SUDDENR;
 	}
-	else if(strcmp(IntKey2p,"17931793")==0)
+	else if ( strcmp ( IntKey2p,"17931793" ) ==0 )
 	{
 		IntKey2p[7]='0';
 		return HMODE_RANDOMS;
@@ -1430,69 +1556,44 @@ int	ScanHiddenMode2p(void)
 	else return HMODE_NONE;
 }
 
-void DrawMode(int x, int y, int Mode)
+void DrawMode ( int x, int y, int Mode )
 {
-	RECT	modeRect;
+	SDL_Rect	modeRect = {0, };
 
-	switch(Mode)
+	modeRect.w = 37;
+	modeRect.h = 37;
+
+	switch ( Mode )
 	{
 		case HMODE_2X:
 		case HMODE_4X:
 		case HMODE_8X:
-			modeRect.top=0;
-			modeRect.left=0;
-			modeRect.right=37;
-			modeRect.bottom=37;
+			modeRect.x=0;
 			break;
 		case HMODE_VANISH:
-			modeRect.top=0;
-			modeRect.left=37;
-			modeRect.right=37*2;
-			modeRect.bottom=37;
+			modeRect.x=37;
 			break;
 		case HMODE_MIRROR:
-			modeRect.top=0;
-			modeRect.left=37*2;
-			modeRect.right=37*3;
-			modeRect.bottom=37;
+			modeRect.x = 37*2;
 			break;
 		case HMODE_RANDOM:
-			modeRect.top=0;
-			modeRect.left=37*3;
-			modeRect.right=37*4;
-			modeRect.bottom=37;
+			modeRect.x = 37*3;
 			break;
 		case HMODE_COUPLE:
-			modeRect.top=0;
-			modeRect.left=37*4;
-			modeRect.right=37*5;
-			modeRect.bottom=37;
+			modeRect.x = 37*4;
 			break;
 		case HMODE_SYNCHRO:
-			modeRect.top=0;
-			modeRect.left=37*5;
-			modeRect.right=37*6;
-			modeRect.bottom=37;
+			modeRect.x = 37*5;
 			break;
 		case HMODE_NONSTEP:
-			modeRect.top=0;
-			modeRect.left=37*6;
-			modeRect.right=37*7;
-			modeRect.bottom=37;
+			modeRect.x = 37*6;
 			break;
 		case HMODE_UNION:
-			modeRect.top=0;
-			modeRect.left=37*7;
-			modeRect.right=37*8;
-			modeRect.bottom=37;
+			modeRect.x = 37*7;
 			break;
 		default:
-			modeRect.top=0;
-			modeRect.left=0;
-			modeRect.right=0;
-			modeRect.bottom=0;
 			break;
 	}
 
-	g_pDDSBack->BltFast(x,y, ModeIcon, &modeRect, DDBLTFAST_SRCCOLORKEY);
+	gModeIcon.BltFast ( x, y, gScreen, &modeRect );
 }

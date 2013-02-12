@@ -1,20 +1,17 @@
-// SONG.h: interface for the SONG class.
+// Song.h: interface for the SONG class.
 //
 //////////////////////////////////////////////////////////////////////
 
-#if !defined(AFX_SONG_H__9B34A601_B4DC_11D3_AB0D_444553540000__INCLUDED_)
-#define AFX_SONG_H__9B34A601_B4DC_11D3_AB0D_444553540000__INCLUDED_
+#ifndef	_KICKITUP_SONG_H
+#define	_KICKITUP_SONG_H
 
-#if _MSC_VER > 1000
-#pragma once
-#endif // _MSC_VER > 1000
+#include "Main.h"
+#include "Surface.h"
+#include "Common.h"
 
-#include "ddutil.h"
-//#include "sound.h"
-#include "dsutil.h"
-#include "main.h"
+#define PATH_LEN    255
 
-extern LPDIRECTDRAWSURFACE NoDISC;
+extern Surface  gNoDISC;
 
 struct  STEP
 {
@@ -69,8 +66,8 @@ public:
 	int Easy_Start3;
 	int Double_Start3;
 
-	DWORD Bunki;
-	DWORD Bunki2;
+	Uint32 Bunki;
+	Uint32 Bunki2;
 
 	int Crazy_Tick;
 	int Hard_Tick;
@@ -82,36 +79,34 @@ public:
 	int Easy_Diff;
 	int Double_Diff;
 
-	void ReadCrazy_1_STF(char *Filename);
-	void ReadCrazy_1_KSF(char *Filename);
-	void ReadCrazy_2_STF(char *Filename);
-	void ReadCrazy_2_KSF(char *Filename);
+	void ReadCrazy_1_STF(char *fileName);
+	void ReadCrazy_1_KSF(char *fileName);
+	void ReadCrazy_2_STF(char *fileName);
+	void ReadCrazy_2_KSF(char *fileName);
 
-	void ReadHard_1_STF(char *Filename);
-	void ReadHard_1_KSF(char *Filename);
-	void ReadHard_2_STF(char *Filename);
-	void ReadHard_2_KSF(char *Filename);
+	void ReadHard_1_STF(char *fileName);
+	void ReadHard_1_KSF(char *fileName);
+	void ReadHard_2_STF(char *fileName);
+	void ReadHard_2_KSF(char *fileName);
 	
-	void ReadEasy_1_STF(char *Filename);
-	void ReadEasy_1_KSF(char *Filename);
-	void ReadEasy_2_STF(char *Filename);
-	void ReadEasy_2_KSF(char *Filename);
+	void ReadEasy_1_STF(char *fileName);
+	void ReadEasy_1_KSF(char *fileName);
+	void ReadEasy_2_STF(char *fileName);
+	void ReadEasy_2_KSF(char *fileName);
 	
-	void ReadDouble_STF(char *Filename);
-	void ReadDouble_KSF(char *Filename);
+	void ReadDouble_STF(char *fileName);
+	void ReadDouble_KSF(char *fileName);
 
-	BOOL HaveCrazy;
-	BOOL HaveHard;
-	BOOL HaveEasy;
-	BOOL HaveCouple;
-	BOOL HaveDouble;
+	bool HaveCrazy;
+	bool HaveHard;
+	bool HaveEasy;
+	bool HaveCouple;
+	bool HaveDouble;
 
 
-	LPDIRECTSOUNDBUFFER	Int_Song;
-
-	char TitleImgPath[MAX_PATH+1];
-	char IntroWavPath[MAX_PATH+1];	// intro wav file.
-	char IntroMp3Path[MAX_PATH+1];	// intro mp3 file.
+	char TitleImgPath[PATH_LEN+1];
+	char IntroWavPath[PATH_LEN+1];	// intro wav file.
+	char IntroMp3Path[PATH_LEN+1];	// intro mp3 file.
 	
 	char Data_Hard[MAX_DATA][14];
 	char Data_Hard1[MAX_DATA][14];
@@ -124,23 +119,26 @@ public:
 
 	char Data_Double[MAX_DATA][14];
 	
-	char DiscImagePath[MAX_PATH+1];
-	char BgImgPath[MAX_PATH+1];
-	char MSDPath[MAX_PATH+1];
+	char DiscImagePath[PATH_LEN+1];
+	char BgImgPath[PATH_LEN+1];
+	char MSDPath[PATH_LEN+1];
 	
-	LPDIRECTDRAWSURFACE DiskImage;
+    Surface *   mpDiskImage;
+    Surface     mThisSongDiskImage;
 
-	char SongTitle[MAX_PATH+1];
-	char PlayWavPath[MAX_PATH+1];
-	char PlayMp3Path[MAX_PATH+1];
-	char PlayMpgPath[MAX_PATH+1];
+	char SongTitle[PATH_LEN+1];
+	char PlayWavPath[PATH_LEN+1];
+	char PlayMp3Path[PATH_LEN+1];
+	char PlayMpgPath[PATH_LEN+1];
 
-	DWORD	Next;
-	DWORD	Prev;
+	Uint32	Next;
+	Uint32	Prev;
 
 	SONG();
 	virtual ~SONG();
 
+private:
+    void LoadDiskImage();
 };
 
-#endif // !defined(AFX_SONG_H__9B34A601_B4DC_11D3_AB0D_444553540000__INCLUDED_)
+#endif // _SONG_H

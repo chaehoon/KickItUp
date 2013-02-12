@@ -1,5 +1,5 @@
-#ifndef __DOUBLE__INCLUDE__
-#define __DOUBLE__INCLUDE__
+#ifndef	_KICKITUP_DOUBLE_H
+#define	_KICKITUP_DOUBLE_H
 
 #define	ZONE_U						35+8-8
 #define	ZONE_D						78-7+7
@@ -17,4 +17,4 @@
 
 void KIU_STAGE_DOUBLE(void);
 
-#endif
+#endif	// _DOUBLE_H

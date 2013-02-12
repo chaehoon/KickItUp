@@ -11,19 +11,17 @@
 			- Bpm changing bug fixed (bpm change was incorrected.)
 */
 
-#include <ddraw.h>
 #include <stdio.h>
 #include <time.h>
 
-#include "select.h"
-#include "double.h"
-#include "main.h"
-//#include "sound.h"
-#include <dsound.h>
-#include "dsutil.h"
-
-#include "input.h"
-#include "config.h"
+#include "Common.h"
+#include "Select.h"
+#include "Double.h"
+#include "Main.h"
+#include "Input.h"
+#include "Config.h"
+#include "Surface.h"
+#include "Chunk.h"
 
 #define LP1DB1_X		62
 #define LP7DB1_X		62+PUMP_SPRITE
@@ -39,43 +37,40 @@
 
 
 extern	int					start,start2,start3,tick;
-extern	DWORD				bunki,bunki2;
+extern	Uint32				bunki,bunki2;
 extern	int					start1;
-extern	char				Title[MAX_PATH+1];
+extern	char				Title[PATH_LEN+1];
 extern	double				bpm;
 extern	double				bpm2;
 extern	double				bpm3;
-extern	char				SongName[MAX_PATH+1];
+extern	char				SongName[PATH_LEN+1];
 
-extern	LPDIRECTDRAWSURFACE	wArrow;
+extern	Surface gWArrow;
 
-extern	LPDIRECTDRAWSURFACE	cArrow1;
-extern	LPDIRECTDRAWSURFACE	cArrow3;
-extern	LPDIRECTDRAWSURFACE	cArrow5;
-extern	LPDIRECTDRAWSURFACE	cArrow7;
-extern	LPDIRECTDRAWSURFACE	cArrow9;
+extern	Surface	cArrow1;
+extern	Surface	cArrow3;
+extern	Surface	cArrow5;
+extern	Surface	cArrow7;
+extern	Surface	cArrow9;
+extern	Surface	pArrow1;
+extern	Surface	pArrow3;
+extern	Surface	pArrow5;
+extern	Surface	pArrow7;
+extern	Surface	pArrow9;
 
-extern	LPDIRECTDRAWSURFACE	pArrow1;
-extern	LPDIRECTDRAWSURFACE	pArrow3;
-extern	LPDIRECTDRAWSURFACE	pArrow5;
-extern	LPDIRECTDRAWSURFACE	pArrow7;
-extern	LPDIRECTDRAWSURFACE	pArrow9;
+extern	Surface 	gArrow1;
+extern	Surface 	gArrow2;
 
-extern	LPDIRECTDRAWSURFACE	Arrow1;
-extern	LPDIRECTDRAWSURFACE	Arrow2;
+extern Surface      gSongBack;
+extern Surface      gNumberFont;
+extern Surface      JudgeFont;
+extern	Surface	ComboFont;
 
-extern	LPDIRECTDRAWSURFACE	SongBack;
-//extern	LPDIRECTDRAWSURFACE	g_pDDSBack;
-extern	LPDIRECTDRAWSURFACE	GaugeWaku;
-extern	LPDIRECTDRAWSURFACE	JudgeFont;
-extern	LPDIRECTDRAWSURFACE	NumberFont;
-extern	LPDIRECTDRAWSURFACE	ComboFont;
-extern	LPDIRECTDRAWSURFACE	Gauge;
-extern	LPDIRECTDRAWSURFACE	StageCount;
+extern Surface	GaugeWaku;
+extern Surface	Gauge;
 
-extern	LPDIRECTSOUNDBUFFER	g_dsBeat;
+extern Chunk    gBeat;
 
-//extern	CWAVE				*WavePrimary;
 
 int		HighSpeed;
 
@@ -85,59 +80,63 @@ int		HighSpeed_5;
 int		HighSpeed_7;
 int		HighSpeed_9;
 
-BOOL	bModeMirror;
-BOOL	bModeNonstep;
-BOOL	bModeUnion;
-BOOL	bModeRandom;
-BOOL	b4dMix;
-BOOL	bModeVanish;
+bool	bModeMirror;
+bool	bModeNonstep;
+bool	bModeUnion;
+bool	bModeRandom;
+bool	b4dMix;
+bool	bModeVanish;
 
-extern DWORD	dwGameCount;
+extern int	dwGameCount;
 extern	KIUCONFIG	KCFG;
 
 void DrawGaugeDB_1p(void)
 {
 	int CurG;
 	int i;
-	RECT sRect;
+	SDL_Rect sRect;
 
 	CurG=Gauge1p;
 	
 	if(CurG<0)CurG=0;
 
-	g_pDDSBack->BltFast(64,0,GaugeWaku,NULL, DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
+	// g_pDDSBack->BltFast(64,0,GaugeWaku,NULL, DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
+    GaugeWaku.BltFast( 64, 0, gScreen );
 	
-	sRect.top=0;
-	sRect.left=0;
-	sRect.right=6;
-	sRect.bottom=20;
+	sRect.y=0;
+	sRect.x=0;
+	sRect.w=6;
+	sRect.h=20;
 
 	for(i=0;i<7;i++)
 	{
 		if(i>CurG)break;
-		g_pDDSBack->BltFast(312-(i*6),20,Gauge,&sRect, DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
+        //		g_pDDSBack->BltFast(312-(i*6),20,Gauge,&sRect, DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
+        Gauge.BltFast( 312-(i*6), 20, gScreen, &sRect );
 	}
 
-	sRect.top=0;
-	sRect.left=6;
-	sRect.right=12;
-	sRect.bottom=20;
+	sRect.y=0;
+	sRect.x=6;
+	sRect.w=6;
+	sRect.h=20;
 
 	for(i=7;i<21;i++)
 	{
 		if(i>CurG)break;
-		g_pDDSBack->BltFast(312-(i*6),20,Gauge,&sRect, DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
+		// g_pDDSBack->BltFast(312-(i*6),20,Gauge,&sRect, DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
+        Gauge.BltFast( 312-(i*6), 20, gScreen, &sRect );
 	}
 
-	sRect.top=0;
-	sRect.left=12;
-	sRect.right=18;
-	sRect.bottom=20;
+	sRect.y=0;
+	sRect.x=12;
+	sRect.w=6;
+	sRect.h=20;
 
 	for(i=21;i<42;i++)
 	{
 		if(i>CurG)break;
-		g_pDDSBack->BltFast(312-(i*6),20,Gauge,&sRect,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
+		// g_pDDSBack->BltFast(312-(i*6),20,Gauge,&sRect,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
+        Gauge.BltFast( 312-(i*6), 20, gScreen, &sRect );
 	}
 
 }
@@ -146,58 +145,62 @@ void DrawGaugeDB_2p(void)
 {
 	int CurG;
 	int i;
-	RECT sRect;
+	SDL_Rect sRect;
 
 	CurG=Gauge1p;
 	
 	if(CurG<0)CurG=0;
 
-	g_pDDSBack->BltFast(322,0,GaugeWaku,NULL,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
+	// g_pDDSBack->BltFast(322,0,GaugeWaku,NULL,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
+    GaugeWaku.BltFast( 322, 0, gScreen );
 	
-	sRect.top=0;
-	sRect.left=0;
-	sRect.right=6;
-	sRect.bottom=20;
+	sRect.y=0;
+	sRect.x=0;
+	sRect.w=6;
+	sRect.h=20;
 
 	for(i=0;i<7;i++)
 	{
 		if(i>CurG)break;
-		g_pDDSBack->BltFast(322+(i*6),20,Gauge,&sRect,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
+		// g_pDDSBack->BltFast(322+(i*6),20,Gauge,&sRect,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
+        Gauge.BltFast( 322+(i*6), 20, gScreen, &sRect );
 	}
 
-	sRect.top=0;
-	sRect.left=6;
-	sRect.right=12;
-	sRect.bottom=20;
+	sRect.y=0;
+	sRect.x=6;
+	sRect.w=6;
+	sRect.h=20;
 
 	for(i=7;i<21;i++)
 	{
 		if(i>CurG)break;
-		g_pDDSBack->BltFast(322+(i*6),20,Gauge,&sRect,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
+		// g_pDDSBack->BltFast(322+(i*6),20,Gauge,&sRect,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
+        Gauge.BltFast( 322+(i*6), 20, gScreen, &sRect );
 	}
 
-	sRect.top=0;
-	sRect.left=12;
-	sRect.right=18;
-	sRect.bottom=20;
+	sRect.y=0;
+	sRect.x=12;
+	sRect.w=6;
+	sRect.h=20;
 
 	for(i=21;i<42;i++)
 	{
 		if(i>CurG)break;
-		g_pDDSBack->BltFast(322+(i*6),20,Gauge,&sRect,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
+		// g_pDDSBack->BltFast(322+(i*6),20,Gauge,&sRect,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
+        Gauge.BltFast( 322+(i*6), 20, gScreen, &sRect );
 	}
 
 }
 void DrawJudgeDB(void)
 {
-	static DWORD cur, last;
+	static Uint32 cur, last;
 	static char LastJudge;
 
 	char chCombo1p[255];
 
-	static DWORD sec,delta;
+	static Uint32 sec,delta;
 
-	RECT rRect, cRect, destRect;
+	SDL_Rect rRect, cRect, destRect;
 	int Loop;
 
 	if(Judgement1p)
@@ -208,10 +211,10 @@ void DrawJudgeDB(void)
 	{
 		Judgement1p=LastJudge;
 
-		delta=timeGetTime()-sec;
+		delta=SDL_GetTicks()-sec;
 		if(delta>16)
 		{
-			sec=timeGetTime();
+			sec=SDL_GetTicks();
 			if(dwState>=40)
 			{
 				dwState=0;
@@ -231,99 +234,96 @@ void DrawJudgeDB(void)
 			break;
 		case PERFECT:
 			LastJudge=PERFECT;
-			rRect.top=0;
-			rRect.right=JUDGE_SIZE_X;
-			rRect.left=0;
-			rRect.bottom=JUDGE_SIZE_Y;
+			rRect.y=0;
+			rRect.w=JUDGE_SIZE_X;
+			rRect.x=0;
+			rRect.h=JUDGE_SIZE_Y;
 			if(dwState==0)dwState++;
 			break;
 		case GREAT:
 			LastJudge=GREAT;
-			rRect.top=JUDGE_SIZE_Y;
-			rRect.right=JUDGE_SIZE_X;
-			rRect.left=0;
-			rRect.bottom=JUDGE_SIZE_Y*2;
+			rRect.y=JUDGE_SIZE_Y;
+			rRect.w=JUDGE_SIZE_X;
+			rRect.x=0;
+			rRect.h=JUDGE_SIZE_Y;
 			if(dwState==0)dwState++;
 			break;
 		case GOOD:
 			LastJudge=GOOD;
-			rRect.top=JUDGE_SIZE_Y*2;
-			rRect.right=JUDGE_SIZE_X;
-			rRect.left=0;
-			rRect.bottom=JUDGE_SIZE_Y*3;
+			rRect.y=JUDGE_SIZE_Y*2;
+			rRect.w=JUDGE_SIZE_X;
+			rRect.x=0;
+			rRect.h=JUDGE_SIZE_Y;
 			if(dwState==0)dwState++;
 			break;
 		case BAD:
 			LastJudge=BAD;
-			rRect.top=JUDGE_SIZE_Y*3;
-			rRect.right=JUDGE_SIZE_X;
-			rRect.left=0;
-			rRect.bottom=JUDGE_SIZE_Y*4;
+			rRect.y=JUDGE_SIZE_Y*3;
+			rRect.w=JUDGE_SIZE_X;
+			rRect.x=0;
+			rRect.h=JUDGE_SIZE_Y;
 			if(dwState==0)dwState++;
 			break;
 		case MISS:
 			LastJudge=MISS;
-			rRect.top=JUDGE_SIZE_Y*4;
-			rRect.right=JUDGE_SIZE_X;
-			rRect.left=0;
-			rRect.bottom=JUDGE_SIZE_Y*5;
+			rRect.y=JUDGE_SIZE_Y*4;
+			rRect.w=JUDGE_SIZE_X;
+			rRect.x=0;
+			rRect.h=JUDGE_SIZE_Y;
 			if(dwState==0)dwState++;
 			break;
 	}
 
 	if(dwState>15)
 	{
-		destRect.top=200;
-		destRect.left=200;
-		destRect.right=200+JUDGE_SIZE_X;
-		destRect.bottom=200+JUDGE_SIZE_Y;
+		destRect.y=200;
+		destRect.x=200;
+		destRect.w=JUDGE_SIZE_X;
+		destRect.h=JUDGE_SIZE_Y;
 	}
 	else
 	{
-		destRect.top=200-30+(dwState*2);
-		destRect.left=200-60+(dwState*4);
-		destRect.right=200+JUDGE_SIZE_X+60-(dwState*4);
-		destRect.bottom=200+JUDGE_SIZE_Y+30-(dwState*2);
+		destRect.y= static_cast<int>( 200-30+(dwState*2) );
+		destRect.x= static_cast<int>( 200-60+(dwState*4) );
+		destRect.w=JUDGE_SIZE_X;
+		destRect.h=JUDGE_SIZE_Y;
 	}
 
 	if(Judgement1p)
 	{
-		//g_pDDSBack->BltFast(40,200+dwState/2,JudgeFont,&rRect, DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
-		
-		g_pDDSBack->Blt(&destRect, JudgeFont, &rRect,DDBLT_WAIT | DDBLT_KEYSRC , NULL);
+        JudgeFont.BltFast( destRect.x, destRect.y, gScreen, &rRect );
 
-		/* ƒﬁ∫∏ √‚∑¬∫Œ ¿‘¥œ¥Ÿ. */
+		/* ÏΩ§Î≥¥ Ï∂úÎ†•Î∂Ä ÏûÖÎãàÎã§. */
 		if((Judgement1p==PERFECT || Judgement1p==GREAT) && Combo1p>3)
 		{
 			sprintf(chCombo1p,"%03d",Combo1p);
 			
 			for(Loop=0;;Loop++)
 			{
-				if(chCombo1p[Loop]==NULL)break;
+				if(chCombo1p[Loop]==0)break;
 				chCombo1p[Loop]-=48;
-				cRect.left=chCombo1p[Loop]*50;
-				cRect.right=cRect.left+50;
-				cRect.top=0;
-				cRect.bottom=65;
+				cRect.x=chCombo1p[Loop]*50;
+				cRect.w=50;
+				cRect.y=0;
+				cRect.h=65;
 
-//				g_pDDSBack->BltFast(60+Loop*30+dwState*2,250,ComboFont,&cRect, DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
-				if(dwState>10)g_pDDSBack->BltFast(250+Loop*50,250+dwState*2-dwState*2,ComboFont,&cRect, DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
-				else g_pDDSBack->BltFast(250+Loop*50,250+dwState*2,ComboFont,&cRect, DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
+				if(dwState>10)  ComboFont.BltFast( 250+Loop*50, 250+dwState*2-dwState*2, gScreen, &cRect );
+				else            ComboFont.BltFast( 250+Loop*50, 250+dwState*2, gScreen, &cRect );
 
-				cRect.left=0;
-				cRect.right=150;
-				cRect.top=65;
-				cRect.bottom=100;
-				if(dwState>10)g_pDDSBack->BltFast(250,320+dwState*2-dwState*2,ComboFont,&cRect, DDBLTFAST_SRCCOLORKEY);
-				else g_pDDSBack->BltFast(250,320+dwState*2,ComboFont,&cRect, DDBLTFAST_SRCCOLORKEY);
-			}/* ø©±‚±Ó¡ˆ */
+				cRect.x=0;
+				cRect.w=150;
+				cRect.y=65;
+				cRect.h=100-65;
+				if(dwState>10)  ComboFont.BltFast( 250,320+dwState*2-dwState*2, gScreen, &cRect );
+				else            ComboFont.BltFast( 250,320+dwState*2,gScreen, &cRect );
+			}
 		}
 	}
 
 	Judgement1p=NONE;
 }
 
-void DrawArrow_DB(DWORD cur)
+void DrawArrow_DB(Uint32 cur)
 {
 	static int arrow_l[20]={0,0,72,72,144,144,216,216,288,288,360,360,432,432,504,504,576,576,648,648};
 	static int arrow_r[20]={72,72,144,144,216,216,288,288,360,360,432,432,504,504,576,576,648,648,720,720};
@@ -331,34 +331,39 @@ void DrawArrow_DB(DWORD cur)
 	static int cArrow_l[20]={0,0,80,80,160,160,240,240,320,320,400,400,480,480,560,560,640,640};
 	static int cArrow_r[20]={80,80,160,160,240,240,320,320,400,400,480,480,560,560,640,640,720,720};
 
-	static BYTE sl1,sl3,sl5,sl7,sl9;
-	static BYTE sr1,sr3,sr5,sr7,sr9;
+	static Uint8 sl1,sl3,sl5,sl7,sl9;
+	static Uint8 sr1,sr3,sr5,sr7,sr9;
 
-	static DWORD statl1,statl3,statl5,statl7,statl9;
-	static DWORD statr1,statr3,statr5,statr7,statr9;
+	static Uint32 statl1,statl3,statl5,statl7,statl9;
+	static Uint32 statr1,statr3,statr5,statr7,statr9;
 
-	static BOOL	Onl1, Onl3, Onl5, Onl7, Onl9;
-	static BOOL	Onr1, Onr3, Onr5, Onr7, Onr9;
+	static bool	Onl1, Onl3, Onl5, Onl7, Onl9;
+	static bool	Onr1, Onr3, Onr5, Onr7, Onr9;
 
-	static DWORD cur2;
+	static Uint32 cur2;
 	static int beat;
 
-	static BOOL Crashl1, Crashl3, Crashl5, Crashl7, Crashl9;
-	static BOOL Crashr1, Crashr3, Crashr5, Crashr7, Crashr9;
+	static bool Crashl1, Crashl3, Crashl5, Crashl7, Crashl9;
+	static bool Crashr1, Crashr3, Crashr5, Crashr7, Crashr9;
 
-	static RECT pArrl1,pArrl3,pArrl5,pArrl7,pArrl9;
-	static RECT cArrl1,cArrl3,cArrl5,cArrl7,cArrl9;
+    static SDL_Rect pArrl1;
+    static SDL_Rect cArrl1;
+    static SDL_Rect pArrr1;
+    static SDL_Rect cArrr1;
 
-	static RECT pArrr1,pArrr3,pArrr5,pArrr7,pArrr9;
-	static RECT cArrr1,cArrr3,cArrr5,cArrr7,cArrr9;
+	static SDL_Rect pArrl3,pArrl5,pArrl7,pArrl9;
+	static SDL_Rect cArrl3,cArrl5,cArrl7,cArrl9;
 
-//	KCFG.auto1_2p = KCFG.auto3_2p = KCFG.auto5_2p = KCFG.auto7_2p = KCFG.auto9_2p = TRUE;
+	static SDL_Rect pArrr3,pArrr5,pArrr7,pArrr9;
+	static SDL_Rect cArrr3,cArrr5,cArrr7,cArrr9;
+
+//	KCFG.auto1_2p = KCFG.auto3_2p = KCFG.auto5_2p = KCFG.auto7_2p = KCFG.auto9_2p = true;
 
 /*	int KCFG.auto1,KCFG.auto3,KCFG.auto5,KCFG.auto7,KCFG.auto9;
-		KCFG.auto1=KCFG.auto3=KCFG.auto5=KCFG.auto7=KCFG.auto9=FALSE;
+		KCFG.auto1=KCFG.auto3=KCFG.auto5=KCFG.auto7=KCFG.auto9=false;
 */
-	BYTE JudgeTemp=0;
-	BYTE	count;
+	Uint8 JudgeTemp=0;
+	Uint8	count;
 
 	if(cur2!=cur)
 	{
@@ -373,8 +378,8 @@ void DrawArrow_DB(DWORD cur)
 
 	ReadGameInput();
 
-	// ø¿≈‰ πˆ∆∞ ¡ˆø¯ ∫Œ∫– 
-	if(KCFG.auto1_1p==TRUE)
+	// Ïò§ÌÜ† Î≤ÑÌäº ÏßÄÏõê Î∂ÄÎ∂Ñ 
+	if(KCFG.auto1_1p==true)
 	{
 		for(count=0;count<10;count++)
 		{
@@ -385,14 +390,14 @@ void DrawArrow_DB(DWORD cur)
 					Data_Double_Judge[cur+count][0]='0';
 					statl1=cur+count;
 					sl1=1;
-					Crashl1=TRUE;
+					Crashl1=true;
 					break;
 				}
 			}
 		}
 	}
 
-	if(KCFG.auto7_1p==TRUE)
+	if(KCFG.auto7_1p==true)
 	{
 		for(count=0;count<10;count++)
 		{
@@ -403,14 +408,14 @@ void DrawArrow_DB(DWORD cur)
 					Data_Double_Judge[cur+count][1]='0';
 					statl7=cur+count;
 					sl7=1;
-					Crashl7=TRUE;
+					Crashl7=true;
 					break;
 				}
 			}
 		}
 	}
 
-	if(KCFG.auto5_1p==TRUE)
+	if(KCFG.auto5_1p==true)
 	{
 		for(count=0;count<10;count++)
 		{
@@ -421,7 +426,7 @@ void DrawArrow_DB(DWORD cur)
 					Data_Double_Judge[cur+count][2]='0';
 					statl5=cur+count;
 					sl5=1;
-					Crashl5=TRUE;
+					Crashl5=true;
 					break;
 				}
 			}
@@ -429,7 +434,7 @@ void DrawArrow_DB(DWORD cur)
 		}
 	}
 
-	if(KCFG.auto9_1p==TRUE)
+	if(KCFG.auto9_1p==true)
 	{
 		for(count=0;count<10;count++)
 		{
@@ -440,7 +445,7 @@ void DrawArrow_DB(DWORD cur)
 					Data_Double_Judge[cur+count][3]='0';
 					statl9=cur+count;
 					sl9=1;
-					Crashl9=TRUE;
+					Crashl9=true;
 					break;
 				}
 			}
@@ -448,7 +453,7 @@ void DrawArrow_DB(DWORD cur)
 		}
 	}
 
-	if(KCFG.auto3_1p==TRUE)
+	if(KCFG.auto3_1p==true)
 	{
 		for(count=0;count<10;count++)
 		{
@@ -459,7 +464,7 @@ void DrawArrow_DB(DWORD cur)
 					Data_Double_Judge[cur+count][4]='0';
 					statl3=cur+count;
 					sl3=1;
-					Crashl3=TRUE;
+					Crashl3=true;
 					break;
 				}
 			}
@@ -468,7 +473,7 @@ void DrawArrow_DB(DWORD cur)
 	}
 
 // 2 player
-	if(KCFG.auto1_2p==TRUE)
+	if(KCFG.auto1_2p==true)
 	{
 		for(count=0;count<10;count++)
 		{
@@ -479,7 +484,7 @@ void DrawArrow_DB(DWORD cur)
 					Data_Double_Judge[cur+count][5]='0';
 					statr1=cur+count;
 					sr1=1;
-					Crashr1=TRUE;
+					Crashr1=true;
 					break;
 				}
 			}
@@ -487,7 +492,7 @@ void DrawArrow_DB(DWORD cur)
 		}
 	}
 
-	if(KCFG.auto7_2p==TRUE)
+	if(KCFG.auto7_2p==true)
 	{
 		for(count=0;count<10;count++)
 		{
@@ -498,7 +503,7 @@ void DrawArrow_DB(DWORD cur)
 					Data_Double_Judge[cur+count][6]='0';
 					statr7=cur+count;
 					sr7=1;
-					Crashr7=TRUE;
+					Crashr7=true;
 					break;
 				}
 			}
@@ -506,7 +511,7 @@ void DrawArrow_DB(DWORD cur)
 		}
 	}
 
-	if(KCFG.auto5_2p==TRUE)
+	if(KCFG.auto5_2p==true)
 	{
 		for(count=0;count<10;count++)
 		{
@@ -517,7 +522,7 @@ void DrawArrow_DB(DWORD cur)
 					Data_Double_Judge[cur+count][7]='0';
 					statr5=cur+count;
 					sr5=1;
-					Crashr5=TRUE;
+					Crashr5=true;
 					break;
 				}
 			}
@@ -525,7 +530,7 @@ void DrawArrow_DB(DWORD cur)
 		}
 	}
 
-	if(KCFG.auto9_2p==TRUE)
+	if(KCFG.auto9_2p==true)
 	{
 		for(count=0;count<10;count++)
 		{
@@ -536,7 +541,7 @@ void DrawArrow_DB(DWORD cur)
 					Data_Double_Judge[cur+count][8]='0';
 					statr9=cur+count;
 					sr9=1;
-					Crashr9=TRUE;
+					Crashr9=true;
 					break;
 				}
 			}
@@ -544,7 +549,7 @@ void DrawArrow_DB(DWORD cur)
 		}
 	}
 
-	if(KCFG.auto3_2p==TRUE)
+	if(KCFG.auto3_2p==true)
 	{
 		for(count=0;count<10;count++)
 		{
@@ -555,7 +560,7 @@ void DrawArrow_DB(DWORD cur)
 					Data_Double_Judge[cur+count][9]='0';
 					statr3=cur+count;
 					sr3=1;
-					Crashr3=TRUE;
+					Crashr3=true;
 					break;
 				}
 			}
@@ -563,18 +568,18 @@ void DrawArrow_DB(DWORD cur)
 		}
 	}
 
-	if(sl1 || (PressedKey1p[1]==TRUE) )
+	if(sl1 || (PressedKey1p[1]==true) )
 	{
 		if(sl1==20)
 		{
 			sl1=0;
-			Crashl1=FALSE;
+			Crashl1=false;
 		}
 		else
 		{
 			sl1++;
 		}
-		if(PressedKey1p[1]==TRUE)
+		if(PressedKey1p[1]==true)
 		for(count=0;count<18;count++)
 		{
 			if( ZONE_U*HighSpeed_1<Data_Double_y[cur+count] &&
@@ -587,12 +592,12 @@ void DrawArrow_DB(DWORD cur)
 					{
 						Data_Double_Judge[cur+count][0]='0';
 						statl1=cur+count;
-						Onl1=TRUE;
+						Onl1=true;
 						sl1=1;
 						if(Data_Double_Judge[statl1][0]=='0' && Data_Double_Judge[statl1][1]=='0' && Data_Double_Judge[statl1][2]=='0' && Data_Double_Judge[statl1][3]=='0' && Data_Double_Judge[statl1][4]=='0'
 							&& Data_Double_Judge[statl1][5]=='0' && Data_Double_Judge[statl1][6]=='0' && Data_Double_Judge[statl1][7]=='0' && Data_Double_Judge[statl1][8]=='0' && Data_Double_Judge[statl1][9]=='0')
 						{
-							Crashl1=TRUE;
+							Crashl1=true;
 							JudgeTemp=PERFECT;
 						}
 						break;
@@ -605,12 +610,12 @@ void DrawArrow_DB(DWORD cur)
 					{
 						Data_Double_Judge[cur+count][0]='0';
 						statl1=cur+count;
-						Onl1=TRUE;
+						Onl1=true;
 						sl1=1;
 						if(Data_Double_Judge[statl1][0]=='0' && Data_Double_Judge[statl1][1]=='0' && Data_Double_Judge[statl1][2]=='0' && Data_Double_Judge[statl1][3]=='0' && Data_Double_Judge[statl1][4]=='0'
 							&& Data_Double_Judge[statl1][5]=='0' && Data_Double_Judge[statl1][6]=='0' && Data_Double_Judge[statl1][7]=='0' && Data_Double_Judge[statl1][8]=='0' && Data_Double_Judge[statl1][9]=='0')
 						{
-							Crashl1=TRUE;
+							Crashl1=true;
 							JudgeTemp=GREAT;
 						}
 						break;
@@ -652,18 +657,18 @@ void DrawArrow_DB(DWORD cur)
 		}
 	}
 
-	if(sl7 || (PressedKey1p[7]==TRUE) )
+	if(sl7 || (PressedKey1p[7]==true) )
 	{
 		if(sl7==20)
 		{
 			sl7=0;
-			Crashl7=FALSE;
+			Crashl7=false;
 		}
 		else
 		{
 			sl7++;
 		}
-		if(PressedKey1p[7]==TRUE)
+		if(PressedKey1p[7]==true)
 		for(count=0;count<18;count++)
 		{
 			if( ZONE_U*HighSpeed_7<Data_Double_y[cur+count] &&
@@ -676,12 +681,12 @@ void DrawArrow_DB(DWORD cur)
 					{
 						Data_Double_Judge[cur+count][1]='0';
 						statl7=cur+count;
-						Onl7=TRUE;
+						Onl7=true;
 						sl7=1;
 						if(Data_Double_Judge[statl7][0]=='0' && Data_Double_Judge[statl7][1]=='0' && Data_Double_Judge[statl7][2]=='0' && Data_Double_Judge[statl7][3]=='0' && Data_Double_Judge[statl7][4]=='0'
 							&& Data_Double_Judge[statl7][5]=='0' && Data_Double_Judge[statl7][6]=='0' && Data_Double_Judge[statl7][7]=='0' && Data_Double_Judge[statl7][8]=='0' && Data_Double_Judge[statl7][9]=='0')
 						{
-							Crashl7=TRUE;
+							Crashl7=true;
 							JudgeTemp=PERFECT;
 						}
 						break;
@@ -694,12 +699,12 @@ void DrawArrow_DB(DWORD cur)
 					{
 						Data_Double_Judge[cur+count][1]='0';
 						statl7=cur+count;
-						Onl7=TRUE;
+						Onl7=true;
 						sl7=1;
 						if(Data_Double_Judge[statl7][0]=='0' && Data_Double_Judge[statl7][1]=='0' && Data_Double_Judge[statl7][2]=='0' && Data_Double_Judge[statl7][3]=='0' && Data_Double_Judge[statl7][4]=='0'
 							&& Data_Double_Judge[statl7][5]=='0' && Data_Double_Judge[statl7][6]=='0' && Data_Double_Judge[statl7][7]=='0' && Data_Double_Judge[statl7][8]=='0' && Data_Double_Judge[statl7][9]=='0')
 						{
-							Crashl7=TRUE;
+							Crashl7=true;
 							JudgeTemp=GREAT;
 						}
 						break;
@@ -741,18 +746,18 @@ void DrawArrow_DB(DWORD cur)
 		}
 	}
 
-	if(sl5 || (PressedKey1p[5]==TRUE) )
+	if(sl5 || (PressedKey1p[5]==true) )
 	{
 		if(sl5==20)
 		{
 			sl5=0;
-			Crashl5=FALSE;
+			Crashl5=false;
 		}
 		else
 		{
 			sl5++;
 		}
-		if(PressedKey1p[5]==TRUE)
+		if(PressedKey1p[5]==true)
 		for(count=0;count<18;count++)
 		{
 			if( ZONE_U*HighSpeed_5<Data_Double_y[cur+count] &&
@@ -765,12 +770,12 @@ void DrawArrow_DB(DWORD cur)
 					{
 						Data_Double_Judge[cur+count][2]='0';
 						statl5=cur+count;
-						Onl5=TRUE;
+						Onl5=true;
 						sl5=1;
 						if(Data_Double_Judge[statl5][0]=='0' && Data_Double_Judge[statl5][1]=='0' && Data_Double_Judge[statl5][2]=='0' && Data_Double_Judge[statl5][3]=='0' && Data_Double_Judge[statl5][4]=='0'
 							&& Data_Double_Judge[statl5][5]=='0' && Data_Double_Judge[statl5][6]=='0' && Data_Double_Judge[statl5][7]=='0' && Data_Double_Judge[statl5][8]=='0' && Data_Double_Judge[statl5][9]=='0')
 						{
-							Crashl5=TRUE;
+							Crashl5=true;
 							JudgeTemp=PERFECT;
 						}
 						break;
@@ -783,12 +788,12 @@ void DrawArrow_DB(DWORD cur)
 					{
 						Data_Double_Judge[cur+count][2]='0';
 						statl5=cur+count;
-						Onl5=TRUE;
+						Onl5=true;
 						sl5=1;
 						if(Data_Double_Judge[statl5][0]=='0' && Data_Double_Judge[statl5][1]=='0' && Data_Double_Judge[statl5][2]=='0' && Data_Double_Judge[statl5][3]=='0' && Data_Double_Judge[statl5][4]=='0'
 							&& Data_Double_Judge[statl5][5]=='0' && Data_Double_Judge[statl5][6]=='0' && Data_Double_Judge[statl5][7]=='0' && Data_Double_Judge[statl5][8]=='0' && Data_Double_Judge[statl5][9]=='0')
 						{
-							Crashl5=TRUE;
+							Crashl5=true;
 							JudgeTemp=GREAT;
 						}
 						break;
@@ -830,18 +835,18 @@ void DrawArrow_DB(DWORD cur)
 		}
 	}
 
-	if(sl9 || (PressedKey1p[9]==TRUE) )
+	if(sl9 || (PressedKey1p[9]==true) )
 	{
 		if(sl9==20)
 		{
 			sl9=0;
-			Crashl9=FALSE;
+			Crashl9=false;
 		}
 		else
 		{
 			sl9++;
 		}
-		if(PressedKey1p[9]==TRUE)
+		if(PressedKey1p[9]==true)
 		for(count=0;count<18;count++)
 		{
 			if( ZONE_U*HighSpeed_9<Data_Double_y[cur+count] &&
@@ -854,12 +859,12 @@ void DrawArrow_DB(DWORD cur)
 					{
 						Data_Double_Judge[cur+count][3]='0';
 						statl9=cur+count;
-						Onl9=TRUE;
+						Onl9=true;
 						sl9=1;
 						if(Data_Double_Judge[statl9][0]=='0' && Data_Double_Judge[statl9][1]=='0' && Data_Double_Judge[statl9][2]=='0' && Data_Double_Judge[statl9][3]=='0' && Data_Double_Judge[statl9][4]=='0'
 							&& Data_Double_Judge[statl9][5]=='0' && Data_Double_Judge[statl9][6]=='0' && Data_Double_Judge[statl9][7]=='0' && Data_Double_Judge[statl9][8]=='0' && Data_Double_Judge[statl9][9]=='0')
 						{
-							Crashl9=TRUE;
+							Crashl9=true;
 							JudgeTemp=PERFECT;
 						}
 						break;
@@ -872,12 +877,12 @@ void DrawArrow_DB(DWORD cur)
 					{
 						Data_Double_Judge[cur+count][3]='0';
 						statl9=cur+count;
-						Onl9=TRUE;
+						Onl9=true;
 						sl9=1;
 						if(Data_Double_Judge[statl9][0]=='0' && Data_Double_Judge[statl9][1]=='0' && Data_Double_Judge[statl9][2]=='0' && Data_Double_Judge[statl9][3]=='0' && Data_Double_Judge[statl9][4]=='0'
 							&& Data_Double_Judge[statl9][5]=='0' && Data_Double_Judge[statl9][6]=='0' && Data_Double_Judge[statl9][7]=='0' && Data_Double_Judge[statl9][8]=='0' && Data_Double_Judge[statl9][9]=='0')
 						{
-							Crashl9=TRUE;
+							Crashl9=true;
 							JudgeTemp=GREAT;
 						}
 						break;
@@ -919,18 +924,18 @@ void DrawArrow_DB(DWORD cur)
 		}
 	}
 
-	if(sl3 || (PressedKey1p[3]==TRUE) )
+	if(sl3 || (PressedKey1p[3]==true) )
 	{
 		if(sl3==20)
 		{
 			sl3=0;
-			Crashl3=FALSE;
+			Crashl3=false;
 		}
 		else
 		{
 			sl3++;
 		}
-		if(PressedKey1p[3]==TRUE)
+		if(PressedKey1p[3]==true)
 		for(count=0;count<18;count++)
 		{
 			if( ZONE_U*HighSpeed_3<Data_Double_y[cur+count] &&
@@ -943,12 +948,12 @@ void DrawArrow_DB(DWORD cur)
 					{
 						Data_Double_Judge[cur+count][4]='0';
 						statl3=cur+count;
-						Onl3=TRUE;
+						Onl3=true;
 						sl3=1;
 						if(Data_Double_Judge[statl3][0]=='0' && Data_Double_Judge[statl3][1]=='0' && Data_Double_Judge[statl3][2]=='0' && Data_Double_Judge[statl3][3]=='0' && Data_Double_Judge[statl3][4]=='0'
 							&& Data_Double_Judge[statl3][5]=='0' && Data_Double_Judge[statl3][6]=='0' && Data_Double_Judge[statl3][7]=='0' && Data_Double_Judge[statl3][8]=='0' && Data_Double_Judge[statl3][9]=='0')
 						{
-							Crashl3=TRUE;
+							Crashl3=true;
 							JudgeTemp=PERFECT;
 						}
 						break;
@@ -961,12 +966,12 @@ void DrawArrow_DB(DWORD cur)
 					{
 						Data_Double_Judge[cur+count][4]='0';
 						statl3=cur+count;
-						Onl3=TRUE;
+						Onl3=true;
 						sl3=1;
 						if(Data_Double_Judge[statl3][0]=='0' && Data_Double_Judge[statl3][1]=='0' && Data_Double_Judge[statl3][2]=='0' && Data_Double_Judge[statl3][3]=='0' && Data_Double_Judge[statl3][4]=='0'
 							&& Data_Double_Judge[statl3][5]=='0' && Data_Double_Judge[statl3][6]=='0' && Data_Double_Judge[statl3][7]=='0' && Data_Double_Judge[statl3][8]=='0' && Data_Double_Judge[statl3][9]=='0')
 						{
-							Crashl3=TRUE;
+							Crashl3=true;
 							JudgeTemp=GREAT;
 						}
 						break;
@@ -1009,18 +1014,18 @@ void DrawArrow_DB(DWORD cur)
 	}
 
 	// 2 player
-	if(sr1 || (PressedKey2p[1]==TRUE) )
+	if(sr1 || (PressedKey2p[1]==true) )
 	{
 		if(sr1==20)
 		{
 			sr1=0;
-			Crashr1=FALSE;
+			Crashr1=false;
 		}
 		else
 		{
 			sr1++;
 		}
-		if(PressedKey2p[1]==TRUE)
+		if(PressedKey2p[1]==true)
 		for(count=0;count<18;count++)
 		{
 			if( ZONE_U*HighSpeed_1<Data_Double_y[cur+count] &&
@@ -1033,12 +1038,12 @@ void DrawArrow_DB(DWORD cur)
 					{
 						Data_Double_Judge[cur+count][5]='0';
 						statr1=cur+count;
-						Onr1=TRUE;
+						Onr1=true;
 						sr1=1;
 						if(Data_Double_Judge[statr1][5]=='0' && Data_Double_Judge[statr1][6]=='0' && Data_Double_Judge[statr1][7]=='0' && Data_Double_Judge[statr1][8]=='0' && Data_Double_Judge[statr1][9]=='0'
 							&& Data_Double_Judge[statr1][5]=='0' && Data_Double_Judge[statr1][6]=='0' && Data_Double_Judge[statr1][7]=='0' && Data_Double_Judge[statr1][8]=='0' && Data_Double_Judge[statr1][9]=='0')
 						{
-							Crashr1=TRUE;
+							Crashr1=true;
 							JudgeTemp=PERFECT;
 						}
 						break;
@@ -1051,12 +1056,12 @@ void DrawArrow_DB(DWORD cur)
 					{
 						Data_Double_Judge[cur+count][5]='0';
 						statr1=cur+count;
-						Onr1=TRUE;
+						Onr1=true;
 						sr1=1;
 						if(Data_Double_Judge[statr1][5]=='0' && Data_Double_Judge[statr1][6]=='0' && Data_Double_Judge[statr1][7]=='0' && Data_Double_Judge[statr1][8]=='0' && Data_Double_Judge[statr1][9]=='0'
 							&& Data_Double_Judge[statr1][5]=='0' && Data_Double_Judge[statr1][6]=='0' && Data_Double_Judge[statr1][7]=='0' && Data_Double_Judge[statr1][8]=='0' && Data_Double_Judge[statr1][9]=='0')
 						{
-							Crashr1=TRUE;
+							Crashr1=true;
 							JudgeTemp=GREAT;
 						}
 						break;
@@ -1098,18 +1103,18 @@ void DrawArrow_DB(DWORD cur)
 		}
 	}
 
-	if(sr7 || (PressedKey2p[7]==TRUE) )
+	if(sr7 || (PressedKey2p[7]==true) )
 	{
 		if(sr7==20)
 		{
 			sr7=0;
-			Crashr7=FALSE;
+			Crashr7=false;
 		}
 		else
 		{
 			sr7++;
 		}
-		if(PressedKey2p[7]==TRUE)
+		if(PressedKey2p[7]==true)
 		for(count=0;count<18;count++)
 		{
 			if( ZONE_U*HighSpeed_7<Data_Double_y[cur+count] &&
@@ -1122,12 +1127,12 @@ void DrawArrow_DB(DWORD cur)
 					{
 						Data_Double_Judge[cur+count][6]='0';
 						statr7=cur+count;
-						Onr7=TRUE;
+						Onr7=true;
 						sr7=1;
 						if(Data_Double_Judge[statr7][5]=='0' && Data_Double_Judge[statr7][6]=='0' && Data_Double_Judge[statr7][7]=='0' && Data_Double_Judge[statr7][8]=='0' && Data_Double_Judge[statr7][9]=='0'
 							&& Data_Double_Judge[statr7][5]=='0' && Data_Double_Judge[statr7][6]=='0' && Data_Double_Judge[statr7][7]=='0' && Data_Double_Judge[statr7][8]=='0' && Data_Double_Judge[statr7][9]=='0')
 						{
-							Crashr7=TRUE;
+							Crashr7=true;
 							JudgeTemp=PERFECT;
 						}
 						break;
@@ -1140,12 +1145,12 @@ void DrawArrow_DB(DWORD cur)
 					{
 						Data_Double_Judge[cur+count][6]='0';
 						statr7=cur+count;
-						Onr7=TRUE;
+						Onr7=true;
 						sr7=1;
 						if(Data_Double_Judge[statr7][5]=='0' && Data_Double_Judge[statr7][6]=='0' && Data_Double_Judge[statr7][7]=='0' && Data_Double_Judge[statr7][8]=='0' && Data_Double_Judge[statr7][9]=='0'
 							&& Data_Double_Judge[statr7][5]=='0' && Data_Double_Judge[statr7][6]=='0' && Data_Double_Judge[statr7][7]=='0' && Data_Double_Judge[statr7][8]=='0' && Data_Double_Judge[statr7][9]=='0')
 						{
-							Crashr7=TRUE;
+							Crashr7=true;
 							JudgeTemp=GREAT;
 						}
 						break;
@@ -1187,18 +1192,18 @@ void DrawArrow_DB(DWORD cur)
 		}
 	}
 
-	if(sr5 || (PressedKey2p[5]==TRUE) )
+	if(sr5 || (PressedKey2p[5]==true) )
 	{
 		if(sr5==20)
 		{
 			sr5=0;
-			Crashr5=FALSE;
+			Crashr5=false;
 		}
 		else
 		{
 			sr5++;
 		}
-		if(PressedKey2p[5]==TRUE)
+		if(PressedKey2p[5]==true)
 		for(count=0;count<18;count++)
 		{
 			if( ZONE_U*HighSpeed_5<Data_Double_y[cur+count] &&
@@ -1211,12 +1216,12 @@ void DrawArrow_DB(DWORD cur)
 					{
 						Data_Double_Judge[cur+count][7]='0';
 						statr5=cur+count;
-						Onr5=TRUE;
+						Onr5=true;
 						sr5=1;
 						if(Data_Double_Judge[statr5][5]=='0' && Data_Double_Judge[statr5][6]=='0' && Data_Double_Judge[statr5][7]=='0' && Data_Double_Judge[statr5][8]=='0' && Data_Double_Judge[statr5][9]=='0'
 							&& Data_Double_Judge[statr5][5]=='0' && Data_Double_Judge[statr5][6]=='0' && Data_Double_Judge[statr5][7]=='0' && Data_Double_Judge[statr5][8]=='0' && Data_Double_Judge[statr5][9]=='0')
 						{
-							Crashr5=TRUE;
+							Crashr5=true;
 							JudgeTemp=PERFECT;
 						}
 						break;
@@ -1229,12 +1234,12 @@ void DrawArrow_DB(DWORD cur)
 					{
 						Data_Double_Judge[cur+count][7]='0';
 						statr5=cur+count;
-						Onr5=TRUE;
+						Onr5=true;
 						sr5=1;
 						if(Data_Double_Judge[statr5][5]=='0' && Data_Double_Judge[statr5][6]=='0' && Data_Double_Judge[statr5][7]=='0' && Data_Double_Judge[statr5][8]=='0' && Data_Double_Judge[statr5][9]=='0'
 							&& Data_Double_Judge[statr5][5]=='0' && Data_Double_Judge[statr5][6]=='0' && Data_Double_Judge[statr5][7]=='0' && Data_Double_Judge[statr5][8]=='0' && Data_Double_Judge[statr5][9]=='0')
 						{
-							Crashr5=TRUE;
+							Crashr5=true;
 							JudgeTemp=GREAT;
 						}
 						break;
@@ -1276,18 +1281,18 @@ void DrawArrow_DB(DWORD cur)
 		}
 	}
 
-	if(sr9 || (PressedKey2p[9]==TRUE) )
+	if(sr9 || (PressedKey2p[9]==true) )
 	{
 		if(sr9==20)
 		{
 			sr9=0;
-			Crashr9=FALSE;
+			Crashr9=false;
 		}
 		else
 		{
 			sr9++;
 		}
-		if(PressedKey2p[9]==TRUE)
+		if(PressedKey2p[9]==true)
 		for(count=0;count<18;count++)
 		{
 			if( ZONE_U*HighSpeed_9<Data_Double_y[cur+count] &&
@@ -1300,12 +1305,12 @@ void DrawArrow_DB(DWORD cur)
 					{
 						Data_Double_Judge[cur+count][8]='0';
 						statr9=cur+count;
-						Onr9=TRUE;
+						Onr9=true;
 						sr9=1;
 						if(Data_Double_Judge[statr9][5]=='0' && Data_Double_Judge[statr9][6]=='0' && Data_Double_Judge[statr9][7]=='0' && Data_Double_Judge[statr9][8]=='0' && Data_Double_Judge[statr9][9]=='0'
 							&& Data_Double_Judge[statr9][5]=='0' && Data_Double_Judge[statr9][6]=='0' && Data_Double_Judge[statr9][7]=='0' && Data_Double_Judge[statr9][8]=='0' && Data_Double_Judge[statr9][9]=='0')
 						{
-							Crashr9=TRUE;
+							Crashr9=true;
 							JudgeTemp=PERFECT;
 						}
 						break;
@@ -1318,12 +1323,12 @@ void DrawArrow_DB(DWORD cur)
 					{
 						Data_Double_Judge[cur+count][8]='0';
 						statr9=cur+count;
-						Onr9=TRUE;
+						Onr9=true;
 						sr9=1;
 						if(Data_Double_Judge[statr9][5]=='0' && Data_Double_Judge[statr9][6]=='0' && Data_Double_Judge[statr9][7]=='0' && Data_Double_Judge[statr9][8]=='0' && Data_Double_Judge[statr9][9]=='0'
 							&& Data_Double_Judge[statr9][5]=='0' && Data_Double_Judge[statr9][6]=='0' && Data_Double_Judge[statr9][7]=='0' && Data_Double_Judge[statr9][8]=='0' && Data_Double_Judge[statr9][9]=='0')
 						{
-							Crashr9=TRUE;
+							Crashr9=true;
 							JudgeTemp=GREAT;
 						}
 						break;
@@ -1365,18 +1370,18 @@ void DrawArrow_DB(DWORD cur)
 		}
 	}
 
-	if(sr3 || (PressedKey2p[3]==TRUE) )
+	if(sr3 || (PressedKey2p[3]==true) )
 	{
 		if(sr3==20)
 		{
 			sr3=0;
-			Crashr3=FALSE;
+			Crashr3=false;
 		}
 		else
 		{
 			sr3++;
 		}
-		if(PressedKey2p[3]==TRUE)
+		if(PressedKey2p[3]==true)
 		for(count=0;count<18;count++)
 		{
 			if( ZONE_U*HighSpeed_3<Data_Double_y[cur+count] &&
@@ -1389,12 +1394,12 @@ void DrawArrow_DB(DWORD cur)
 					{
 						Data_Double_Judge[cur+count][9]='0';
 						statr3=cur+count;
-						Onr3=TRUE;
+						Onr3=true;
 						sr3=1;
 						if(Data_Double_Judge[statr3][5]=='0' && Data_Double_Judge[statr3][6]=='0' && Data_Double_Judge[statr3][7]=='0' && Data_Double_Judge[statr3][8]=='0' && Data_Double_Judge[statr3][9]=='0'
 							&& Data_Double_Judge[statr3][5]=='0' && Data_Double_Judge[statr3][6]=='0' && Data_Double_Judge[statr3][7]=='0' && Data_Double_Judge[statr3][8]=='0' && Data_Double_Judge[statr3][9]=='0')
 						{
-							Crashr3=TRUE;
+							Crashr3=true;
 							JudgeTemp=PERFECT;
 						}
 						break;
@@ -1407,12 +1412,12 @@ void DrawArrow_DB(DWORD cur)
 					{
 						Data_Double_Judge[cur+count][9]='0';
 						statr3=cur+count;
-						Onr3=TRUE;
+						Onr3=true;
 						sr3=1;
 						if(Data_Double_Judge[statr3][5]=='0' && Data_Double_Judge[statr3][6]=='0' && Data_Double_Judge[statr3][7]=='0' && Data_Double_Judge[statr3][8]=='0' && Data_Double_Judge[statr3][9]=='0'
 							&& Data_Double_Judge[statr3][5]=='0' && Data_Double_Judge[statr3][6]=='0' && Data_Double_Judge[statr3][7]=='0' && Data_Double_Judge[statr3][8]=='0' && Data_Double_Judge[statr3][9]=='0')
 						{
-							Crashr3=TRUE;
+							Crashr3=true;
 							JudgeTemp=GREAT;
 						}
 						break;
@@ -1457,7 +1462,7 @@ void DrawArrow_DB(DWORD cur)
 
 	Judgement1p=JudgeTemp;
 	
-	// πÃΩ∫√≥∏Æ¿‘¥œ¥Ÿ.
+	// ÎØ∏Ïä§Ï≤òÎ¶¨ÏûÖÎãàÎã§.
 	for(count=0;count<10;count++)
 	if(Data_Double_y[cur+count] < ZONE_U
 		&& (Data_Double_Judge[cur+count][0]!='0' || Data_Double_Judge[cur+count][1]!='0' || Data_Double_Judge[cur+count][2]!='0' || Data_Double_Judge[cur+count][3]!='0' || Data_Double_Judge[cur+count][4]!='0' || Data_Double_Judge[cur+count][5]!='0' || Data_Double_Judge[cur+count][6]!='0' || Data_Double_Judge[cur+count][7]!='0' || Data_Double_Judge[cur+count][8]!='0' || Data_Double_Judge[cur+count][9]!='0')
@@ -1563,13 +1568,10 @@ void DrawArrow_DB(DWORD cur)
 
 	if(Judgement1p==PERFECT || Judgement1p==GREAT)
 	{
-		if(g_dsBeat)
-		{
-			g_dsBeat->Stop();
-			g_dsBeat->SetCurrentPosition(0);
-			g_dsBeat->Play(0,0,0);
-		}
-		Combo1p++;
+        gBeat.Halt();
+        gBeat.Play();
+
+        Combo1p++;
 		if(Start1p)
 		{
 			if(Judgement1p==PERFECT)cPerfect1p++;
@@ -1601,7 +1603,7 @@ void DrawArrow_DB(DWORD cur)
 		Crashr7=Onr7;
 		Crashr9=Onr9;
 
-		Onl1=Onl3=Onl5=Onl7=Onl9=Onr1=Onr3=Onr5=Onr7=Onr9=FALSE;
+		Onl1=Onl3=Onl5=Onl7=Onl9=Onr1=Onr3=Onr5=Onr7=Onr9=false;
 	}
 	else if(Judgement1p==GOOD || Judgement1p==BAD || Judgement1p==MISS)
 	{
@@ -1671,9 +1673,8 @@ void DrawArrow_DB(DWORD cur)
 		{
 			if(SongFlag)
 			{
-				song->OnMediaStop();
-				delete song;
-				SongFlag=FALSE;
+                gSong.Halt();
+				SongFlag=false;
 			}
 			g_ProgramState=DEAD;
 		}
@@ -1682,161 +1683,162 @@ void DrawArrow_DB(DWORD cur)
 	if(Start1p)if(Score1p<0)Score1p=0;
 	if(Start2p)if(Score2p<0)Score2p=0;
 
-	if(beat)
-	{
-		g_pDDSBack->BltFast(64,50,Arrow2,NULL,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
-		g_pDDSBack->BltFast(320,50,Arrow2,NULL,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
+    if(beat) {
+        gArrow2.BltFast( 64, 50, gScreen );
+        gArrow2.BltFast( 320, 50, gScreen );
 	}
 	else 
 	{
-		g_pDDSBack->BltFast(64,50,Arrow1,NULL,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
-		g_pDDSBack->BltFast(320,50,Arrow1,NULL,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
+        gArrow1.BltFast( 64, 50, gScreen );
+        gArrow1.BltFast( 320, 50, gScreen );
 	}
 
-	pArrl1.top=0;
-	pArrl1.left=arrow_l[sl1];
-	pArrl1.right=arrow_r[sl1];
-	pArrl1.bottom=70;
+	pArrl1.y=0;
+	pArrl1.x=arrow_l[sl1];
+	pArrl1.w=arrow_r[0];
+	pArrl1.h=70;
 
-	pArrl3.top=0;
-	pArrl3.left=arrow_l[sl3];
-	pArrl3.right=arrow_r[sl3];
-	pArrl3.bottom=70;
+ 	pArrl3.y=0;
+	pArrl3.x=arrow_l[sl3];
+	pArrl3.w=arrow_r[0];
+	pArrl3.h=70;
 
-	pArrl5.top=0;
-	pArrl5.left=arrow_l[sl5];
-	pArrl5.right=arrow_r[sl5];
-	pArrl5.bottom=70;
+	pArrl5.y=0;
+	pArrl5.x=arrow_l[sl5];
+	pArrl5.w=arrow_r[0];
+	pArrl5.h=70;
 
-	pArrl7.top=0;
-	pArrl7.left=arrow_l[sl7];
-	pArrl7.right=arrow_r[sl7];
-	pArrl7.bottom=70;
+	pArrl7.y=0;
+	pArrl7.x=arrow_l[sl7];
+	pArrl7.w=arrow_r[0];
+	pArrl7.h=70;
 
-	pArrl9.top=0;
-	pArrl9.left=arrow_l[sl9];
-	pArrl9.right=arrow_r[sl9];
-	pArrl9.bottom=70;
+	pArrl9.y=0;
+	pArrl9.x=arrow_l[sl9];
+	pArrl9.w=arrow_r[0];
+	pArrl9.h=70;
 
-	cArrl1.top=0;
-	cArrl1.left=cArrow_l[sl1];
-	cArrl1.right=cArrow_r[sl1];
-	cArrl1.bottom=80;
+	cArrl1.y=0;
+	cArrl1.x=cArrow_l[sl1];
+	cArrl1.w=cArrow_r[0];
+	cArrl1.h=80;
 
-	cArrl3.top=0;
-	cArrl3.left=cArrow_l[sl3];
-	cArrl3.right=cArrow_r[sl3];
-	cArrl3.bottom=80;
+	cArrl3.y=0;
+	cArrl3.x=cArrow_l[sl3];
+	cArrl3.w=cArrow_r[0];
+	cArrl3.h=80;
 
-	cArrl5.top=0;
-	cArrl5.left=cArrow_l[sl5];
-	cArrl5.right=cArrow_r[sl5];
-	cArrl5.bottom=80;
+	cArrl5.y=0;
+	cArrl5.x=cArrow_l[sl5];
+	cArrl5.w=cArrow_r[0];
+	cArrl5.h=80;
 
-	cArrl7.top=0;
-	cArrl7.left=cArrow_l[sl7];
-	cArrl7.right=cArrow_r[sl7];
-	cArrl7.bottom=80;
+	cArrl7.y=0;
+	cArrl7.x=cArrow_l[sl7];
+	cArrl7.w=cArrow_r[0];
+	cArrl7.h=80;
 
-	cArrl9.top=0;
-	cArrl9.left=cArrow_l[sl9];
-	cArrl9.right=cArrow_r[sl9];
-	cArrl9.bottom=80;
+	cArrl9.y=0;
+	cArrl9.x=cArrow_l[sl9];
+	cArrl9.w=cArrow_r[0];
+	cArrl9.h=80;
 
 // 2player
-	pArrr1.top=0;
-	pArrr1.left=arrow_l[sr1];
-	pArrr1.right=arrow_r[sr1];
-	pArrr1.bottom=70;
+	pArrr1.y=0;
+	pArrr1.x=arrow_l[sr1];
+	pArrr1.w=arrow_r[sr1];
+	pArrr1.h=70;
 
-	pArrr3.top=0;
-	pArrr3.left=arrow_l[sr3];
-	pArrr3.right=arrow_r[sr3];
-	pArrr3.bottom=70;
+	pArrr3.y=0;
+	pArrr3.x=arrow_l[sr3];
+	pArrr3.w=arrow_r[0];
+	pArrr3.h=70;
 
-	pArrr5.top=0;
-	pArrr5.left=arrow_l[sr5];
-	pArrr5.right=arrow_r[sr5];
-	pArrr5.bottom=70;
+	pArrr5.y=0;
+	pArrr5.x=arrow_l[sr5];
+	pArrr5.w=arrow_r[0];
+	pArrr5.h=70;
 
-	pArrr7.top=0;
-	pArrr7.left=arrow_l[sr7];
-	pArrr7.right=arrow_r[sr7];
-	pArrr7.bottom=70;
+	pArrr7.y=0;
+	pArrr7.x=arrow_l[sr7];
+	pArrr7.w=arrow_r[0];
+	pArrr7.h=70;
 
-	pArrr9.top=0;
-	pArrr9.left=arrow_l[sr9];
-	pArrr9.right=arrow_r[sr9];
-	pArrr9.bottom=70;
+	pArrr9.y=0;
+	pArrr9.x=arrow_l[sr9];
+	pArrr9.w=arrow_r[0];
+	pArrr9.h=70;
 
-	cArrr1.top=0;
-	cArrr1.left=cArrow_l[sr1];
-	cArrr1.right=cArrow_r[sr1];
-	cArrr1.bottom=80;
+	cArrr1.y=0;
+	cArrr1.x=cArrow_l[sr1];
+	cArrr1.w=cArrow_r[0];
+	cArrr1.h=80;
 
-	cArrr3.top=0;
-	cArrr3.left=cArrow_l[sr3];
-	cArrr3.right=cArrow_r[sr3];
-	cArrr3.bottom=80;
+	cArrr3.y=0;
+	cArrr3.x=cArrow_l[sr3];
+	cArrr3.w=cArrow_r[0];
+	cArrr3.h=80;
 
-	cArrr5.top=0;
-	cArrr5.left=cArrow_l[sr5];
-	cArrr5.right=cArrow_r[sr5];
-	cArrr5.bottom=80;
+	cArrr5.y=0;
+	cArrr5.x=cArrow_l[sr5];
+	cArrr5.w=cArrow_r[0];
+	cArrr5.h=80;
 
-	cArrr7.top=0;
-	cArrr7.left=cArrow_l[sr7];
-	cArrr7.right=cArrow_r[sr7];
-	cArrr7.bottom=80;
+	cArrr7.y=0;
+	cArrr7.x=cArrow_l[sr7];
+	cArrr7.w=cArrow_r[0];
+	cArrr7.h=80;
 
-	cArrr9.top=0;
-	cArrr9.left=cArrow_l[sr9];
-	cArrr9.right=cArrow_r[sr9];
-	cArrr9.bottom=80;
+	cArrr9.y=0;
+	cArrr9.x=cArrow_l[sr9];
+	cArrr9.w=cArrow_r[0];
+	cArrr9.h=80;
 
-	if(Crashl1)g_pDDSBack->BltFast(57,43,cArrow1,&cArrl1,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
-	else if(sl1)g_pDDSBack->BltFast(59,45,pArrow1,&pArrl1,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
+	if(Crashl1)
+        cArrow1.BltFast( 57, 43, gScreen, &cArrl1 );
+	else if(sl1)
+        pArrow1.BltFast( 59, 45, gScreen, &pArrl1 );
+
+	if(Crashl7) cArrow7.BltFast( 107, 43, gScreen, &cArrl7 );
+	else if(sl7)pArrow7.BltFast( 109, 45, gScreen, &pArrl7 );
 	
-	if(Crashl7)g_pDDSBack->BltFast(107,43,cArrow7,&cArrl7,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
-	else if(sl7)g_pDDSBack->BltFast(109,45,pArrow7,&pArrl7,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
-	
-	if(Crashl5)g_pDDSBack->BltFast(157,43,cArrow5,&cArrl5,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
-	else if(sl5)g_pDDSBack->BltFast(159,45,pArrow5,&pArrl5,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
+	if(Crashl5) cArrow5.BltFast( 157, 43, gScreen, &cArrl5 );
+	else if(sl5)pArrow5.BltFast( 159, 45, gScreen, &pArrl5 );
 
-	if(Crashl9)g_pDDSBack->BltFast(207,43,cArrow9,&cArrl9,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
-	else if(sl9)g_pDDSBack->BltFast(209,45,pArrow9,&pArrl9,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
+	if(Crashl9) cArrow9.BltFast( 207, 43, gScreen, &cArrl9 );
+	else if(sl9)pArrow9.BltFast( 209, 45, gScreen, &pArrl9 );
 	
-	if(Crashl3)g_pDDSBack->BltFast(257,43,cArrow3,&cArrl3,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
-	else if(sl3)g_pDDSBack->BltFast(259,45,pArrow3,&pArrl3,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
+	if(Crashl3) cArrow3.BltFast( 257, 43, gScreen, &cArrl3 );
+	else if(sl3)pArrow3.BltFast( 259, 45, gScreen, &pArrl3 );
 
 // 2 player
-	if(Crashr1)g_pDDSBack->BltFast(313,43,cArrow1,&cArrr1,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
-	else if(sr1)g_pDDSBack->BltFast(315,45,pArrow1,&pArrr1,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
+	if(Crashr1) cArrow1.BltFast( 313, 43, gScreen, &cArrl1 );
+	else if(sr1)pArrow1.BltFast( 315, 45, gScreen, &pArrl1 );
 	
-	if(Crashr7)g_pDDSBack->BltFast(363,43,cArrow7,&cArrr7,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
-	else if(sr7)g_pDDSBack->BltFast(365,45,pArrow7,&pArrr7,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
+	if(Crashr7) cArrow7.BltFast( 363, 43, gScreen, &cArrl7 );
+	else if(sr7)pArrow7.BltFast( 365, 45, gScreen, &pArrl7 );
 	
-	if(Crashr5)g_pDDSBack->BltFast(413,43,cArrow5,&cArrr5,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
-	else if(sr5)g_pDDSBack->BltFast(415,45,pArrow5,&pArrr5,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
+	if(Crashr5) cArrow5.BltFast( 413, 43, gScreen, &cArrl5 );
+	else if(sr5)pArrow5.BltFast( 415, 45, gScreen, &pArrl5 );
 
-	if(Crashr9)g_pDDSBack->BltFast(463,43,cArrow9,&cArrr9,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
-	else if(sr9)g_pDDSBack->BltFast(465,45,pArrow9,&pArrr9,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
+	if(Crashr9) cArrow9.BltFast( 463, 43, gScreen, &cArrl9 );
+	else if(sr9)pArrow9.BltFast( 465, 45, gScreen, &pArrl9 );
 	
-	if(Crashr3)g_pDDSBack->BltFast(513,43,cArrow3,&cArrr3,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
-	else if(sr3)g_pDDSBack->BltFast(515,45,pArrow3,&pArrr3,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
+	if(Crashr3) cArrow3.BltFast( 513, 43, gScreen, &cArrl3 );
+	else if(sr3)pArrow3.BltFast( 515, 45, gScreen, &pArrl3 );
 }
 
 void KIU_STAGE_DOUBLE(void)
 {
 	static int temp;
-	static DWORD i;
-	static DWORD cur,last,sec;
-	static DWORD starttime, curtime;
+	static Uint32 i;
+	static Uint32 cur,last,sec;
+	static Uint32 starttime, curtime;
 
 	int k;
-	static RECT rect1[7],rect3[7],rect5[7],rect7[7],rect9[7];
+	static SDL_Rect rect1[7],rect3[7],rect5[7],rect7[7],rect9[7];
 	
-	DWORD delta;
+	Uint32 delta;
 
 	static int sta;
 
@@ -1845,7 +1847,7 @@ void KIU_STAGE_DOUBLE(void)
 		
 	double bpmpix=PUMP_SPRITE_Y*(bpm/60)/1000;
 
-	g_pDDSBack->BltFast(0,0,SongBack,NULL,DDBLTFAST_WAIT | DDBLTFAST_NOCOLORKEY);
+    gSongBack.BltFast( 0, 0, gScreen );
 
 	DisplayStageCount(dwGameCount);
 
@@ -1907,30 +1909,30 @@ void KIU_STAGE_DOUBLE(void)
 
 		for(sta=0;sta<6;sta++)
 		{
-			rect7[sta].top=0;
-			rect7[sta].left=0+PUMP_SPRITE_NEW*sta;
-			rect7[sta].right=PUMP_SPRITE_NEW+PUMP_SPRITE_NEW*sta;
-			rect7[sta].bottom=PUMP_SPRITE_NEW;
+			rect7[sta].y=0;
+			rect7[sta].x=0+PUMP_SPRITE_NEW*sta;
+			rect7[sta].w=PUMP_SPRITE_NEW;
+			rect7[sta].h=PUMP_SPRITE_NEW;
 
-			rect9[sta].top=PUMP_SPRITE_NEW;
-			rect9[sta].left=0+PUMP_SPRITE_NEW*sta;
-			rect9[sta].right=PUMP_SPRITE_NEW+PUMP_SPRITE_NEW*sta;
-			rect9[sta].bottom=PUMP_SPRITE_NEW*2;
+			rect9[sta].y=PUMP_SPRITE_NEW;
+			rect9[sta].x=0+PUMP_SPRITE_NEW*sta;
+			rect9[sta].w=PUMP_SPRITE_NEW;
+			rect9[sta].h=PUMP_SPRITE_NEW;
 
-			rect5[sta].top=PUMP_SPRITE_NEW*2;
-			rect5[sta].left=0+PUMP_SPRITE_NEW*sta;
-			rect5[sta].right=PUMP_SPRITE_NEW+PUMP_SPRITE_NEW*sta;
-			rect5[sta].bottom=PUMP_SPRITE_NEW*3;
+			rect5[sta].y=PUMP_SPRITE_NEW*2;
+			rect5[sta].x=0+PUMP_SPRITE_NEW*sta;
+			rect5[sta].w=PUMP_SPRITE_NEW;
+			rect5[sta].h=PUMP_SPRITE_NEW;
 
-			rect3[sta].top=PUMP_SPRITE_NEW*3;
-			rect3[sta].left=0+PUMP_SPRITE_NEW*sta;
-			rect3[sta].right=PUMP_SPRITE_NEW+PUMP_SPRITE_NEW*sta;
-			rect3[sta].bottom=PUMP_SPRITE_NEW*4;
+			rect3[sta].y=PUMP_SPRITE_NEW*3;
+			rect3[sta].x=0+PUMP_SPRITE_NEW*sta;
+			rect3[sta].w=PUMP_SPRITE_NEW;
+			rect3[sta].h=PUMP_SPRITE_NEW;
 
-			rect1[sta].top=PUMP_SPRITE_NEW*4;
-			rect1[sta].left=0+PUMP_SPRITE_NEW*sta;
-			rect1[sta].right=PUMP_SPRITE_NEW+PUMP_SPRITE_NEW*sta;
-			rect1[sta].bottom=PUMP_SPRITE_NEW*5;
+			rect1[sta].y=PUMP_SPRITE_NEW*4;
+			rect1[sta].x=0+PUMP_SPRITE_NEW*sta;
+			rect1[sta].w=PUMP_SPRITE_NEW;
+			rect1[sta].h=PUMP_SPRITE_NEW;
 		}
 		sta=0;
 		
@@ -2066,19 +2068,19 @@ void KIU_STAGE_DOUBLE(void)
 			}
 		}
 
-		//FadeToSurface(SongBack);
-		g_pDDSBack->BltFast(0,0, SongBack, NULL, DDBLTFAST_NOCOLORKEY);
+        gSongBack.BltFast( 0, 0, gScreen );
 
-		if(SongFlag==TRUE)
+
+		if(SongFlag==true)
 		{
-			song->OnMediaPlay();
+			gSong.Play();
 		}
 
 		start*=10;
 		start2*=10;start3*=10;
 		bunki*=10;bunki2*=10;
 		//if(tick==4)start/=2;
-		last=cur=timeGetTime();
+		last=cur=SDL_GetTicks();
 
 		tail=0;
 
@@ -2092,11 +2094,11 @@ void KIU_STAGE_DOUBLE(void)
 		curtime=0;
 	}
 
-	cur=timeGetTime();        // 130/ 600000
+	cur=SDL_GetTicks();        // 130/ 600000
 	delta=cur-last;
 	last=cur;
 
-	DrawArrow_DB(i); //»∏ªˆ »≠ªÏ«•∏¶ ∏ª«’¥œ¥Ÿ.
+	DrawArrow_DB(i); //ÌöåÏÉâ ÌôîÏÇ¥ÌëúÎ•º ÎßêÌï©ÎãàÎã§.
 
 	start-=delta;
 
@@ -2129,14 +2131,14 @@ void KIU_STAGE_DOUBLE(void)
 			temp=+55;
 			tail=0;
 
-			curtime=(DWORD)(song->GetCurrentPosition()*1000);
+			curtime = gSong.GetCurrentPosition();
 
 			if(curtime > starttime) 
-			delta=(DWORD)curtime-starttime;
-			else delta=(DWORD)curtime;
+			delta=(Uint32)curtime-starttime;
+			else delta=(Uint32)curtime;
 		}
 
-		//1000 Tick¥Á 180/60 -> 1√ ø° 64*(180/60)  ¡Ô 1 tick ¥Á 64*(bpm/60)/1000
+		//1000 TickÎãπ 180/60 -> 1Ï¥àÏóê 64*(180/60)  Ï¶â 1 tick Îãπ 64*(bpm/60)/1000
 		temp-=(int)(delta*bpmpix);
 		tail+=(double)((double)(delta*bpmpix)-(int)(delta*bpmpix));
 
@@ -2159,9 +2161,9 @@ void KIU_STAGE_DOUBLE(void)
 
 	}
 
-	if(timeGetTime()-sec>100)
+	if(SDL_GetTicks()-sec>100)
 	{
-		sec=timeGetTime();
+		sec=SDL_GetTicks();
 		if(sta==5)sta=0;
 		else sta++;
 	}
@@ -2175,9 +2177,8 @@ void KIU_STAGE_DOUBLE(void)
 			k=48;
 			if(SongFlag)
 			{
-				song->OnMediaStop();
-				delete song;
-				SongFlag=FALSE;
+                gSong.Halt();
+				SongFlag=false;
 			}
 			g_ProgramState=RESULT;
 		}
@@ -2268,27 +2269,27 @@ void KIU_STAGE_DOUBLE(void)
 				}
 			}
 			if(Data_Double[i+k][0]=='1')
-				ClpBlt(LP1DB1_X,(temp+PUMP_SPRITE_Y*k/2)*HighSpeed_1-(PUMP_SPRITE_Y)*(HighSpeed_1-1),wArrow,&rect1[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP1DB1_X,(temp+PUMP_SPRITE_Y*k/2)*HighSpeed_1-(PUMP_SPRITE_Y)*(HighSpeed_1-1),gWArrow, rect1[sta] );
 			if(Data_Double[i+k][1]=='1')
-				ClpBlt(LP7DB1_X,(temp+PUMP_SPRITE_Y*k/2)*HighSpeed_7-(PUMP_SPRITE_Y)*(HighSpeed_7-1),wArrow,&rect7[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP7DB1_X,(temp+PUMP_SPRITE_Y*k/2)*HighSpeed_7-(PUMP_SPRITE_Y)*(HighSpeed_7-1),gWArrow, rect7[sta] );
 			if(Data_Double[i+k][2]=='1')
-				ClpBlt(LP5DB1_X,(temp+PUMP_SPRITE_Y*k/2)*HighSpeed_5-(PUMP_SPRITE_Y)*(HighSpeed_5-1),wArrow,&rect5[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP5DB1_X,(temp+PUMP_SPRITE_Y*k/2)*HighSpeed_5-(PUMP_SPRITE_Y)*(HighSpeed_5-1),gWArrow, rect5[sta] );
 			if(Data_Double[i+k][3]=='1')
-				ClpBlt(LP9DB1_X,(temp+PUMP_SPRITE_Y*k/2)*HighSpeed_9-(PUMP_SPRITE_Y)*(HighSpeed_9-1),wArrow,&rect9[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP9DB1_X,(temp+PUMP_SPRITE_Y*k/2)*HighSpeed_9-(PUMP_SPRITE_Y)*(HighSpeed_9-1),gWArrow, rect9[sta] );
 			if(Data_Double[i+k][4]=='1')
-				ClpBlt(LP3DB1_X,(temp+PUMP_SPRITE_Y*k/2)*HighSpeed_3-(PUMP_SPRITE_Y)*(HighSpeed_3-1),wArrow,&rect3[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP3DB1_X,(temp+PUMP_SPRITE_Y*k/2)*HighSpeed_3-(PUMP_SPRITE_Y)*(HighSpeed_3-1),gWArrow, rect3[sta] );
 			Data_Double_y[i+k]=(temp+PUMP_SPRITE_Y*k/2)*MinSpeed-(PUMP_SPRITE_Y)*(MinSpeed-1);
 			
 			if(Data_Double[i+k+1][0]=='1')
-				ClpBlt(LP1DB1_X,(25+temp+PUMP_SPRITE_Y*k/2)*HighSpeed_1-(PUMP_SPRITE_Y)*(HighSpeed_1-1),wArrow,&rect1[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP1DB1_X,(25+temp+PUMP_SPRITE_Y*k/2)*HighSpeed_1-(PUMP_SPRITE_Y)*(HighSpeed_1-1),gWArrow, rect1[sta] );
 			if(Data_Double[i+k+1][1]=='1')
-				ClpBlt(LP7DB1_X,(25+temp+PUMP_SPRITE_Y*k/2)*HighSpeed_7-(PUMP_SPRITE_Y)*(HighSpeed_7-1),wArrow,&rect7[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP7DB1_X,(25+temp+PUMP_SPRITE_Y*k/2)*HighSpeed_7-(PUMP_SPRITE_Y)*(HighSpeed_7-1),gWArrow, rect7[sta] );
 			if(Data_Double[i+k+1][2]=='1')
-				ClpBlt(LP5DB1_X,(25+temp+PUMP_SPRITE_Y*k/2)*HighSpeed_5-(PUMP_SPRITE_Y)*(HighSpeed_5-1),wArrow,&rect5[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP5DB1_X,(25+temp+PUMP_SPRITE_Y*k/2)*HighSpeed_5-(PUMP_SPRITE_Y)*(HighSpeed_5-1),gWArrow, rect5[sta] );
 			if(Data_Double[i+k+1][3]=='1')
-				ClpBlt(LP9DB1_X,(25+temp+PUMP_SPRITE_Y*k/2)*HighSpeed_9-(PUMP_SPRITE_Y)*(HighSpeed_9-1),wArrow,&rect9[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP9DB1_X,(25+temp+PUMP_SPRITE_Y*k/2)*HighSpeed_9-(PUMP_SPRITE_Y)*(HighSpeed_9-1),gWArrow, rect9[sta] );
 			if(Data_Double[i+k+1][4]=='1')
-				ClpBlt(LP3DB1_X,(25+temp+PUMP_SPRITE_Y*k/2)*HighSpeed_3-(PUMP_SPRITE_Y)*(HighSpeed_3-1),wArrow,&rect3[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP3DB1_X,(25+temp+PUMP_SPRITE_Y*k/2)*HighSpeed_3-(PUMP_SPRITE_Y)*(HighSpeed_3-1),gWArrow, rect3[sta] );
 
 			Data_Double_y[i+k+1]=(25+temp+PUMP_SPRITE_Y*k/2)*MinSpeed-(PUMP_SPRITE_Y)*(MinSpeed-1);
 		}	
@@ -2458,137 +2459,137 @@ void KIU_STAGE_DOUBLE(void)
 				}
 			}
 			if(Data_Double[i+k][0]=='1')
-				ClpBlt(LP1DB1_X,(temp+PUMP_SPRITE_Y*k/4)*HighSpeed_1-(PUMP_SPRITE_Y)*(HighSpeed_1-1),wArrow,&rect1[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP1DB1_X,(temp+PUMP_SPRITE_Y*k/4)*HighSpeed_1-(PUMP_SPRITE_Y)*(HighSpeed_1-1),gWArrow, rect1[sta] );
 			if(Data_Double[i+k][1]=='1')
-				ClpBlt(LP7DB1_X,(temp+PUMP_SPRITE_Y*k/4)*HighSpeed_7-(PUMP_SPRITE_Y)*(HighSpeed_7-1),wArrow,&rect7[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP7DB1_X,(temp+PUMP_SPRITE_Y*k/4)*HighSpeed_7-(PUMP_SPRITE_Y)*(HighSpeed_7-1),gWArrow, rect7[sta] );
 			if(Data_Double[i+k][2]=='1')
-				ClpBlt(LP5DB1_X,(temp+PUMP_SPRITE_Y*k/4)*HighSpeed_5-(PUMP_SPRITE_Y)*(HighSpeed_5-1),wArrow,&rect5[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP5DB1_X,(temp+PUMP_SPRITE_Y*k/4)*HighSpeed_5-(PUMP_SPRITE_Y)*(HighSpeed_5-1),gWArrow, rect5[sta] );
 			if(Data_Double[i+k][3]=='1')
-				ClpBlt(LP9DB1_X,(temp+PUMP_SPRITE_Y*k/4)*HighSpeed_9-(PUMP_SPRITE_Y)*(HighSpeed_9-1),wArrow,&rect9[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP9DB1_X,(temp+PUMP_SPRITE_Y*k/4)*HighSpeed_9-(PUMP_SPRITE_Y)*(HighSpeed_9-1),gWArrow, rect9[sta] );
 			if(Data_Double[i+k][4]=='1')
-				ClpBlt(LP3DB1_X,(temp+PUMP_SPRITE_Y*k/4)*HighSpeed_3-(PUMP_SPRITE_Y)*(HighSpeed_3-1),wArrow,&rect3[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP3DB1_X,(temp+PUMP_SPRITE_Y*k/4)*HighSpeed_3-(PUMP_SPRITE_Y)*(HighSpeed_3-1),gWArrow, rect3[sta] );
 
 			Data_Double_y[i+k]=(temp+PUMP_SPRITE_Y*k/4)*MinSpeed-(PUMP_SPRITE_Y)*(MinSpeed-1);
 
 			if(Data_Double[i+k+1][0]=='1')
-				ClpBlt(LP1DB1_X,(12+temp+PUMP_SPRITE_Y*k/4)*HighSpeed_1-(PUMP_SPRITE_Y)*(HighSpeed_1-1),wArrow,&rect1[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP1DB1_X,(12+temp+PUMP_SPRITE_Y*k/4)*HighSpeed_1-(PUMP_SPRITE_Y)*(HighSpeed_1-1),gWArrow, rect1[sta] );
 			if(Data_Double[i+k+1][1]=='1')
-				ClpBlt(LP7DB1_X,(12+temp+PUMP_SPRITE_Y*k/4)*HighSpeed_7-(PUMP_SPRITE_Y)*(HighSpeed_7-1),wArrow,&rect7[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP7DB1_X,(12+temp+PUMP_SPRITE_Y*k/4)*HighSpeed_7-(PUMP_SPRITE_Y)*(HighSpeed_7-1),gWArrow, rect7[sta] );
 			if(Data_Double[i+k+1][2]=='1')
-				ClpBlt(LP5DB1_X,(12+temp+PUMP_SPRITE_Y*k/4)*HighSpeed_5-(PUMP_SPRITE_Y)*(HighSpeed_5-1),wArrow,&rect5[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP5DB1_X,(12+temp+PUMP_SPRITE_Y*k/4)*HighSpeed_5-(PUMP_SPRITE_Y)*(HighSpeed_5-1),gWArrow, rect5[sta] );
 			if(Data_Double[i+k+1][3]=='1')
-				ClpBlt(LP9DB1_X,(12+temp+PUMP_SPRITE_Y*k/4)*HighSpeed_9-(PUMP_SPRITE_Y)*(HighSpeed_9-1),wArrow,&rect9[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP9DB1_X,(12+temp+PUMP_SPRITE_Y*k/4)*HighSpeed_9-(PUMP_SPRITE_Y)*(HighSpeed_9-1),gWArrow, rect9[sta] );
 			if(Data_Double[i+k+1][4]=='1')
-				ClpBlt(LP3DB1_X,(12+temp+PUMP_SPRITE_Y*k/4)*HighSpeed_3-(PUMP_SPRITE_Y)*(HighSpeed_3-1),wArrow,&rect3[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP3DB1_X,(12+temp+PUMP_SPRITE_Y*k/4)*HighSpeed_3-(PUMP_SPRITE_Y)*(HighSpeed_3-1),gWArrow, rect3[sta] );
 
 			Data_Double_y[i+k+1]=(12+temp+PUMP_SPRITE_Y*k/4)*MinSpeed-(PUMP_SPRITE_Y)*(MinSpeed-1);
 
 			if(Data_Double[i+k+2][0]=='1')
-				ClpBlt(LP1DB1_X,(25+temp+PUMP_SPRITE_Y*k/4)*HighSpeed_1-(PUMP_SPRITE_Y)*(HighSpeed_1-1),wArrow,&rect1[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP1DB1_X,(25+temp+PUMP_SPRITE_Y*k/4)*HighSpeed_1-(PUMP_SPRITE_Y)*(HighSpeed_1-1),gWArrow, rect1[sta] );
 			if(Data_Double[i+k+2][1]=='1')
-				ClpBlt(LP7DB1_X,(25+temp+PUMP_SPRITE_Y*k/4)*HighSpeed_7-(PUMP_SPRITE_Y)*(HighSpeed_7-1),wArrow,&rect7[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP7DB1_X,(25+temp+PUMP_SPRITE_Y*k/4)*HighSpeed_7-(PUMP_SPRITE_Y)*(HighSpeed_7-1),gWArrow, rect7[sta] );
 			if(Data_Double[i+k+2][2]=='1')
-				ClpBlt(LP5DB1_X,(25+temp+PUMP_SPRITE_Y*k/4)*HighSpeed_5-(PUMP_SPRITE_Y)*(HighSpeed_5-1),wArrow,&rect5[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP5DB1_X,(25+temp+PUMP_SPRITE_Y*k/4)*HighSpeed_5-(PUMP_SPRITE_Y)*(HighSpeed_5-1),gWArrow, rect5[sta] );
 			if(Data_Double[i+k+2][3]=='1')
-				ClpBlt(LP9DB1_X,(25+temp+PUMP_SPRITE_Y*k/4)*HighSpeed_9-(PUMP_SPRITE_Y)*(HighSpeed_9-1),wArrow,&rect9[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP9DB1_X,(25+temp+PUMP_SPRITE_Y*k/4)*HighSpeed_9-(PUMP_SPRITE_Y)*(HighSpeed_9-1),gWArrow, rect9[sta] );
 			if(Data_Double[i+k+2][4]=='1')
-				ClpBlt(LP3DB1_X,(25+temp+PUMP_SPRITE_Y*k/4)*HighSpeed_3-(PUMP_SPRITE_Y)*(HighSpeed_3-1),wArrow,&rect3[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP3DB1_X,(25+temp+PUMP_SPRITE_Y*k/4)*HighSpeed_3-(PUMP_SPRITE_Y)*(HighSpeed_3-1),gWArrow, rect3[sta] );
 
 			Data_Double_y[i+k+2]=(25+temp+PUMP_SPRITE_Y*k/4)*MinSpeed-(PUMP_SPRITE_Y)*(MinSpeed-1);
 		
 			if(Data_Double[i+k+3][0]=='1')
-				ClpBlt(LP1DB1_X,(38+temp+PUMP_SPRITE_Y*k/4)*HighSpeed_1-(PUMP_SPRITE_Y)*(HighSpeed_1-1),wArrow,&rect1[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP1DB1_X,(38+temp+PUMP_SPRITE_Y*k/4)*HighSpeed_1-(PUMP_SPRITE_Y)*(HighSpeed_1-1),gWArrow, rect1[sta] );
 			if(Data_Double[i+k+3][1]=='1')
-				ClpBlt(LP7DB1_X,(38+temp+PUMP_SPRITE_Y*k/4)*HighSpeed_7-(PUMP_SPRITE_Y)*(HighSpeed_7-1),wArrow,&rect7[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP7DB1_X,(38+temp+PUMP_SPRITE_Y*k/4)*HighSpeed_7-(PUMP_SPRITE_Y)*(HighSpeed_7-1),gWArrow, rect7[sta] );
 			if(Data_Double[i+k+3][2]=='1')
-				ClpBlt(LP5DB1_X,(38+temp+PUMP_SPRITE_Y*k/4)*HighSpeed_5-(PUMP_SPRITE_Y)*(HighSpeed_5-1),wArrow,&rect5[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP5DB1_X,(38+temp+PUMP_SPRITE_Y*k/4)*HighSpeed_5-(PUMP_SPRITE_Y)*(HighSpeed_5-1),gWArrow, rect5[sta] );
 			if(Data_Double[i+k+3][3]=='1')
-				ClpBlt(LP9DB1_X,(38+temp+PUMP_SPRITE_Y*k/4)*HighSpeed_9-(PUMP_SPRITE_Y)*(HighSpeed_9-1),wArrow,&rect9[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP9DB1_X,(38+temp+PUMP_SPRITE_Y*k/4)*HighSpeed_9-(PUMP_SPRITE_Y)*(HighSpeed_9-1),gWArrow, rect9[sta] );
 			if(Data_Double[i+k+3][4]=='1')
-				ClpBlt(LP3DB1_X,(38+temp+PUMP_SPRITE_Y*k/4)*HighSpeed_3-(PUMP_SPRITE_Y)*(HighSpeed_3-1),wArrow,&rect3[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP3DB1_X,(38+temp+PUMP_SPRITE_Y*k/4)*HighSpeed_3-(PUMP_SPRITE_Y)*(HighSpeed_3-1),gWArrow, rect3[sta] );
 
 			Data_Double_y[i+k+3]=(38+temp+PUMP_SPRITE_Y*k/4)*MinSpeed-(PUMP_SPRITE_Y)*(MinSpeed-1);
 		}
 
-// ø¿∏•¬  
+// Ïò§Î•∏Ï™Ω 
 		if(tick==2)
 		{
 			if(Data_Double[i+k][5]=='1')
-				ClpBlt(LP1DB2_X,(temp+PUMP_SPRITE_Y*k/2)*HighSpeed_1-(PUMP_SPRITE_Y)*(HighSpeed_1-1),wArrow,&rect1[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP1DB2_X,(temp+PUMP_SPRITE_Y*k/2)*HighSpeed_1-(PUMP_SPRITE_Y)*(HighSpeed_1-1),gWArrow, rect1[sta] );
 			if(Data_Double[i+k][6]=='1')
-				ClpBlt(LP7DB2_X,(temp+PUMP_SPRITE_Y*k/2)*HighSpeed_7-(PUMP_SPRITE_Y)*(HighSpeed_7-1),wArrow,&rect7[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP7DB2_X,(temp+PUMP_SPRITE_Y*k/2)*HighSpeed_7-(PUMP_SPRITE_Y)*(HighSpeed_7-1),gWArrow, rect7[sta] );
 			if(Data_Double[i+k][7]=='1')
-				ClpBlt(LP5DB2_X,(temp+PUMP_SPRITE_Y*k/2)*HighSpeed_5-(PUMP_SPRITE_Y)*(HighSpeed_5-1),wArrow,&rect5[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP5DB2_X,(temp+PUMP_SPRITE_Y*k/2)*HighSpeed_5-(PUMP_SPRITE_Y)*(HighSpeed_5-1),gWArrow, rect5[sta] );
 			if(Data_Double[i+k][8]=='1')
-				ClpBlt(LP9DB2_X,(temp+PUMP_SPRITE_Y*k/2)*HighSpeed_9-(PUMP_SPRITE_Y)*(HighSpeed_9-1),wArrow,&rect9[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP9DB2_X,(temp+PUMP_SPRITE_Y*k/2)*HighSpeed_9-(PUMP_SPRITE_Y)*(HighSpeed_9-1),gWArrow, rect9[sta] );
 			if(Data_Double[i+k][9]=='1')
-				ClpBlt(LP3DB2_X,(temp+PUMP_SPRITE_Y*k/2)*HighSpeed_3-(PUMP_SPRITE_Y)*(HighSpeed_3-1),wArrow,&rect3[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP3DB2_X,(temp+PUMP_SPRITE_Y*k/2)*HighSpeed_3-(PUMP_SPRITE_Y)*(HighSpeed_3-1),gWArrow, rect3[sta] );
 			Data_Double_y[i+k]=(temp+PUMP_SPRITE_Y*k/2)*MinSpeed-(PUMP_SPRITE_Y)*(MinSpeed-1);
 			
 			if(Data_Double[i+k+1][5]=='1')
-				ClpBlt(LP1DB2_X,(25+temp+PUMP_SPRITE_Y*k/2)*HighSpeed_1-(PUMP_SPRITE_Y)*(HighSpeed_1-1),wArrow,&rect1[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP1DB2_X,(25+temp+PUMP_SPRITE_Y*k/2)*HighSpeed_1-(PUMP_SPRITE_Y)*(HighSpeed_1-1),gWArrow, rect1[sta] );
 			if(Data_Double[i+k+1][6]=='1')
-				ClpBlt(LP7DB2_X,(25+temp+PUMP_SPRITE_Y*k/2)*HighSpeed_7-(PUMP_SPRITE_Y)*(HighSpeed_7-1),wArrow,&rect7[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP7DB2_X,(25+temp+PUMP_SPRITE_Y*k/2)*HighSpeed_7-(PUMP_SPRITE_Y)*(HighSpeed_7-1),gWArrow, rect7[sta] );
 			if(Data_Double[i+k+1][7]=='1')
-				ClpBlt(LP5DB2_X,(25+temp+PUMP_SPRITE_Y*k/2)*HighSpeed_5-(PUMP_SPRITE_Y)*(HighSpeed_5-1),wArrow,&rect5[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP5DB2_X,(25+temp+PUMP_SPRITE_Y*k/2)*HighSpeed_5-(PUMP_SPRITE_Y)*(HighSpeed_5-1),gWArrow, rect5[sta] );
 			if(Data_Double[i+k+1][8]=='1')
-				ClpBlt(LP9DB2_X,(25+temp+PUMP_SPRITE_Y*k/2)*HighSpeed_9-(PUMP_SPRITE_Y)*(HighSpeed_9-1),wArrow,&rect9[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP9DB2_X,(25+temp+PUMP_SPRITE_Y*k/2)*HighSpeed_9-(PUMP_SPRITE_Y)*(HighSpeed_9-1),gWArrow, rect9[sta] );
 			if(Data_Double[i+k+1][9]=='1')
-				ClpBlt(LP3DB2_X,(25+temp+PUMP_SPRITE_Y*k/2)*HighSpeed_3-(PUMP_SPRITE_Y)*(HighSpeed_3-1),wArrow,&rect3[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP3DB2_X,(25+temp+PUMP_SPRITE_Y*k/2)*HighSpeed_3-(PUMP_SPRITE_Y)*(HighSpeed_3-1),gWArrow, rect3[sta] );
 
 			Data_Double_y[i+k+1]=(25+temp+PUMP_SPRITE_Y*k/2)*MinSpeed-(PUMP_SPRITE_Y)*(MinSpeed-1);
 		}	
 		else if(tick==4)
 		{
 			if(Data_Double[i+k][5]=='1')
-				ClpBlt(LP1DB2_X,(temp+PUMP_SPRITE_Y*k/4)*HighSpeed_1-(PUMP_SPRITE_Y)*(HighSpeed_1-1),wArrow,&rect1[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP1DB2_X,(temp+PUMP_SPRITE_Y*k/4)*HighSpeed_1-(PUMP_SPRITE_Y)*(HighSpeed_1-1),gWArrow, rect1[sta] );
 			if(Data_Double[i+k][6]=='1')
-				ClpBlt(LP7DB2_X,(temp+PUMP_SPRITE_Y*k/4)*HighSpeed_7-(PUMP_SPRITE_Y)*(HighSpeed_7-1),wArrow,&rect7[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP7DB2_X,(temp+PUMP_SPRITE_Y*k/4)*HighSpeed_7-(PUMP_SPRITE_Y)*(HighSpeed_7-1),gWArrow, rect7[sta] );
 			if(Data_Double[i+k][7]=='1')
-				ClpBlt(LP5DB2_X,(temp+PUMP_SPRITE_Y*k/4)*HighSpeed_5-(PUMP_SPRITE_Y)*(HighSpeed_5-1),wArrow,&rect5[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP5DB2_X,(temp+PUMP_SPRITE_Y*k/4)*HighSpeed_5-(PUMP_SPRITE_Y)*(HighSpeed_5-1),gWArrow, rect5[sta] );
 			if(Data_Double[i+k][8]=='1')
-				ClpBlt(LP9DB2_X,(temp+PUMP_SPRITE_Y*k/4)*HighSpeed_9-(PUMP_SPRITE_Y)*(HighSpeed_9-1),wArrow,&rect9[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP9DB2_X,(temp+PUMP_SPRITE_Y*k/4)*HighSpeed_9-(PUMP_SPRITE_Y)*(HighSpeed_9-1),gWArrow, rect9[sta] );
 			if(Data_Double[i+k][9]=='1')
-				ClpBlt(LP3DB2_X,(temp+PUMP_SPRITE_Y*k/4)*HighSpeed_3-(PUMP_SPRITE_Y)*(HighSpeed_3-1),wArrow,&rect3[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP3DB2_X,(temp+PUMP_SPRITE_Y*k/4)*HighSpeed_3-(PUMP_SPRITE_Y)*(HighSpeed_3-1),gWArrow, rect3[sta] );
 
 			Data_Double_y[i+k]=(temp+PUMP_SPRITE_Y*k/4)*MinSpeed-(PUMP_SPRITE_Y)*(MinSpeed-1);
 
 			if(Data_Double[i+k+1][5]=='1')
-				ClpBlt(LP1DB2_X,(12+temp+PUMP_SPRITE_Y*k/4)*HighSpeed_1-(PUMP_SPRITE_Y)*(HighSpeed_1-1),wArrow,&rect1[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP1DB2_X,(12+temp+PUMP_SPRITE_Y*k/4)*HighSpeed_1-(PUMP_SPRITE_Y)*(HighSpeed_1-1),gWArrow, rect1[sta] );
 			if(Data_Double[i+k+1][6]=='1')
-				ClpBlt(LP7DB2_X,(12+temp+PUMP_SPRITE_Y*k/4)*HighSpeed_7-(PUMP_SPRITE_Y)*(HighSpeed_7-1),wArrow,&rect7[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP7DB2_X,(12+temp+PUMP_SPRITE_Y*k/4)*HighSpeed_7-(PUMP_SPRITE_Y)*(HighSpeed_7-1),gWArrow, rect7[sta] );
 			if(Data_Double[i+k+1][7]=='1')
-				ClpBlt(LP5DB2_X,(12+temp+PUMP_SPRITE_Y*k/4)*HighSpeed_5-(PUMP_SPRITE_Y)*(HighSpeed_5-1),wArrow,&rect5[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP5DB2_X,(12+temp+PUMP_SPRITE_Y*k/4)*HighSpeed_5-(PUMP_SPRITE_Y)*(HighSpeed_5-1),gWArrow, rect5[sta] );
 			if(Data_Double[i+k+1][8]=='1')
-				ClpBlt(LP9DB2_X,(12+temp+PUMP_SPRITE_Y*k/4)*HighSpeed_9-(PUMP_SPRITE_Y)*(HighSpeed_9-1),wArrow,&rect9[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP9DB2_X,(12+temp+PUMP_SPRITE_Y*k/4)*HighSpeed_9-(PUMP_SPRITE_Y)*(HighSpeed_9-1),gWArrow, rect9[sta] );
 			if(Data_Double[i+k+1][9]=='1')
-				ClpBlt(LP3DB2_X,(12+temp+PUMP_SPRITE_Y*k/4)*HighSpeed_3-(PUMP_SPRITE_Y)*(HighSpeed_3-1),wArrow,&rect3[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP3DB2_X,(12+temp+PUMP_SPRITE_Y*k/4)*HighSpeed_3-(PUMP_SPRITE_Y)*(HighSpeed_3-1),gWArrow, rect3[sta] );
 
 			Data_Double_y[i+k+1]=(12+temp+PUMP_SPRITE_Y*k/4)*MinSpeed-(PUMP_SPRITE_Y)*(MinSpeed-1);
 
 			if(Data_Double[i+k+2][5]=='1')
-				ClpBlt(LP1DB2_X,(25+temp+PUMP_SPRITE_Y*k/4)*HighSpeed_1-(PUMP_SPRITE_Y)*(HighSpeed_1-1),wArrow,&rect1[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP1DB2_X,(25+temp+PUMP_SPRITE_Y*k/4)*HighSpeed_1-(PUMP_SPRITE_Y)*(HighSpeed_1-1),gWArrow, rect1[sta] );
 			if(Data_Double[i+k+2][6]=='1')
-				ClpBlt(LP7DB2_X,(25+temp+PUMP_SPRITE_Y*k/4)*HighSpeed_7-(PUMP_SPRITE_Y)*(HighSpeed_7-1),wArrow,&rect7[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP7DB2_X,(25+temp+PUMP_SPRITE_Y*k/4)*HighSpeed_7-(PUMP_SPRITE_Y)*(HighSpeed_7-1),gWArrow, rect7[sta] );
 			if(Data_Double[i+k+2][7]=='1')
-				ClpBlt(LP5DB2_X,(25+temp+PUMP_SPRITE_Y*k/4)*HighSpeed_5-(PUMP_SPRITE_Y)*(HighSpeed_5-1),wArrow,&rect5[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP5DB2_X,(25+temp+PUMP_SPRITE_Y*k/4)*HighSpeed_5-(PUMP_SPRITE_Y)*(HighSpeed_5-1),gWArrow, rect5[sta] );
 			if(Data_Double[i+k+2][8]=='1')
-				ClpBlt(LP9DB2_X,(25+temp+PUMP_SPRITE_Y*k/4)*HighSpeed_9-(PUMP_SPRITE_Y)*(HighSpeed_9-1),wArrow,&rect9[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP9DB2_X,(25+temp+PUMP_SPRITE_Y*k/4)*HighSpeed_9-(PUMP_SPRITE_Y)*(HighSpeed_9-1),gWArrow, rect9[sta] );
 			if(Data_Double[i+k+2][9]=='1')
-				ClpBlt(LP3DB2_X,(25+temp+PUMP_SPRITE_Y*k/4)*HighSpeed_3-(PUMP_SPRITE_Y)*(HighSpeed_3-1),wArrow,&rect3[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP3DB2_X,(25+temp+PUMP_SPRITE_Y*k/4)*HighSpeed_3-(PUMP_SPRITE_Y)*(HighSpeed_3-1),gWArrow, rect3[sta] );
 
 			Data_Double_y[i+k+2]=(25+temp+PUMP_SPRITE_Y*k/4)*MinSpeed-(PUMP_SPRITE_Y)*(MinSpeed-1);
 		
 			if(Data_Double[i+k+3][5]=='1')
-				ClpBlt(LP1DB2_X,(38+temp+PUMP_SPRITE_Y*k/4)*HighSpeed_1-(PUMP_SPRITE_Y)*(HighSpeed_1-1),wArrow,&rect1[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP1DB2_X,(38+temp+PUMP_SPRITE_Y*k/4)*HighSpeed_1-(PUMP_SPRITE_Y)*(HighSpeed_1-1),gWArrow, rect1[sta] );
 			if(Data_Double[i+k+3][6]=='1')
-				ClpBlt(LP7DB2_X,(38+temp+PUMP_SPRITE_Y*k/4)*HighSpeed_7-(PUMP_SPRITE_Y)*(HighSpeed_7-1),wArrow,&rect7[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP7DB2_X,(38+temp+PUMP_SPRITE_Y*k/4)*HighSpeed_7-(PUMP_SPRITE_Y)*(HighSpeed_7-1),gWArrow, rect7[sta] );
 			if(Data_Double[i+k+3][7]=='1')
-				ClpBlt(LP5DB2_X,(38+temp+PUMP_SPRITE_Y*k/4)*HighSpeed_5-(PUMP_SPRITE_Y)*(HighSpeed_5-1),wArrow,&rect5[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP5DB2_X,(38+temp+PUMP_SPRITE_Y*k/4)*HighSpeed_5-(PUMP_SPRITE_Y)*(HighSpeed_5-1),gWArrow, rect5[sta] );
 			if(Data_Double[i+k+3][8]=='1')
-				ClpBlt(LP9DB2_X,(38+temp+PUMP_SPRITE_Y*k/4)*HighSpeed_9-(PUMP_SPRITE_Y)*(HighSpeed_9-1),wArrow,&rect9[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP9DB2_X,(38+temp+PUMP_SPRITE_Y*k/4)*HighSpeed_9-(PUMP_SPRITE_Y)*(HighSpeed_9-1),gWArrow, rect9[sta] );
 			if(Data_Double[i+k+3][9]=='1')
-				ClpBlt(LP3DB2_X,(38+temp+PUMP_SPRITE_Y*k/4)*HighSpeed_3-(PUMP_SPRITE_Y)*(HighSpeed_3-1),wArrow,&rect3[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP3DB2_X,(38+temp+PUMP_SPRITE_Y*k/4)*HighSpeed_3-(PUMP_SPRITE_Y)*(HighSpeed_3-1),gWArrow, rect3[sta] );
 
 			Data_Double_y[i+k+3]=(38+temp+PUMP_SPRITE_Y*k/4)*MinSpeed-(PUMP_SPRITE_Y)*(MinSpeed-1);
 		}
@@ -2622,5 +2623,4 @@ void KIU_STAGE_DOUBLE(void)
 		DrawScore2p();
 	}
 	DrawJudgeDB();
-	Flipp();
 }

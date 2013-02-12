@@ -1,5 +1,5 @@
-#ifndef __INCLUDE_CONFIG__
-#define	__INCLUDE_CONFIG__
+#ifndef	_KICKITUP_CONFIG_H
+#define	_KICKITUP_CONFIG_H
 
 #define	NORMAL		0
 #define	FUSION		1
@@ -9,20 +9,20 @@
 
 struct KIUCONFIG
 {
-	BOOL	bcDead;
-	BOOL	auto1_1p;
-	BOOL	auto3_1p;
-	BOOL	auto5_1p;
-	BOOL	auto7_1p;
-	BOOL	auto9_1p;
-	BOOL	auto1_2p;
-	BOOL	auto3_2p;
-	BOOL    auto5_2p;
-	BOOL    auto7_2p;
-	BOOL    auto9_2p;
+	bool	bcDead;
+	bool	auto1_1p;
+	bool	auto3_1p;
+	bool	auto5_1p;
+	bool	auto7_1p;
+	bool	auto9_1p;
+	bool	auto1_2p;
+	bool	auto3_2p;
+	bool    auto5_2p;
+	bool    auto7_2p;
+	bool    auto9_2p;
 
 	int		KeySet;
-	BOOL	OptJudge;
+	bool	OptJudge;
 	int		JoySet;
 
 };
@@ -31,4 +31,4 @@ void Configuration(void);
 void CFGInitialize();
 void CFGWrite();
 
-#endif
+#endif	// _CONFIG_H

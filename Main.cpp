@@ -10,39 +10,92 @@
 	2000/07/23 'Patching'
 			- Bpm changing bug fixed (bpm change was incorrected.)
 */
-#include "main.h"
 
-// Dshow ..
-#include "Media.h"
-
-// Dshow ..
-
-#include <windows.h>
-#include <ddraw.h>
-#include <stdio.h>
-#include <dsound.h>
-#include <mmsystem.h>
-#include <time.h>
-#include <io.h>
-
-#include "result.h"
-#include "config.h"
-#include "dead.h"
+#include "Main.h"
+#include "Result.h"
+#include "Config.h"
+#include "Dead.h"
 #include "Double.h"
-#include "ddutil.h"
-#include "dsutil.h"
-#include "song.h"
-#include "select.h"
-//#include "sound.h"
-#include "input.h"
-#include "resource.h"
+#include "Song.h"
+#include "Select.h"
+#include "Input.h"
+#include "Common.h"
+#include "Surface.h"
+#include "Timer.h"
+#include "Chunk.h"
+#include "Music.h"
+#include <stdio.h>
+#include <time.h>
+#include <sstream>
+#include <algorithm>
+#include <iostream>
+#include <fmodex/fmod_errors.h>
 
-#define VER_NUM	"0.4b"
-char	TITLE[MAX_PATH];
+using std::max;
+using std::min;
+
+#define VER_NUM	"0.4a"
+char	TITLE[PATH_LEN];
 
 #define	PRGNAME		"Kick It UP!"
 
-// ¿œπ› «œµÂ µ•¿Ã≈Õ ∫Œ∫–
+FMOD::System *	gpSystem;
+
+Surface gScreen;
+Surface	gGameTitle;
+Surface gStateComment;
+Surface gSmallFont;
+Surface gSelectBack;
+Surface gSongBack;
+Surface gSongTitle;
+Surface gNumberFont;
+Surface gNoDISC;
+Surface gShiftLeft;
+Surface gShiftRight;
+Surface	gModeIcon;
+Surface gDoubleIcon;
+Surface gCrazyIcon;
+Surface gEasyIcon;
+Surface gHardIcon;
+Surface	gStageCount;
+Surface gArrow1;
+Surface gArrow2;
+
+Surface gWArrow;
+
+Surface	pArrow1;
+Surface	pArrow3;
+Surface	pArrow5;
+Surface	pArrow7;
+Surface	pArrow9;
+
+Surface	cArrow1;
+Surface	cArrow3;
+Surface	cArrow5;
+Surface	cArrow7;
+Surface	cArrow9;
+Surface	JudgeFont;
+Surface ComboFont;
+Surface	GaugeWaku;
+Surface Gauge;
+Surface DeadScreen;
+Surface GameOver;
+Surface Score;
+Surface	ResultFont;
+Surface	ResultBack;
+
+
+Chunk	gOpening;
+Chunk	gDead;
+Chunk	gMode;
+Chunk	gCancel;
+Chunk	gMove;
+Chunk	gBeat;
+Chunk	gSelectSong;
+
+Music   gIntro;
+Music   gSong;
+
 char				Data[MAX_DATA+1][14];
 char				Data_Judge[MAX_DATA+1][14];
 double				Data_y[MAX_DATA+1];
@@ -50,31 +103,31 @@ double				Data_y[MAX_DATA+1];
 char				Data1[MAX_DATA+1][14];
 char				Data_Judge1[MAX_DATA+1][14];
 double				Data_y1[MAX_DATA+1];
-// ø©±‚±Ó¡ˆ
+// Ïó¨Í∏∞ÍπåÏßÄ
 
-// ¥ı∫Ì µ•¿Ã≈Õ Ω√¿€
+// ÎçîÎ∏î Îç∞Ïù¥ÌÑ∞ ÏãúÏûë
 char				Data_Double[MAX_DATA+1][14];
 char				Data_Double_Judge[MAX_DATA+1][14];
-double				Data_Double_y[MAX_DATA+1];//¡∑∫∏ µ•¿Ã≈Õ¿« Y∞™¿ª ∞°¡ˆ∞Ì ¿÷¥¬ πËø≠
-// ¥ı∫Ì µ•¿Ã≈Õ ≥°
+double				Data_Double_y[MAX_DATA+1];//Ï°±Î≥¥ Îç∞Ïù¥ÌÑ∞Ïùò YÍ∞íÏùÑ Í∞ÄÏßÄÍ≥† ÏûàÎäî Î∞∞Ïó¥
+// ÎçîÎ∏î Îç∞Ïù¥ÌÑ∞ ÎÅù
 
 
-char				SongName[MAX_PATH+1];
-char				SongName2[MAX_PATH+1];
-char				SongName3[MAX_PATH+1];
+char				SongName[PATH_LEN+1];
+char				SongName2[PATH_LEN+1];
+char				SongName3[PATH_LEN+1];
 
-char				LogoTitleName[MAX_PATH];
+char				LogoTitleName[PATH_LEN];
 
 double				bpm;
 double				bpm2;
 double				bpm3;
 
 int					start,start2,start3;
-DWORD					bunki,bunki2;
+Uint32					bunki,bunki2;
 
 int					tick;
 
-char				Title[MAX_PATH+1];
+char				Title[PATH_LEN+1];
 
 char				g_ProgramState=GAMETITLE;
 char				ArrowState1p[10];
@@ -82,17 +135,17 @@ char				ArrowState2p[10];
 
 char				ArrowState_Joy[10];
 
-DWORD				PressedKey1p[10];
-DWORD				PressedKey2p[10];
-DWORD				PressedKey_Joy[10];
+Uint32				PressedKey1p[10];
+Uint32				PressedKey2p[10];
+Uint32				PressedKey_Joy[10];
 
 char				Judgement1p;
 char				Judgement2p;
-DWORD				Combo1p;
-DWORD				Combo2p;
-DWORD				dwState;
-DWORD				dwState2;
-BOOL				g_bActive;
+Uint32				Combo1p;
+Uint32				Combo2p;
+Uint32				dwState;
+Uint32				dwState2;
+bool				g_bActive;
 
 long				Score1p;
 long				Score2p;
@@ -102,84 +155,19 @@ int					Gauge2p=10;
 
 char				GameMode=MODE_HARD;
 
-char				Couple=FALSE;
-char				Double=FALSE;
+char				Couple=false;
+char				Double=false;
 
 char				First;
 int start1;
 
-BOOL				Start1p;
-BOOL				Start2p;
-
-HWND hWnd;
-HINSTANCE	g_hInst;
-
-LPDIRECTDRAW g_pDD                = NULL;
-LPDIRECTDRAWSURFACE	g_pDDSPrimary = NULL;
-LPDIRECTDRAWSURFACE g_pDDSBack    = NULL;
-
-LPDIRECTDRAWSURFACE	GameTITLE		= NULL;
-LPDIRECTDRAWSURFACE	Background		= NULL;
-LPDIRECTDRAWSURFACE	SongTitle 		= NULL;
-LPDIRECTDRAWSURFACE	SongBack 		= NULL;
-LPDIRECTDRAWSURFACE	SelectBack		= NULL;
-LPDIRECTDRAWSURFACE	JudgeFont		= NULL;
-LPDIRECTDRAWSURFACE	NumberFont		= NULL;
-LPDIRECTDRAWSURFACE	ComboFont		= NULL;
-LPDIRECTDRAWSURFACE NoDISC			= NULL;
-LPDIRECTDRAWSURFACE	ShiftLeft		= NULL;
-LPDIRECTDRAWSURFACE	ShiftRight		= NULL;
-LPDIRECTDRAWSURFACE	GaugeWaku		= NULL;
-LPDIRECTDRAWSURFACE Gauge			= NULL;
-LPDIRECTDRAWSURFACE Score			= NULL;
-LPDIRECTDRAWSURFACE DeadScreen		= NULL;
-LPDIRECTDRAWSURFACE GameOver		= NULL;
-LPDIRECTDRAWSURFACE Logo			= NULL;
-LPDIRECTDRAWSURFACE	Diff			= NULL;
-LPDIRECTDRAWSURFACE	DoubleIcon		= NULL;
-LPDIRECTDRAWSURFACE	CrazyIcon		= NULL;
-LPDIRECTDRAWSURFACE	EasyIcon		= NULL;
-LPDIRECTDRAWSURFACE	HardIcon		= NULL;
-
-LPDIRECTDRAWSURFACE	SmallFont		= NULL;
-LPDIRECTDRAWSURFACE	Arrow1			= NULL;
-LPDIRECTDRAWSURFACE	Arrow2			= NULL;
-LPDIRECTDRAWSURFACE	wArrow			= NULL;
-
-LPDIRECTDRAWSURFACE	pArrow1			= NULL;
-LPDIRECTDRAWSURFACE	pArrow3			= NULL;
-LPDIRECTDRAWSURFACE	pArrow5			= NULL;
-LPDIRECTDRAWSURFACE	pArrow7			= NULL;
-LPDIRECTDRAWSURFACE	pArrow9			= NULL;
-
-LPDIRECTDRAWSURFACE	cArrow1			= NULL;
-LPDIRECTDRAWSURFACE	cArrow3			= NULL;
-LPDIRECTDRAWSURFACE	cArrow5			= NULL;
-LPDIRECTDRAWSURFACE	cArrow7			= NULL;
-LPDIRECTDRAWSURFACE	cArrow9			= NULL;
-
-LPDIRECTDRAWSURFACE	ModeIcon		= NULL;
-LPDIRECTDRAWSURFACE	g_cFont			= NULL;
-
-LPDIRECTDRAWSURFACE	ResultFont		= NULL;
-LPDIRECTDRAWSURFACE	ResultBack		= NULL;
-LPDIRECTDRAWSURFACE	StageCount		= NULL;
-
-LPDIRECTSOUND		lpds			= NULL;
-LPDIRECTSOUNDBUFFER	lpdsbd			= NULL;
-
-LPDIRECTSOUNDBUFFER				g_dsOpening	= NULL;
-LPDIRECTSOUNDBUFFER				g_dsDead		= NULL;
-LPDIRECTSOUNDBUFFER				g_dsMode		= NULL;
-LPDIRECTSOUNDBUFFER				g_dsCancel		= NULL;
-LPDIRECTSOUNDBUFFER				g_dsMove		= NULL;
-LPDIRECTSOUNDBUFFER				g_dsBeat		= NULL;
-LPDIRECTSOUNDBUFFER				g_dsSelectSong	= NULL;
+bool				Start1p;
+bool				Start2p;
 
 SONG				CSONG[512];
 
-BOOL	SongFlag;
-BOOL	IntroFlag;
+bool	SongFlag;
+bool	IntroFlag;
 
 int		HighSpeed1p=1;
 int		HighSpeed2p=1;
@@ -201,61 +189,54 @@ int		MinSpeed;
 
 int		JudgeArray[110];
 
-BOOL	bModeMirror1p;
-BOOL	bModeNonstep1p;
-BOOL	bModeSynchro;
-BOOL	bModeUnion1p;
-BOOL	bModeRandom1p;
-BOOL	b4dMix1p;			// 1p 4DMIX mode.
-BOOL	bModeVanish1p;
-BOOL	bModeCrazy1p;
-BOOL	bModeSuddenR1p;
-BOOL	bModeRandomS1p;
+bool	bModeMirror1p;
+bool	bModeNonstep1p;
+bool	bModeSynchro;
+bool	bModeUnion1p;
+bool	bModeRandom1p;
+bool	b4dMix1p;			// 1p 4DMIX mode.
+bool	bModeVanish1p;
+bool	bModeCrazy1p;
+bool	bModeSuddenR1p;
+bool	bModeRandomS1p;
 
-BOOL	bModeMirror2p;
-BOOL	bModeNonstep2p;
-BOOL	bModeUnion2p;
-BOOL	bModeRandom2p;
-BOOL	b4dMix2p;
-BOOL	bModeVanish2p;
-BOOL	bModeCrazy2p;
-BOOL	bModeSuddenR2p;
-BOOL	bModeRandomS2p;
+bool	bModeMirror2p;
+bool	bModeNonstep2p;
+bool	bModeUnion2p;
+bool	bModeRandom2p;
+bool	b4dMix2p;
+bool	bModeVanish2p;
+bool	bModeCrazy2p;
+bool	bModeSuddenR2p;
+bool	bModeRandomS2p;
 
 int	ALPHA=0;
 int	inc=20;
-DWORD	CKey_CFont;
-DWORD	CKey_Arr;
+Uint32	CKey_Arr;
 
-DWORD	cPerfect1p;
-DWORD	cGreat1p;
-DWORD	cGood1p;
-DWORD	cBad1p;
-DWORD	cMiss1p;
-DWORD	cMaxCombo1p;
+Uint32	cPerfect1p;
+Uint32	cGreat1p;
+Uint32	cGood1p;
+Uint32	cBad1p;
+Uint32	cMiss1p;
+Uint32	cMaxCombo1p;
 
-DWORD	cPerfect2p;
-DWORD	cGreat2p;
-DWORD	cGood2p;
-DWORD	cBad2p;
-DWORD	cMiss2p;
-DWORD	cMaxCombo2p;
+Uint32	cPerfect2p;
+Uint32	cGreat2p;
+Uint32	cGood2p;
+Uint32	cBad2p;
+Uint32	cMiss2p;
+Uint32	cMaxCombo2p;
 
 // Data of configuration
 KIUCONFIG	KCFG;
 
-DWORD		dwGameCount;
+int		dwGameCount;
 
-BOOL debugflag=TRUE;
-char g_szDebugName[MAX_PATH];
+bool debugflag=true;
+char g_szDebugName[PATH_LEN];
 
-BOOL	g_fullscreen=FALSE;
-
-CMedia *intro;
-CMedia *song;
-
-RECT                    g_rcViewport;           // Pos. & size to blt from
-RECT                    g_rcScreen;             // Screen pos. for blt
+bool	g_fullscreen=false;
 
 void	DebugPrintf(char *str,...)
 {
@@ -284,16 +265,16 @@ void	JudgementSet(void)
 	for(i=73;i<88;i++)	JudgeArray[i] = PERFECT;
 }
 
-void	DisplayStageCount(DWORD Count)
+void	DisplayStageCount(const int count)
 {
-	RECT	sssRect;
-	
-	sssRect.top=0;
-	sssRect.left=Count*80;
-	sssRect.right=sssRect.left+80;
-	sssRect.bottom=46;
+    SDL_Rect    sRect = {0, };
 
-	g_pDDSBack->BltFast(280, 0, StageCount, &sssRect, DDBLTFAST_SRCCOLORKEY);
+    sRect.x = count * 80;
+    sRect.y = 0;
+    sRect.w = 80;
+    sRect.h = 46;
+
+    gStageCount.BltFast( 280, 0, gScreen, &sRect );
 }
 
 
@@ -301,151 +282,139 @@ void	DisplayStageCount(DWORD Count)
 void ClearMode(void)
 {
 		HighSpeed1p=1;
-		bModeMirror1p=FALSE;
-		bModeNonstep1p=FALSE;
-		bModeSynchro=FALSE;
-		bModeUnion1p=FALSE;
-		bModeRandom1p=FALSE;
-		b4dMix1p=FALSE;
+		bModeMirror1p=false;
+		bModeNonstep1p=false;
+		bModeSynchro=false;
+		bModeUnion1p=false;
+		bModeRandom1p=false;
+		b4dMix1p=false;
 		HighSpeed1p_1=1;
 		HighSpeed1p_3=1;
 		HighSpeed1p_5=1;
 		HighSpeed1p_7=1;
 		HighSpeed1p_9=1;
-		bModeVanish1p=FALSE;
-		bModeRandomS1p=FALSE;
-		bModeSuddenR1p=FALSE;
+		bModeVanish1p=false;
+		bModeRandomS1p=false;
+		bModeSuddenR1p=false;
 
 		HighSpeed2p=1;
-		bModeMirror2p=FALSE;
-		bModeNonstep2p=FALSE;
-		bModeUnion2p=FALSE;
-		bModeRandom2p=FALSE;
-		b4dMix2p=FALSE;
+		bModeMirror2p=false;
+		bModeNonstep2p=false;
+		bModeUnion2p=false;
+		bModeRandom2p=false;
+		b4dMix2p=false;
 		HighSpeed2p_1=1;
 		HighSpeed2p_3=1;
 		HighSpeed2p_5=1;
 		HighSpeed2p_7=1;
 		HighSpeed2p_9=1;
-		bModeVanish2p=FALSE;
-		Double=FALSE;
-		bModeRandomS2p=FALSE;
-		bModeSuddenR2p=FALSE;
+		bModeVanish2p=false;
+		Double=false;
+		bModeRandomS2p=false;
+		bModeSuddenR2p=false;
 }
 
 void	GameOver1(void)
 {
 	static int count;
 
-	if(First==0)
-	{
+	if(First==0) {
 		count=0;
 		First++;
 	}
 	count++;
-	g_pDDSBack->BltFast(0,0, GameOver, NULL, DDBLTFAST_NOCOLORKEY);
-	if(count==60)First=0, g_ProgramState=GAMETITLE;
-
-	Flipp();
-}
-
-void DrawBackground(char Data[][14], DWORD i, int temp)
-{
-	g_pDDSBack->BltFast(0,0,SongBack,NULL, DDBLTFAST_WAIT | DDBLTFAST_NOCOLORKEY);
+    GameOver.BltFast( 0, 0, gScreen );
+    if(count==60) {
+        First=0;
+        g_ProgramState=GAMETITLE;
+    }
 }
 
 void DrawScore1p(void)
 {
-	RECT	cRect;
+	SDL_Rect	cRect;
 	char chScore[11];
-	int Loop;
 
 	sprintf(chScore,"%07d",Score1p);
 			
-	for(Loop=0;;Loop++)
-	{
-		if(chScore[Loop]==NULL)break;
-		chScore[Loop]-=48;
-		cRect.left=chScore[Loop]*22;
-		cRect.right=cRect.left+21;
-		cRect.top=0;
-		cRect.bottom=35;
-		g_pDDSBack->BltFast(20+Loop*22,444,Score,&cRect, DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
-	}/* ø©±‚±Ó¡ˆ */
+	for(int i=0;;i++) {
+		if(chScore[i]==0)
+			break;
+		chScore[i]-=48;
+		cRect.x=chScore[i]*22;
+		cRect.w=21;
+		cRect.y=0;
+		cRect.h=35;
+
+        Score.BltFast( 20+i*22,444, gScreen, &cRect );
+	}
 }
 
 void DrawScore2p(void)
 {
-	RECT	cRect;
+	SDL_Rect	cRect;
 	char chScore[11];
-	int Loop;
 
 	sprintf(chScore,"%07d",Score2p);
 			
-	for(Loop=0;;Loop++)
-	{
-		if(chScore[Loop]==NULL)break;
-		chScore[Loop]-=48;
-		cRect.left=chScore[Loop]*22;
-		cRect.right=cRect.left+21;
-		cRect.top=0;
-		cRect.bottom=35;
-		g_pDDSBack->BltFast(463+Loop*22,444,Score,&cRect, DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
-	}/* ø©±‚±Ó¡ˆ */
+	for(int i=0;;i++) {
+		if(chScore[i]==0)
+			break;
+		chScore[i]-=48;
+		cRect.x=chScore[i]*22;
+		cRect.w=21;
+		cRect.y=0;
+		cRect.h=35;
+        Score.BltFast( 463+i*22, 444, gScreen, &cRect );
+	}
 }
 
 void DrawGauge1p(void)
 {
 	int CurG;
-	int i;
-//	static	int	Phase;
-
-	RECT sRect;
+	SDL_Rect sRect;
 
 	CurG=Gauge1p;
 	
 	if(CurG<0)CurG=0;
 
-	g_pDDSBack->BltFast(32,0,GaugeWaku,NULL, DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
-
-/*	if(Phase==1)
-	{
-		Phase=0;
-		return;
-	}
-	else Phase++;*/
+	// g_pDDSBack->BltFast(32,0,GaugeWaku,NULL, DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
+    GaugeWaku.BltFast(32, 0, gScreen );
 	
-	sRect.top=0;
-	sRect.left=0;
-	sRect.right=6;
-	sRect.bottom=20;
+	sRect.y=0;
+	sRect.x=0;
+	sRect.w=6;
+	sRect.h=20;
 
-	for(i=0;i<7;i++)
+	for(int i=0;i<7;i++)
 	{
 		if(i>CurG)break;
-		g_pDDSBack->BltFast(280-(i*6),20,Gauge,&sRect, DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
+        //	g_pDDSBack->BltFast(280-(i*6),20,Gauge,&sRect, DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
+        Gauge.BltFast( 280-(i*6), 20, gScreen, &sRect );
 	}
 
-	sRect.top=0;
-	sRect.left=6;
-	sRect.right=12;
-	sRect.bottom=20;
+	sRect.y=0;
+	sRect.x=6;
+	sRect.w=6;
+	sRect.h=20;
 
-	for(i=7;i<21;i++)
+	for(int i=7;i<21;i++)
 	{
 		if(i>CurG)break;
-		g_pDDSBack->BltFast(280-(i*6),20,Gauge,&sRect, DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
+		// g_pDDSBack->BltFast(280-(i*6),20,Gauge,&sRect, DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
+        Gauge.BltFast( 280-(i*6), 20, gScreen, &sRect );
 	}
 
-	sRect.top=0;
-	sRect.left=12;
-	sRect.right=18;
-	sRect.bottom=20;
+	sRect.y=0;
+	sRect.x=12;
+	sRect.w = 6;
+	sRect.h=20;
 
-	for(i=21;i<42;i++)
+	for(int i=21;i<42;i++)
 	{
 		if(i>CurG)break;
-		g_pDDSBack->BltFast(280-(i*6),20,Gauge,&sRect,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
+		// g_pDDSBack->BltFast(280-(i*6),20,Gauge,&sRect,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
+        Gauge.BltFast( 280-(i*6), 20, gScreen, &sRect );
 	}
 
 }
@@ -454,53 +423,47 @@ void DrawGauge2p(void)
 {
 	int CurG;
 	int i;
-	RECT sRect;
-//	static	int	Phase;
+	SDL_Rect sRect;
 
 	CurG=Gauge2p;
 	
-	if(CurG<0)CurG=0;
+	if(CurG<0)
+		CurG=0;
 
-	g_pDDSBack->BltFast(352,0,GaugeWaku,NULL,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
+	// g_pDDSBack->BltFast(352,0,GaugeWaku,NULL,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
+    GaugeWaku.BltFast( 352, 0, gScreen );
 
-/*	if(Phase==1)
-	{
-		Phase=0;
-		return;
-	}
-	else Phase++;*/
+	sRect.y=0;
+	sRect.x=0;
+	sRect.w = 6;
+	sRect.h=20;
 
-	sRect.top=0;
-	sRect.left=0;
-	sRect.right=6;
-	sRect.bottom=20;
-
-	for(i=0;i<7;i++)
-	{
-		if(i>CurG)break;
-		g_pDDSBack->BltFast(352+(i*6),20,Gauge,&sRect,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
+	for(i=0;i<7;i++) {
+		if(i>CurG)
+			break;
+        Gauge.BltFast( 352+(i*6), 20, gScreen, &sRect );
 	}
 
-	sRect.top=0;
-	sRect.left=6;
-	sRect.right=12;
-	sRect.bottom=20;
+	sRect.y = 0;
+	sRect.x = 6;
+	sRect.w = 6;
+	sRect.h = 20;
 
-	for(i=7;i<21;i++)
-	{
-		if(i>CurG)break;
-		g_pDDSBack->BltFast(352+(i*6),20,Gauge,&sRect,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
+	for(i=7;i<21;i++) {
+		if(i>CurG)
+			break;
+        Gauge.BltFast( 352+(i*6), 20, gScreen, &sRect );
 	}
 
-	sRect.top=0;
-	sRect.left=12;
-	sRect.right=18;
-	sRect.bottom=20;
+	sRect.y = 0;
+	sRect.x = 12;
+	sRect.w = 6;
+	sRect.h = 20;
 
-	for(i=21;i<42;i++)
-	{
-		if(i>CurG)break;
-		g_pDDSBack->BltFast(352+(i*6),20,Gauge,&sRect,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
+	for(i=21;i<42;i++) {
+		if(i>CurG)
+			break;
+        Gauge.BltFast( 352+(i*6), 20, gScreen, &sRect );
 	}
 
 }
@@ -508,13 +471,13 @@ void DrawGauge2p(void)
 void KIU_STAGE(void)
 {
 	static int temp;
-	static DWORD i;
-	static DWORD cur,last,sec;
-	static DWORD starttime, curtime;
+	static int i;
+	static Uint32 cur,last,sec;
+	static Uint32 starttime, curtime;
 
-	static RECT rect1[7],rect3[7],rect5[7],rect7[7],rect9[7];
+	static SDL_Rect rect1[7],rect3[7],rect5[7],rect7[7],rect9[7];
 	int k;
-	DWORD delta;
+	Uint32 delta;
 
 	static int sta;
 
@@ -522,13 +485,11 @@ void KIU_STAGE(void)
 
 	static time_t t;
 
-	static	HRESULT	hr;
-
 	char s[50];
 
 	double bpmpix=(PUMP_SPRITE_Y)*bpm/60000;
 
-	DrawBackground(Data,i,temp);
+    gSongBack.BltFast( 0, 0, gScreen );
 	DisplayStageCount(dwGameCount);
 	
 	
@@ -552,7 +513,7 @@ void KIU_STAGE(void)
 
 	if(start1==0)
 	{
-		if(b4dMix1p==TRUE)
+		if(b4dMix1p==true)
 		{
 			MaxSpeed = MinSpeed = HighSpeed1p_1;
 
@@ -592,32 +553,31 @@ void KIU_STAGE(void)
 			HighSpeed2p_1 = HighSpeed2p_3 = HighSpeed2p_5 = HighSpeed2p_7 = HighSpeed2p_9 = HighSpeed2p;
 		}
 
-		for(sta=0;sta<6;sta++)
-		{
-			rect7[sta].top=0;
-			rect7[sta].left=PUMP_SPRITE_NEW*sta;
-			rect7[sta].right=PUMP_SPRITE_NEW+PUMP_SPRITE_NEW*sta;
-			rect7[sta].bottom=PUMP_SPRITE_NEW;
+		for(sta=0;sta<6;sta++) {
+			rect7[sta].y = 0;
+			rect7[sta].x = PUMP_SPRITE_NEW*sta;
+			rect7[sta].w = PUMP_SPRITE_NEW;
+			rect7[sta].h = PUMP_SPRITE_NEW;
 
-			rect9[sta].top=PUMP_SPRITE_NEW;
-			rect9[sta].left=PUMP_SPRITE_NEW*sta;
-			rect9[sta].right=PUMP_SPRITE_NEW+PUMP_SPRITE_NEW*sta;
-			rect9[sta].bottom=PUMP_SPRITE_NEW*2;
+			rect9[sta].y = PUMP_SPRITE_NEW;
+			rect9[sta].x = PUMP_SPRITE_NEW*sta;
+			rect9[sta].w = PUMP_SPRITE_NEW;
+			rect9[sta].h = PUMP_SPRITE_NEW;
 
-			rect5[sta].top=PUMP_SPRITE_NEW*2;
-			rect5[sta].left=PUMP_SPRITE_NEW*sta;
-			rect5[sta].right=PUMP_SPRITE_NEW+PUMP_SPRITE_NEW*sta;
-			rect5[sta].bottom=PUMP_SPRITE_NEW*3;
+			rect5[sta].y = PUMP_SPRITE_NEW*2;
+			rect5[sta].x = PUMP_SPRITE_NEW*sta;
+			rect5[sta].w = PUMP_SPRITE_NEW;
+			rect5[sta].h = PUMP_SPRITE_NEW;
 
-			rect3[sta].top=PUMP_SPRITE_NEW*3;
-			rect3[sta].left=PUMP_SPRITE_NEW*sta;
-			rect3[sta].right=PUMP_SPRITE_NEW+PUMP_SPRITE_NEW*sta;
-			rect3[sta].bottom=PUMP_SPRITE_NEW*4;
+			rect3[sta].y = PUMP_SPRITE_NEW*3;
+			rect3[sta].x = PUMP_SPRITE_NEW*sta;
+			rect3[sta].w = PUMP_SPRITE_NEW;
+			rect3[sta].h = PUMP_SPRITE_NEW;
 
-			rect1[sta].top=PUMP_SPRITE_NEW*4;
-			rect1[sta].left=PUMP_SPRITE_NEW*sta;
-			rect1[sta].right=PUMP_SPRITE_NEW+PUMP_SPRITE_NEW*sta;
-			rect1[sta].bottom=PUMP_SPRITE_NEW*5;
+			rect1[sta].y = PUMP_SPRITE_NEW*4;
+			rect1[sta].x = PUMP_SPRITE_NEW*sta;
+			rect1[sta].w = PUMP_SPRITE_NEW;
+			rect1[sta].h = PUMP_SPRITE_NEW;
 		}
 		sta=0;
 
@@ -762,19 +722,18 @@ void KIU_STAGE(void)
 			}
 		}
 
-		//FadeToSurface(SongBack);
-		g_pDDSBack->BltFast(0,0, SongBack, NULL, DDBLTFAST_NOCOLORKEY);
+        gSongBack.BltFast( 0, 0, gScreen );
 
-		if(SongFlag==TRUE)
+		if(SongFlag==true)
 		{
-			song->OnMediaPlay();
+            gSong.Play();
 		}
 
 		start*=10;
 		start2*=10;start3*=10;
 		bunki*=10;bunki2*=10;
 		
-		last=cur=timeGetTime();
+		last=cur=SDL_GetTicks();
 		tail=0;
 		i=0;
 		temp=0;
@@ -784,12 +743,15 @@ void KIU_STAGE(void)
 		curtime=0;
 	}
 	
-	cur=timeGetTime();        // 130/ 600000
+	cur=SDL_GetTicks();        // 130/ 600000
 	delta=cur-last;
 	last=cur;
 
-	if(Start1p)DrawArrow1p(i); //»∏ªˆ »≠ªÏ«•∏¶ ∏ª«’¥œ¥Ÿ.
-	if(Start2p)DrawArrow2p(i);
+	if(Start1p)
+        DrawArrow1p(i); //ÌöåÏÉâ ÌôîÏÇ¥ÌëúÎ•º ÎßêÌï©ÎãàÎã§.
+
+	if(Start2p)
+        DrawArrow2p(i);
 
 	start-=delta;
 
@@ -821,14 +783,15 @@ void KIU_STAGE(void)
 			temp=+55;
 			tail=0;
 
-			curtime=(DWORD)(song->GetCurrentPosition()*1000);
+			curtime = gSong.GetCurrentPosition();
 
 			if(curtime > starttime) 
-			delta=(DWORD)curtime-starttime;
-			else delta=(DWORD)curtime;
+			    delta=(Uint32)curtime-starttime;
+			else
+                delta=(Uint32)curtime;
 		}
 
-		//1000 Tick¥Á 180/60 -> 1√ ø° 64*(180/60)  ¡Ô 1 tick ¥Á 64*(bpm/60)/1000
+		//1000 TickÎãπ 180/60 -> 1Ï¥àÏóê 64*(180/60)  Ï¶â 1 tick Îãπ 64*(bpm/60)/1000
 		temp-=(int)(delta*bpmpix);
 		tail+=(double)((double)(delta*bpmpix)-(int)(delta*bpmpix));
 
@@ -849,9 +812,9 @@ void KIU_STAGE(void)
 		}
 
 	}
-	if(timeGetTime()-sec>50)
+	if(SDL_GetTicks()-sec>50)
 	{
-		sec=timeGetTime();
+		sec=SDL_GetTicks();
 		if(sta==5)sta=0;
 		else sta++;
 	}
@@ -864,9 +827,8 @@ void KIU_STAGE(void)
 			k=48;
 			if(SongFlag)
 			{
-				song->OnMediaStop();
-				delete song;
-				SongFlag=FALSE;
+				gSong.Halt();
+				SongFlag=false;
 			}
 			g_ProgramState=RESULT;
 
@@ -876,28 +838,28 @@ void KIU_STAGE(void)
 		if(tick==2)
 		{
 			if(Data[i+k][0]=='1')
-				ClpBlt(LP1_X,(temp+PUMP_SPRITE_Y*k/2)*HighSpeed1p_1-(PUMP_SPRITE_Y)*(HighSpeed1p_1-1),wArrow,&rect1[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP1_X,(temp+PUMP_SPRITE_Y*k/2)*HighSpeed1p_1-(PUMP_SPRITE_Y)*(HighSpeed1p_1-1),gWArrow, rect1[sta] );
 			if(Data[i+k][1]=='1')
-				ClpBlt(LP7_X,(temp+PUMP_SPRITE_Y*k/2)*HighSpeed1p_7-(PUMP_SPRITE_Y)*(HighSpeed1p_7-1),wArrow,&rect7[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP7_X,(temp+PUMP_SPRITE_Y*k/2)*HighSpeed1p_7-(PUMP_SPRITE_Y)*(HighSpeed1p_7-1),gWArrow, rect7[sta] );
 			if(Data[i+k][2]=='1')
-				ClpBlt(LP5_X,(temp+PUMP_SPRITE_Y*k/2)*HighSpeed1p_5-(PUMP_SPRITE_Y)*(HighSpeed1p_5-1),wArrow,&rect5[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP5_X,(temp+PUMP_SPRITE_Y*k/2)*HighSpeed1p_5-(PUMP_SPRITE_Y)*(HighSpeed1p_5-1),gWArrow, rect5[sta] );
 			if(Data[i+k][3]=='1')
-				ClpBlt(LP9_X,(temp+PUMP_SPRITE_Y*k/2)*HighSpeed1p_9-(PUMP_SPRITE_Y)*(HighSpeed1p_9-1),wArrow,&rect9[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP9_X,(temp+PUMP_SPRITE_Y*k/2)*HighSpeed1p_9-(PUMP_SPRITE_Y)*(HighSpeed1p_9-1),gWArrow, rect9[sta] );
 			if(Data[i+k][4]=='1')
-				ClpBlt(LP3_X,(temp+PUMP_SPRITE_Y*k/2)*HighSpeed1p_3-(PUMP_SPRITE_Y)*(HighSpeed1p_3-1),wArrow,&rect3[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP3_X,(temp+PUMP_SPRITE_Y*k/2)*HighSpeed1p_3-(PUMP_SPRITE_Y)*(HighSpeed1p_3-1),gWArrow, rect3[sta] );
 			
 			Data_y[i+k]=(temp+PUMP_SPRITE_Y*k/2)*MinSpeed-(PUMP_SPRITE_Y)*(MinSpeed-1);
 			
 			if(Data[i+k+1][0]=='1')
-				ClpBlt(LP1_X,(25+temp+PUMP_SPRITE_Y*k/2)*HighSpeed1p_1-(PUMP_SPRITE_Y)*(HighSpeed1p_1-1),wArrow,&rect1[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
-			if(Data[i+k+1][1]=='1')
-				ClpBlt(LP7_X,(25+temp+PUMP_SPRITE_Y*k/2)*HighSpeed1p_7-(PUMP_SPRITE_Y)*(HighSpeed1p_7-1),wArrow,&rect7[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP1_X,(25+temp+PUMP_SPRITE_Y*k/2)*HighSpeed1p_1-(PUMP_SPRITE_Y)*(HighSpeed1p_1-1),gWArrow, rect1[sta] );
+ 			if(Data[i+k+1][1]=='1')
+				ClpBlt(LP7_X,(25+temp+PUMP_SPRITE_Y*k/2)*HighSpeed1p_7-(PUMP_SPRITE_Y)*(HighSpeed1p_7-1),gWArrow, rect7[sta] );
 			if(Data[i+k+1][2]=='1')
-				ClpBlt(LP5_X,(25+temp+PUMP_SPRITE_Y*k/2)*HighSpeed1p_5-(PUMP_SPRITE_Y)*(HighSpeed1p_5-1),wArrow,&rect5[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP5_X,(25+temp+PUMP_SPRITE_Y*k/2)*HighSpeed1p_5-(PUMP_SPRITE_Y)*(HighSpeed1p_5-1),gWArrow, rect5[sta] );
 			if(Data[i+k+1][3]=='1')
-				ClpBlt(LP9_X,(25+temp+PUMP_SPRITE_Y*k/2)*HighSpeed1p_9-(PUMP_SPRITE_Y)*(HighSpeed1p_9-1),wArrow,&rect9[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP9_X,(25+temp+PUMP_SPRITE_Y*k/2)*HighSpeed1p_9-(PUMP_SPRITE_Y)*(HighSpeed1p_9-1),gWArrow, rect9[sta] );
 			if(Data[i+k+1][4]=='1')
-				ClpBlt(LP3_X,(25+temp+PUMP_SPRITE_Y*k/2)*HighSpeed1p_3-(PUMP_SPRITE_Y)*(HighSpeed1p_3-1),wArrow,&rect3[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP3_X,(25+temp+PUMP_SPRITE_Y*k/2)*HighSpeed1p_3-(PUMP_SPRITE_Y)*(HighSpeed1p_3-1),gWArrow, rect3[sta] );
 
 			Data_y[i+k+1]=(25+temp+PUMP_SPRITE_Y*k/2)*MinSpeed-(PUMP_SPRITE_Y)*(MinSpeed-1);
 
@@ -959,54 +921,54 @@ void KIU_STAGE(void)
 		else if(tick==4)
 		{
 			if(Data[i+k][0]=='1')
-				ClpBlt(LP1_X,(temp+PUMP_SPRITE_Y*k/4)*HighSpeed1p_1-(PUMP_SPRITE_Y)*(HighSpeed1p_1-1),wArrow,&rect1[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP1_X,(temp+PUMP_SPRITE_Y*k/4)*HighSpeed1p_1-(PUMP_SPRITE_Y)*(HighSpeed1p_1-1),gWArrow,rect1[sta] );
 			if(Data[i+k][1]=='1')
-				ClpBlt(LP7_X,(temp+PUMP_SPRITE_Y*k/4)*HighSpeed1p_7-(PUMP_SPRITE_Y)*(HighSpeed1p_7-1),wArrow,&rect7[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP7_X,(temp+PUMP_SPRITE_Y*k/4)*HighSpeed1p_7-(PUMP_SPRITE_Y)*(HighSpeed1p_7-1),gWArrow,rect7[sta] );
 			if(Data[i+k][2]=='1')
-				ClpBlt(LP5_X,(temp+PUMP_SPRITE_Y*k/4)*HighSpeed1p_5-(PUMP_SPRITE_Y)*(HighSpeed1p_5-1),wArrow,&rect5[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP5_X,(temp+PUMP_SPRITE_Y*k/4)*HighSpeed1p_5-(PUMP_SPRITE_Y)*(HighSpeed1p_5-1),gWArrow,rect5[sta] );
 			if(Data[i+k][3]=='1')
-				ClpBlt(LP9_X,(temp+PUMP_SPRITE_Y*k/4)*HighSpeed1p_9-(PUMP_SPRITE_Y)*(HighSpeed1p_9-1),wArrow,&rect9[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP9_X,(temp+PUMP_SPRITE_Y*k/4)*HighSpeed1p_9-(PUMP_SPRITE_Y)*(HighSpeed1p_9-1),gWArrow,rect9[sta] );
 			if(Data[i+k][4]=='1')
-				ClpBlt(LP3_X,(temp+PUMP_SPRITE_Y*k/4)*HighSpeed1p_3-(PUMP_SPRITE_Y)*(HighSpeed1p_3-1),wArrow,&rect3[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP3_X,(temp+PUMP_SPRITE_Y*k/4)*HighSpeed1p_3-(PUMP_SPRITE_Y)*(HighSpeed1p_3-1),gWArrow,rect3[sta] );
 
 			Data_y[i+k]=(temp+PUMP_SPRITE_Y*k/4)*MinSpeed-(PUMP_SPRITE_Y)*(MinSpeed-1);
 
 			if(Data[i+k+1][0]=='1')
-				ClpBlt(LP1_X,(12+temp+PUMP_SPRITE_Y*k/4)*HighSpeed1p_1-(PUMP_SPRITE_Y)*(HighSpeed1p_1-1),wArrow,&rect1[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP1_X,(12+temp+PUMP_SPRITE_Y*k/4)*HighSpeed1p_1-(PUMP_SPRITE_Y)*(HighSpeed1p_1-1),gWArrow,rect1[sta] );
 			if(Data[i+k+1][1]=='1')
-				ClpBlt(LP7_X,(12+temp+PUMP_SPRITE_Y*k/4)*HighSpeed1p_7-(PUMP_SPRITE_Y)*(HighSpeed1p_7-1),wArrow,&rect7[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP7_X,(12+temp+PUMP_SPRITE_Y*k/4)*HighSpeed1p_7-(PUMP_SPRITE_Y)*(HighSpeed1p_7-1),gWArrow,rect7[sta] );
 			if(Data[i+k+1][2]=='1')
-				ClpBlt(LP5_X,(12+temp+PUMP_SPRITE_Y*k/4)*HighSpeed1p_5-(PUMP_SPRITE_Y)*(HighSpeed1p_5-1),wArrow,&rect5[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP5_X,(12+temp+PUMP_SPRITE_Y*k/4)*HighSpeed1p_5-(PUMP_SPRITE_Y)*(HighSpeed1p_5-1),gWArrow,rect5[sta] );
 			if(Data[i+k+1][3]=='1')
-				ClpBlt(LP9_X,(12+temp+PUMP_SPRITE_Y*k/4)*HighSpeed1p_9-(PUMP_SPRITE_Y)*(HighSpeed1p_9-1),wArrow,&rect9[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP9_X,(12+temp+PUMP_SPRITE_Y*k/4)*HighSpeed1p_9-(PUMP_SPRITE_Y)*(HighSpeed1p_9-1),gWArrow,rect9[sta] );
 			if(Data[i+k+1][4]=='1')
-				ClpBlt(LP3_X,(12+temp+PUMP_SPRITE_Y*k/4)*HighSpeed1p_3-(PUMP_SPRITE_Y)*(HighSpeed1p_3-1),wArrow,&rect3[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP3_X,(12+temp+PUMP_SPRITE_Y*k/4)*HighSpeed1p_3-(PUMP_SPRITE_Y)*(HighSpeed1p_3-1),gWArrow,rect3[sta] );
 
 			Data_y[i+k+1]=(12+temp+PUMP_SPRITE_Y*k/4)*MinSpeed-(PUMP_SPRITE_Y)*(MinSpeed-1);
 
 			if(Data[i+k+2][0]=='1')
-				ClpBlt(LP1_X,(25+temp+PUMP_SPRITE_Y*k/4)*HighSpeed1p_1-(PUMP_SPRITE_Y)*(HighSpeed1p_1-1),wArrow,&rect1[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP1_X,(25+temp+PUMP_SPRITE_Y*k/4)*HighSpeed1p_1-(PUMP_SPRITE_Y)*(HighSpeed1p_1-1),gWArrow,rect1[sta] );
 			if(Data[i+k+2][1]=='1')
-				ClpBlt(LP7_X,(25+temp+PUMP_SPRITE_Y*k/4)*HighSpeed1p_7-(PUMP_SPRITE_Y)*(HighSpeed1p_7-1),wArrow,&rect7[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP7_X,(25+temp+PUMP_SPRITE_Y*k/4)*HighSpeed1p_7-(PUMP_SPRITE_Y)*(HighSpeed1p_7-1),gWArrow,rect7[sta] );
 			if(Data[i+k+2][2]=='1')
-				ClpBlt(LP5_X,(25+temp+PUMP_SPRITE_Y*k/4)*HighSpeed1p_5-(PUMP_SPRITE_Y)*(HighSpeed1p_5-1),wArrow,&rect5[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP5_X,(25+temp+PUMP_SPRITE_Y*k/4)*HighSpeed1p_5-(PUMP_SPRITE_Y)*(HighSpeed1p_5-1),gWArrow,rect5[sta] );
 			if(Data[i+k+2][3]=='1')
-				ClpBlt(LP9_X,(25+temp+PUMP_SPRITE_Y*k/4)*HighSpeed1p_9-(PUMP_SPRITE_Y)*(HighSpeed1p_9-1),wArrow,&rect9[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP9_X,(25+temp+PUMP_SPRITE_Y*k/4)*HighSpeed1p_9-(PUMP_SPRITE_Y)*(HighSpeed1p_9-1),gWArrow,rect9[sta] );
 			if(Data[i+k+2][4]=='1')
-				ClpBlt(LP3_X,(25+temp+PUMP_SPRITE_Y*k/4)*HighSpeed1p_3-(PUMP_SPRITE_Y)*(HighSpeed1p_3-1),wArrow,&rect3[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP3_X,(25+temp+PUMP_SPRITE_Y*k/4)*HighSpeed1p_3-(PUMP_SPRITE_Y)*(HighSpeed1p_3-1),gWArrow,rect3[sta] );
 
 			Data_y[i+k+2]=(25+temp+PUMP_SPRITE_Y*k/4)*MinSpeed-(PUMP_SPRITE_Y)*(MinSpeed-1);
 		
 			if(Data[i+k+3][0]=='1')
-				ClpBlt(LP1_X,(38+temp+PUMP_SPRITE_Y*k/4)*HighSpeed1p_1-(PUMP_SPRITE_Y)*(HighSpeed1p_1-1),wArrow,&rect1[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP1_X,(38+temp+PUMP_SPRITE_Y*k/4)*HighSpeed1p_1-(PUMP_SPRITE_Y)*(HighSpeed1p_1-1),gWArrow,rect1[sta] );
 			if(Data[i+k+3][1]=='1')
-				ClpBlt(LP7_X,(38+temp+PUMP_SPRITE_Y*k/4)*HighSpeed1p_7-(PUMP_SPRITE_Y)*(HighSpeed1p_7-1),wArrow,&rect7[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP7_X,(38+temp+PUMP_SPRITE_Y*k/4)*HighSpeed1p_7-(PUMP_SPRITE_Y)*(HighSpeed1p_7-1),gWArrow,rect7[sta] );
 			if(Data[i+k+3][2]=='1')
-				ClpBlt(LP5_X,(38+temp+PUMP_SPRITE_Y*k/4)*HighSpeed1p_5-(PUMP_SPRITE_Y)*(HighSpeed1p_5-1),wArrow,&rect5[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP5_X,(38+temp+PUMP_SPRITE_Y*k/4)*HighSpeed1p_5-(PUMP_SPRITE_Y)*(HighSpeed1p_5-1),gWArrow,rect5[sta] );
 			if(Data[i+k+3][3]=='1')
-				ClpBlt(LP9_X,(38+temp+PUMP_SPRITE_Y*k/4)*HighSpeed1p_9-(PUMP_SPRITE_Y)*(HighSpeed1p_9-1),wArrow,&rect9[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP9_X,(38+temp+PUMP_SPRITE_Y*k/4)*HighSpeed1p_9-(PUMP_SPRITE_Y)*(HighSpeed1p_9-1),gWArrow,rect9[sta] );
 			if(Data[i+k+3][4]=='1')
-				ClpBlt(LP3_X,(38+temp+PUMP_SPRITE_Y*k/4)*HighSpeed1p_3-(PUMP_SPRITE_Y)*(HighSpeed1p_3-1),wArrow,&rect3[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP3_X,(38+temp+PUMP_SPRITE_Y*k/4)*HighSpeed1p_3-(PUMP_SPRITE_Y)*(HighSpeed1p_3-1),gWArrow,rect3[sta] );
 
 			Data_y[i+k+3]=(38+temp+PUMP_SPRITE_Y*k/4)*MinSpeed-(PUMP_SPRITE_Y)*(MinSpeed-1);
 
@@ -1124,9 +1086,8 @@ void KIU_STAGE(void)
 			k=48;
 			if(SongFlag)
 			{
-				song->OnMediaStop();
-				delete song;
-				SongFlag=FALSE;
+				gSong.Halt();
+				SongFlag=false;
 			}
 			g_ProgramState=RESULT;
 
@@ -1136,28 +1097,28 @@ void KIU_STAGE(void)
 		if(tick==2)
 		{
 			if(Data1[i+k][5]=='1')
-				ClpBlt(LP1_X1,(temp+PUMP_SPRITE_Y*k/2)*HighSpeed2p_1-(PUMP_SPRITE_Y)*(HighSpeed2p_1-1),wArrow,&rect1[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP1_X1,(temp+PUMP_SPRITE_Y*k/2)*HighSpeed2p_1-(PUMP_SPRITE_Y)*(HighSpeed2p_1-1),gWArrow,rect1[sta] );
 			if(Data1[i+k][6]=='1')
-				ClpBlt(LP7_X1,(temp+PUMP_SPRITE_Y*k/2)*HighSpeed2p_7-(PUMP_SPRITE_Y)*(HighSpeed2p_7-1),wArrow,&rect7[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP7_X1,(temp+PUMP_SPRITE_Y*k/2)*HighSpeed2p_7-(PUMP_SPRITE_Y)*(HighSpeed2p_7-1),gWArrow,rect7[sta] );
 			if(Data1[i+k][7]=='1')
-				ClpBlt(LP5_X1,(temp+PUMP_SPRITE_Y*k/2)*HighSpeed2p_5-(PUMP_SPRITE_Y)*(HighSpeed2p_5-1),wArrow,&rect5[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP5_X1,(temp+PUMP_SPRITE_Y*k/2)*HighSpeed2p_5-(PUMP_SPRITE_Y)*(HighSpeed2p_5-1),gWArrow,rect5[sta] );
 			if(Data1[i+k][8]=='1')
-				ClpBlt(LP9_X1,(temp+PUMP_SPRITE_Y*k/2)*HighSpeed2p_9-(PUMP_SPRITE_Y)*(HighSpeed2p_9-1),wArrow,&rect9[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP9_X1,(temp+PUMP_SPRITE_Y*k/2)*HighSpeed2p_9-(PUMP_SPRITE_Y)*(HighSpeed2p_9-1),gWArrow,rect9[sta] );
 			if(Data1[i+k][9]=='1')
-				ClpBlt(LP3_X1,(temp+PUMP_SPRITE_Y*k/2)*HighSpeed2p_3-(PUMP_SPRITE_Y)*(HighSpeed2p_3-1),wArrow,&rect3[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP3_X1,(temp+PUMP_SPRITE_Y*k/2)*HighSpeed2p_3-(PUMP_SPRITE_Y)*(HighSpeed2p_3-1),gWArrow,rect3[sta] );
 			
 			Data_y1[i+k]=(temp+PUMP_SPRITE_Y*k/2)*MinSpeed-(PUMP_SPRITE_Y)*(MinSpeed-1);
 			
 			if(Data1[i+k+1][5]=='1')
-				ClpBlt(LP1_X1,(25+temp+PUMP_SPRITE_Y*k/2)*HighSpeed2p_1-(PUMP_SPRITE_Y)*(HighSpeed2p_1-1),wArrow,&rect1[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP1_X1,(25+temp+PUMP_SPRITE_Y*k/2)*HighSpeed2p_1-(PUMP_SPRITE_Y)*(HighSpeed2p_1-1),gWArrow,rect1[sta] );
 			if(Data1[i+k+1][6]=='1')
-				ClpBlt(LP7_X1,(25+temp+PUMP_SPRITE_Y*k/2)*HighSpeed2p_7-(PUMP_SPRITE_Y)*(HighSpeed2p_7-1),wArrow,&rect7[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP7_X1,(25+temp+PUMP_SPRITE_Y*k/2)*HighSpeed2p_7-(PUMP_SPRITE_Y)*(HighSpeed2p_7-1),gWArrow,rect7[sta] );
 			if(Data1[i+k+1][7]=='1')
-				ClpBlt(LP5_X1,(25+temp+PUMP_SPRITE_Y*k/2)*HighSpeed2p_5-(PUMP_SPRITE_Y)*(HighSpeed2p_5-1),wArrow,&rect5[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP5_X1,(25+temp+PUMP_SPRITE_Y*k/2)*HighSpeed2p_5-(PUMP_SPRITE_Y)*(HighSpeed2p_5-1),gWArrow,rect5[sta] );
 			if(Data1[i+k+1][8]=='1')
-				ClpBlt(LP9_X1,(25+temp+PUMP_SPRITE_Y*k/2)*HighSpeed2p_9-(PUMP_SPRITE_Y)*(HighSpeed2p_9-1),wArrow,&rect9[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP9_X1,(25+temp+PUMP_SPRITE_Y*k/2)*HighSpeed2p_9-(PUMP_SPRITE_Y)*(HighSpeed2p_9-1),gWArrow,rect9[sta] );
 			if(Data1[i+k+1][9]=='1')
-				ClpBlt(LP3_X1,(25+temp+PUMP_SPRITE_Y*k/2)*HighSpeed2p_3-(PUMP_SPRITE_Y)*(HighSpeed2p_3-1),wArrow,&rect3[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP3_X1,(25+temp+PUMP_SPRITE_Y*k/2)*HighSpeed2p_3-(PUMP_SPRITE_Y)*(HighSpeed2p_3-1),gWArrow,rect3[sta] );
 
 			Data_y1[i+k+1]=(25+temp+PUMP_SPRITE_Y*k/2)*MinSpeed-(PUMP_SPRITE_Y)*(MinSpeed-1);
 
@@ -1219,54 +1180,54 @@ void KIU_STAGE(void)
 		{
 
 			if(Data1[i+k][5]=='1')
-				ClpBlt(LP1_X1,(temp+PUMP_SPRITE_Y*k/4)*HighSpeed2p_1-(PUMP_SPRITE_Y)*(HighSpeed2p_1-1),wArrow,&rect1[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP1_X1,(temp+PUMP_SPRITE_Y*k/4)*HighSpeed2p_1-(PUMP_SPRITE_Y)*(HighSpeed2p_1-1),gWArrow,rect1[sta] );
 			if(Data1[i+k][6]=='1')
-				ClpBlt(LP7_X1,(temp+PUMP_SPRITE_Y*k/4)*HighSpeed2p_7-(PUMP_SPRITE_Y)*(HighSpeed2p_7-1),wArrow,&rect7[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP7_X1,(temp+PUMP_SPRITE_Y*k/4)*HighSpeed2p_7-(PUMP_SPRITE_Y)*(HighSpeed2p_7-1),gWArrow,rect7[sta] );
 			if(Data1[i+k][7]=='1')
-				ClpBlt(LP5_X1,(temp+PUMP_SPRITE_Y*k/4)*HighSpeed2p_5-(PUMP_SPRITE_Y)*(HighSpeed2p_5-1),wArrow,&rect5[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP5_X1,(temp+PUMP_SPRITE_Y*k/4)*HighSpeed2p_5-(PUMP_SPRITE_Y)*(HighSpeed2p_5-1),gWArrow,rect5[sta] );
 			if(Data1[i+k][8]=='1')
-				ClpBlt(LP9_X1,(temp+PUMP_SPRITE_Y*k/4)*HighSpeed2p_9-(PUMP_SPRITE_Y)*(HighSpeed2p_9-1),wArrow,&rect9[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP9_X1,(temp+PUMP_SPRITE_Y*k/4)*HighSpeed2p_9-(PUMP_SPRITE_Y)*(HighSpeed2p_9-1),gWArrow,rect9[sta] );
 			if(Data1[i+k][9]=='1')
-				ClpBlt(LP3_X1,(temp+PUMP_SPRITE_Y*k/4)*HighSpeed2p_3-(PUMP_SPRITE_Y)*(HighSpeed2p_3-1),wArrow,&rect3[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP3_X1,(temp+PUMP_SPRITE_Y*k/4)*HighSpeed2p_3-(PUMP_SPRITE_Y)*(HighSpeed2p_3-1),gWArrow,rect3[sta] );
 
 			Data_y1[i+k]=(temp+PUMP_SPRITE_Y*k/4)*MinSpeed-(PUMP_SPRITE_Y)*(MinSpeed-1);
 
 			if(Data1[i+k+1][5]=='1')
-				ClpBlt(LP1_X1,(12+temp+PUMP_SPRITE_Y*k/4)*HighSpeed2p_1-(PUMP_SPRITE_Y)*(HighSpeed2p_1-1),wArrow,&rect1[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP1_X1,(12+temp+PUMP_SPRITE_Y*k/4)*HighSpeed2p_1-(PUMP_SPRITE_Y)*(HighSpeed2p_1-1),gWArrow,rect1[sta] );
 			if(Data1[i+k+1][6]=='1')
-				ClpBlt(LP7_X1,(12+temp+PUMP_SPRITE_Y*k/4)*HighSpeed2p_7-(PUMP_SPRITE_Y)*(HighSpeed2p_7-1),wArrow,&rect7[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP7_X1,(12+temp+PUMP_SPRITE_Y*k/4)*HighSpeed2p_7-(PUMP_SPRITE_Y)*(HighSpeed2p_7-1),gWArrow,rect7[sta] );
 			if(Data1[i+k+1][7]=='1')
-				ClpBlt(LP5_X1,(12+temp+PUMP_SPRITE_Y*k/4)*HighSpeed2p_5-(PUMP_SPRITE_Y)*(HighSpeed2p_5-1),wArrow,&rect5[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP5_X1,(12+temp+PUMP_SPRITE_Y*k/4)*HighSpeed2p_5-(PUMP_SPRITE_Y)*(HighSpeed2p_5-1),gWArrow,rect5[sta] );
 			if(Data1[i+k+1][8]=='1')
-				ClpBlt(LP9_X1,(12+temp+PUMP_SPRITE_Y*k/4)*HighSpeed2p_9-(PUMP_SPRITE_Y)*(HighSpeed2p_9-1),wArrow,&rect9[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP9_X1,(12+temp+PUMP_SPRITE_Y*k/4)*HighSpeed2p_9-(PUMP_SPRITE_Y)*(HighSpeed2p_9-1),gWArrow,rect9[sta] );
 			if(Data1[i+k+1][9]=='1')
-				ClpBlt(LP3_X1,(12+temp+PUMP_SPRITE_Y*k/4)*HighSpeed2p_3-(PUMP_SPRITE_Y)*(HighSpeed2p_3-1),wArrow,&rect3[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP3_X1,(12+temp+PUMP_SPRITE_Y*k/4)*HighSpeed2p_3-(PUMP_SPRITE_Y)*(HighSpeed2p_3-1),gWArrow,rect3[sta] );
 
 			Data_y1[i+k+1]=(12+temp+PUMP_SPRITE_Y*k/4)*MinSpeed-(PUMP_SPRITE_Y)*(MinSpeed-1);
 
 			if(Data1[i+k+2][5]=='1')
-				ClpBlt(LP1_X1,(25+temp+PUMP_SPRITE_Y*k/4)*HighSpeed2p_1-(PUMP_SPRITE_Y)*(HighSpeed2p_1-1),wArrow,&rect1[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP1_X1,(25+temp+PUMP_SPRITE_Y*k/4)*HighSpeed2p_1-(PUMP_SPRITE_Y)*(HighSpeed2p_1-1),gWArrow,rect1[sta] );
 			if(Data1[i+k+2][6]=='1')
-				ClpBlt(LP7_X1,(25+temp+PUMP_SPRITE_Y*k/4)*HighSpeed2p_7-(PUMP_SPRITE_Y)*(HighSpeed2p_7-1),wArrow,&rect7[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP7_X1,(25+temp+PUMP_SPRITE_Y*k/4)*HighSpeed2p_7-(PUMP_SPRITE_Y)*(HighSpeed2p_7-1),gWArrow,rect7[sta] );
 			if(Data1[i+k+2][7]=='1')
-				ClpBlt(LP5_X1,(25+temp+PUMP_SPRITE_Y*k/4)*HighSpeed2p_5-(PUMP_SPRITE_Y)*(HighSpeed2p_5-1),wArrow,&rect5[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP5_X1,(25+temp+PUMP_SPRITE_Y*k/4)*HighSpeed2p_5-(PUMP_SPRITE_Y)*(HighSpeed2p_5-1),gWArrow,rect5[sta] );
 			if(Data1[i+k+2][8]=='1')
-				ClpBlt(LP9_X1,(25+temp+PUMP_SPRITE_Y*k/4)*HighSpeed2p_9-(PUMP_SPRITE_Y)*(HighSpeed2p_9-1),wArrow,&rect9[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP9_X1,(25+temp+PUMP_SPRITE_Y*k/4)*HighSpeed2p_9-(PUMP_SPRITE_Y)*(HighSpeed2p_9-1),gWArrow,rect9[sta] );
 			if(Data1[i+k+2][9]=='1')
-				ClpBlt(LP3_X1,(25+temp+PUMP_SPRITE_Y*k/4)*HighSpeed2p_3-(PUMP_SPRITE_Y)*(HighSpeed2p_3-1),wArrow,&rect3[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP3_X1,(25+temp+PUMP_SPRITE_Y*k/4)*HighSpeed2p_3-(PUMP_SPRITE_Y)*(HighSpeed2p_3-1),gWArrow,rect3[sta] );
 
 			Data_y1[i+k+2]=(25+temp+PUMP_SPRITE_Y*k/4)*MinSpeed-(PUMP_SPRITE_Y)*(MinSpeed-1);
 		
 			if(Data1[i+k+3][5]=='1')
-				ClpBlt(LP1_X1,(38+temp+PUMP_SPRITE_Y*k/4)*HighSpeed2p_1-(PUMP_SPRITE_Y)*(HighSpeed2p_1-1),wArrow,&rect1[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP1_X1,(38+temp+PUMP_SPRITE_Y*k/4)*HighSpeed2p_1-(PUMP_SPRITE_Y)*(HighSpeed2p_1-1),gWArrow,rect1[sta] );
 			if(Data1[i+k+3][6]=='1')
-				ClpBlt(LP7_X1,(38+temp+PUMP_SPRITE_Y*k/4)*HighSpeed2p_7-(PUMP_SPRITE_Y)*(HighSpeed2p_7-1),wArrow,&rect7[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP7_X1,(38+temp+PUMP_SPRITE_Y*k/4)*HighSpeed2p_7-(PUMP_SPRITE_Y)*(HighSpeed2p_7-1),gWArrow,rect7[sta] );
 			if(Data1[i+k+3][7]=='1')
-				ClpBlt(LP5_X1,(38+temp+PUMP_SPRITE_Y*k/4)*HighSpeed2p_5-(PUMP_SPRITE_Y)*(HighSpeed2p_5-1),wArrow,&rect5[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP5_X1,(38+temp+PUMP_SPRITE_Y*k/4)*HighSpeed2p_5-(PUMP_SPRITE_Y)*(HighSpeed2p_5-1),gWArrow,rect5[sta] );
 			if(Data1[i+k+3][8]=='1')
-				ClpBlt(LP9_X1,(38+temp+PUMP_SPRITE_Y*k/4)*HighSpeed2p_9-(PUMP_SPRITE_Y)*(HighSpeed2p_9-1),wArrow,&rect9[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP9_X1,(38+temp+PUMP_SPRITE_Y*k/4)*HighSpeed2p_9-(PUMP_SPRITE_Y)*(HighSpeed2p_9-1),gWArrow,rect9[sta] );
 			if(Data1[i+k+3][9]=='1')
-				ClpBlt(LP3_X1,(38+temp+PUMP_SPRITE_Y*k/4)*HighSpeed2p_3-(PUMP_SPRITE_Y)*(HighSpeed2p_3-1),wArrow,&rect3[sta],DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY );
+				ClpBlt(LP3_X1,(38+temp+PUMP_SPRITE_Y*k/4)*HighSpeed2p_3-(PUMP_SPRITE_Y)*(HighSpeed2p_3-1),gWArrow,rect3[sta] );
 
 			Data_y1[i+k+3]=(38+temp+PUMP_SPRITE_Y*k/4)*MinSpeed-(PUMP_SPRITE_Y)*(MinSpeed-1);
 
@@ -1406,206 +1367,171 @@ void KIU_STAGE(void)
 
 	if(HighSpeed2p>1)DrawMode(600,160,HMODE_2X);
 
-	Flipp();
+	// Flipp();
 }
 
 
 void WaveSet_Loading(void)
 {
-	g_dsOpening=DSLoadSoundBuffer(lpds, "wave\\Opening.wav");
-	g_dsDead=DSLoadSoundBuffer(lpds,"wave\\Dead.wav");
-	g_dsMode=DSLoadSoundBuffer(lpds,"wave\\Mode.wav");
-	g_dsCancel=DSLoadSoundBuffer(lpds,"wave\\Cancel.wav");
-	g_dsMove=DSLoadSoundBuffer(lpds,"wave\\Move.wav");
-	g_dsBeat=DSLoadSoundBuffer(lpds,"wave\\Beat.wav");
-	g_dsSelectSong=DSLoadSoundBuffer(lpds, "wave\\MusicSelect.wav");
+    gOpening.Load( "wave/opening.wav" );
+    gDead.Load( "wave/dead.wav" );
+    gMode.Load( "wave/mode.wav" );
+    gCancel.Load( "wave/cancel.wav" );
+    gMove.Load( "wave/move.wav" );
+    gBeat.Load( "wave/beat.wav" );
+    gSelectSong.Load( "wave/music_select.wav" );
 }
 
-void DisplayMessage(int x, int y, char * message)
+void DisplayMessage(int x, int y, const char * message)
 {
 #define FONT_SIZE	8
 #define FONT_HEIGHT	16
-
-	RECT sRect = { 0, };
-
+	SDL_Rect	sRect;
+	
 	for(int i = 0 ; ; i++) {		
-		if(message[i] == NULL)
+		if(message[i] == 0)
 			break;	
 	
 		char msg1 = toupper(message[i]);
 		
-		sRect.top = 0;
-		sRect.bottom = FONT_HEIGHT;
-		sRect.left = FONT_SIZE * (msg1-' ');
-		sRect.right = sRect.left + FONT_SIZE;
-		
-		g_pDDSBack->BltFast(x, y, SmallFont, &sRect, DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
+		sRect.x = FONT_SIZE * (msg1-' ');
+		sRect.y = 0;
+		sRect.w = FONT_SIZE;
+		sRect.h = FONT_HEIGHT;
+
+		gSmallFont.BltFast(x, y, gScreen, &sRect );
+
 		x += FONT_SIZE;
 	}
 }
 
 			
-HRESULT	ClpBlt(int x ,int y ,LPDIRECTDRAWSURFACE ds,LPRECT srect,DWORD mode)
+bool ClpBlt(int x ,int y ,Surface & surface, const SDL_Rect & srect)
 {
-	static RECT sRect;
-	HRESULT	hRet;
+    SDL_Rect sRect;
 
-	memcpy(&sRect,srect,sizeof(sRect));
-	
-	if(x>640 || y>480) return DD_OK;
+    sRect = srect;
 
-	if(y+(srect->bottom-srect->top)>480)srect->bottom=srect->bottom-(y+(srect->bottom-srect->top)-480);
-	if(y<0)
-	{
-		srect->top-=y;
-		y=0;
-	}
+    if(640 < x || 480 < y)
+        return true;
 
-	if(x+(srect->right-srect->left)>640)srect->right=srect->right-(x+(srect->right-srect->left)-640);
-	if(x<0)
-	{
-		srect->left-=x;
-		x=0;
-	}
+    if( sRect.h < -y || sRect.w < -x )
+        return true;
 
-	if(g_ProgramState==DOUBLE)
-	{
-		if(bModeVanish1p || bModeVanish2p)
-		{
+    if(480 < (y + sRect.h))
+        sRect.h = 480 - y;
+
+    if(y < 0) {
+        sRect.y -= y;
+        sRect.h += y;
+        y = 0;
+    }
+
+    if(640 < x + sRect.w )
+        sRect.w = 640 - x;
+
+    if(x < 0 ) {
+        sRect.x -= x;
+        sRect.w += x;
+        x = 0;
+    }
+
+	if(g_ProgramState == DOUBLEST) {
+		if(bModeVanish1p || bModeVanish2p) {
 			if(y<150)
-			{
-				memcpy(srect,&sRect,sizeof(sRect));
-				return 0;
-			}
-			if(y<250)TransAlphaImproved(ds,g_pDDSBack,x,y,sRect,(y-150)*2,CKey_Arr,16);
-			if(y>250)hRet=g_pDDSBack->BltFast(x,y,ds,srect,mode);
-		}
-		else if(bModeSuddenR1p || bModeSuddenR2p)
-		{
-			if(y<=100)hRet = g_pDDSBack->BltFast(x,y,ds,srect,mode);
-			else if(y>100 && y<=200)TransAlphaImproved(ds,g_pDDSBack,x,y,sRect,(200-y)*2,CKey_Arr,16);
-			else if(y>200 && y<320)
-			{
-				memcpy(srect,&sRect,sizeof(sRect));
-				return 0;
-			}
-			else if(y<420)TransAlphaImproved(ds,g_pDDSBack,x,y,sRect,(y-320)*2,CKey_Arr,16);
-			else if(y>420)hRet=g_pDDSBack->BltFast(x,y,ds,srect,mode);
-		}
-		else hRet=g_pDDSBack->BltFast(x,y,ds,srect,mode);
-	}
-	else if(x<320)
-	{
-		if(bModeVanish1p)
-		{
-			if(y<150)
-			{
-				memcpy(srect,&sRect,sizeof(sRect));
-				return 0;
-			}
-			if(y<250)TransAlphaImproved(ds,g_pDDSBack,x,y,sRect,(y-150)*2,CKey_Arr,16);
-			if(y>250)hRet=g_pDDSBack->BltFast(x,y,ds,srect,mode);
-		}
-		else if(bModeSuddenR1p)
-		{
-			if(y<=100)hRet = g_pDDSBack->BltFast(x,y,ds,srect,mode);
-			else if(y>100 && y<=200)TransAlphaImproved(ds,g_pDDSBack,x,y,sRect,(200-y)*2,CKey_Arr,16);
-			else if(y>200 && y<320)
-			{
-				memcpy(srect,&sRect,sizeof(sRect));
-				return 0;
-			}
-			else if(y<420)TransAlphaImproved(ds,g_pDDSBack,x,y,sRect,(y-320)*2,CKey_Arr,16);
-			else if(y>420)hRet=g_pDDSBack->BltFast(x,y,ds,srect,mode);
-		}
-		else hRet=g_pDDSBack->BltFast(x,y,ds,srect,mode);
-	}
-	else if(x>320)
-	{
-		if(bModeVanish2p)
-		{
-			if(y<150)
-			{
-				memcpy(srect,&sRect,sizeof(sRect));
-				return 0;
-			}
-			if(y<250)TransAlphaImproved(ds,g_pDDSBack,x,y,sRect,(y-150)*2,CKey_Arr,16);
-			if(y>250)hRet=g_pDDSBack->BltFast(x,y,ds,srect,mode);
-		}
-		else if(bModeSuddenR2p)
-		{
-			if(y<=100)hRet = g_pDDSBack->BltFast(x,y,ds,srect,mode);
-			else if(y>100 && y<=200)TransAlphaImproved(ds,g_pDDSBack,x,y,sRect,(200-y)*2,CKey_Arr,16);
-			else if(y>200 && y<320)
-			{
-				memcpy(srect,&sRect,sizeof(sRect));
-				return 0;
-			}
-			else if(y<420)TransAlphaImproved(ds,g_pDDSBack,x,y,sRect,(y-320)*2,CKey_Arr,16);
-			else if(y>420)hRet=g_pDDSBack->BltFast(x,y,ds,srect,mode);
-		}
-		else hRet=g_pDDSBack->BltFast(x,y,ds,srect,mode);
-	}
+				return true;
 
-	memcpy(srect,&sRect,sizeof(sRect));
-	
-	return hRet;
+            if(y<250)
+                surface.SetAlpha( (y-150) * 2 );
+		}
+		else if(bModeSuddenR1p || bModeSuddenR2p) {
+            if(100 < y && y <= 200)
+                surface.SetAlpha( (200-y)*2 );
+			else if(200 < y && y < 320)
+				return true;
+            else if(y < 420)
+                surface.SetAlpha( (y-320)*2 );
+		}
+	}
+	else if(x < 320) {
+		if(bModeVanish1p) {
+			if(y < 150)
+                return true;
+            if(y < 250)
+                surface.SetAlpha( (y-150) * 2 );
+		}
+		else if(bModeSuddenR1p) {
+            if(100 < y && y <= 200)
+                surface.SetAlpha( (200-y)*2 );
+			else if(200 < y && y < 320)
+				return true;
+            else if(y < 420)
+                surface.SetAlpha( (y-320)*2 );
+		}
+	}
+	else if(x>320) {
+		if(bModeVanish2p) {
+			if(y<150)
+                return true;
+            if(y<250)
+                surface.SetAlpha( (y-150) * 2 );
+		}
+		else if(bModeSuddenR2p) {
+            if(y>100 && y<=200)
+                surface.SetAlpha( (200-y)*2 );
+            else if(y>200 && y<320)
+                return true;
+            else if(y<420)
+                surface.SetAlpha( (y-320)*2 );
+		}
+	}
+    surface.BltFast( x, y, gScreen, &sRect );
 
+	return true;
 }
 
 void StageTitle(void)
 {
-	RECT	lRect;
-
 	if(First==0)
 	{
 		ClearMode();
 
-		Start1p=FALSE;
-		Start2p=FALSE;
+		Start1p=false;
+		Start2p=false;
 		First++;
-		if(g_dsOpening)
-			g_dsOpening->Play(0,0,0);
+		gOpening.Play( true );
 	}
 
 	ReadGameInput();
 
-	if(PressedKey1p[5]==TRUE)
-		Start1p=TRUE;
+	if(PressedKey1p[5]==true)
+		Start1p=true;
 
-	if(PressedKey2p[5]==TRUE)
-		Start2p=TRUE;
+	if(PressedKey2p[5]==true)
+		Start2p=true;
 	
 	// Draw Background image. "KICK IT UP"
-	g_pDDSBack->BltFast(0,0,GameTITLE,NULL, DDBLTFAST_WAIT | DDBLTFAST_NOCOLORKEY);
+	gGameTitle.BltFast(0, 0, gScreen );
 
 	// Check Start.
-	if(Start1p || Start2p)
-	{
-		if(Start1p && Start2p)
-		{
+	if(Start1p || Start2p) {
+		if(Start1p && Start2p) {
 			PressedKey2p[0]=3;
-		}
-		else if(Start1p)
-		{
-			if(PressedKey1p[5]==TRUE)
+		} else if(Start1p) {
+			if(PressedKey1p[5]==true)
 				PressedKey2p[0]=3;
-		}
-		else if(Start2p)
-		{
-			if(PressedKey2p[5]==TRUE)
+		} else if(Start2p) {
+			if(PressedKey2p[5]==true)
 				PressedKey2p[0]=3;
 		}
 	}
 
 	// if start button is pressed.
-	if(PressedKey2p[0]==3)
-	{
+	if(PressedKey2p[0]==3) {
 		Couple = Start1p && Start2p;
 
 		First=0;
-		if(g_dsOpening)
-			g_dsOpening->Stop();
+		gOpening.Halt();
 		PressedKey2p[0]=0;
 
 		// Change ProgramState to SelectSong Stage
@@ -1614,179 +1540,158 @@ void StageTitle(void)
 	}
 
 	// Draw to screen "FREE PLAY!"
-	lRect.top=46;
-	lRect.left=0;
-	lRect.right=220;
-	lRect.bottom=69;
-
-	g_pDDSBack->BltFast(210,450,g_cFont, &lRect, DDBLTFAST_SRCCOLORKEY);
-
-	if(Start1p==FALSE)
-	{
-		// Draw to screen (10, 450) "PRESS CENTER BUTTON"
-		lRect.top=0;
-		lRect.left=0;
-		lRect.right=220;
-		lRect.bottom=23;
-
-		TransAlphaImproved(g_cFont, g_pDDSBack, 10, 450, lRect, ALPHA, CKey_CFont, 16);
+	SDL_Rect	sRect;
+	sRect.x = 0;
+	sRect.y = 46;
+	sRect.w = 220;
+	sRect.h = 69-46;
+	gStateComment.SetAlpha( 255 );
+	gStateComment.BltFast( 210, 450, gScreen, &sRect );
+	
+	if(Start1p==false) {
+		sRect.x = 0;
+		sRect.y = 0;
+		sRect.w = 220;
+		sRect.h = 23;
+		gStateComment.SetAlpha( ALPHA );
+		gStateComment.BltFast( 10, 450, gScreen, &sRect );
 	}
-	if(Start2p==FALSE)//DisplayMessage(320,480-20,"PRESS CENTER STEP");
-	{
-		// Draw to screen (410, 450) "PRESS CENTER BUTTON"
-		lRect.top=0;
-		lRect.left=0;
-		lRect.right=220;
-		lRect.bottom=23;
 
-		TransAlphaImproved(g_cFont, g_pDDSBack, 410, 450, lRect, ALPHA, CKey_CFont, 16);
+	if(Start2p==false) {
+		// Draw to screen (410, 450) "PRESS CENTER BUTTON"
+		sRect.x = 0;
+		sRect.y = 0;
+		sRect.w = 220;
+		sRect.h = 23;
+
+		gStateComment.SetAlpha( ALPHA );
+		gStateComment.BltFast( 410, 450, gScreen, &sRect );
 	}
 
 	ALPHA += inc;
-	if (ALPHA > 256)
-	{
+	if (ALPHA > 256) {
 		ALPHA = 256;
-		inc = -20;
-	}
-	else if (ALPHA < 0)
-	{
+		inc = -10;
+	} else if (ALPHA < 0) {
 		ALPHA = 0;
-		inc = 20;
+		inc = 10;
 	}
-
-
-	Flipp();
-
 }
 
 void DrawJudge1p(void)
 {
-	static DWORD cur, last;
+	static Uint32 cur, last;
 	static char LastJudge;
 
 	char chCombo1p[255];
 
-	static DWORD sec,delta;
+	static Uint32 sec,delta;
 
-	RECT rRect, cRect, destRect;
+	SDL_Rect rRect, cRect, destRect;
 	int Loop;
 
-	if(Judgement1p)
-	{
+	if(Judgement1p) {
 		dwState=0;
-	}
-	else if(dwState)
-	{
+	} else if(dwState) {
 		Judgement1p=LastJudge;
 
-		delta=timeGetTime()-sec;
-		if(delta>16)
-		{
-			sec=timeGetTime();
-			if(dwState>=40)
-			{
+		delta=SDL_GetTicks()-sec;
+		if(delta>16) {
+			sec=SDL_GetTicks();
+			if(dwState>=40) {
 				dwState=0;
 				Judgement1p=NONE;
-			}
-			else
-			{
+			} else {
 				if(delta >16 && delta <32)dwState+=2;
 				else if(delta >=32)dwState+=4;
 			}
 		}
 	}
 
-	switch(Judgement1p)
-	{
+	switch(Judgement1p) {
 		case NONE:LastJudge=NONE;
 			break;
 		case PERFECT:
 			LastJudge=PERFECT;
-			rRect.top=0;
-			rRect.right=JUDGE_SIZE_X;
-			rRect.left=0;
-			rRect.bottom=JUDGE_SIZE_Y;
+			rRect.y=0;
+			rRect.w=JUDGE_SIZE_X;
+			rRect.x=0;
+			rRect.h=JUDGE_SIZE_Y;
 			if(dwState==0)dwState++;
 			break;
 		case GREAT:
 			LastJudge=GREAT;
-			rRect.top=JUDGE_SIZE_Y;
-			rRect.right=JUDGE_SIZE_X;
-			rRect.left=0;
-			rRect.bottom=JUDGE_SIZE_Y*2;
+			rRect.y=JUDGE_SIZE_Y;
+			rRect.w=JUDGE_SIZE_X;
+			rRect.x=0;
+			rRect.h=JUDGE_SIZE_Y;
 			if(dwState==0)dwState++;
 			break;
 		case GOOD:
 			LastJudge=GOOD;
-			rRect.top=JUDGE_SIZE_Y*2;
-			rRect.right=JUDGE_SIZE_X;
-			rRect.left=0;
-			rRect.bottom=JUDGE_SIZE_Y*3;
+			rRect.y=JUDGE_SIZE_Y*2;
+			rRect.w=JUDGE_SIZE_X;
+			rRect.x=0;
+			rRect.h=JUDGE_SIZE_Y;
 			if(dwState==0)dwState++;
 			break;
 		case BAD:
 			LastJudge=BAD;
-			rRect.top=JUDGE_SIZE_Y*3;
-			rRect.right=JUDGE_SIZE_X;
-			rRect.left=0;
-			rRect.bottom=JUDGE_SIZE_Y*4;
+			rRect.y=JUDGE_SIZE_Y*3;
+			rRect.w=JUDGE_SIZE_X;
+			rRect.x=0;
+			rRect.h=JUDGE_SIZE_Y;
 			if(dwState==0)dwState++;
 			break;
 		case MISS:
 			LastJudge=MISS;
-			rRect.top=JUDGE_SIZE_Y*4;
-			rRect.right=JUDGE_SIZE_X;
-			rRect.left=0;
-			rRect.bottom=JUDGE_SIZE_Y*5;
+			rRect.y=JUDGE_SIZE_Y*4;
+			rRect.w=JUDGE_SIZE_X;
+			rRect.x=0;
+			rRect.h=JUDGE_SIZE_Y;
 			if(dwState==0)dwState++;
 			break;
 	}
 
-	if(dwState>15)
-	{
-		destRect.top=200;
-		destRect.left=40;
-		destRect.right=40+JUDGE_SIZE_X;
-		destRect.bottom=200+JUDGE_SIZE_Y;
-	}
-	else
-	{
-		destRect.top=200-30+(dwState*2);
-		destRect.left=40-60+(dwState*4);
-		destRect.right=40+JUDGE_SIZE_X+60-(dwState*4);
-		destRect.bottom=200+JUDGE_SIZE_Y+30-(dwState*2);
+	if(dwState>15) {
+		destRect.y=200;
+		destRect.x=40;
+		destRect.w = JUDGE_SIZE_X;
+		destRect.h=JUDGE_SIZE_Y;
+	} else {
+		destRect.y = static_cast<int>(200-30+(dwState*2));
+		destRect.x = static_cast<int>(40-60+(dwState*4));
+		destRect.w = JUDGE_SIZE_X;
+		destRect.h = JUDGE_SIZE_Y;
 	}
 
-	if(Judgement1p)
-	{
-		//g_pDDSBack->BltFast(40,200+dwState/2,JudgeFont,&rRect, DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
-		
-		g_pDDSBack->Blt(&destRect, JudgeFont, &rRect,DDBLT_WAIT | DDBLT_KEYSRC , NULL);
+	if(Judgement1p) {
+		// g_pDDSBack->Blt(&destRect, JudgeFont, &rRect,DDBLT_WAIT | DDBLT_KEYSRC , NULL);
+        JudgeFont.BltFast( destRect.x, destRect.y, gScreen, &rRect );
 
-		/* ƒﬁ∫∏ √‚∑¬∫Œ ¿‘¥œ¥Ÿ. */
-		if((Judgement1p==PERFECT || Judgement1p==GREAT) && Combo1p>3)
-		{
+        /* ÏΩ§Î≥¥ Ï∂úÎ†•Î∂Ä ÏûÖÎãàÎã§. */
+		if((Judgement1p==PERFECT || Judgement1p==GREAT) && Combo1p>3) {
 			sprintf(chCombo1p,"%03d",Combo1p);
 			
 			for(Loop=0;;Loop++)
 			{
-				if(chCombo1p[Loop]==NULL)break;
+				if(chCombo1p[Loop]==0)break;
 				chCombo1p[Loop]-=48;
-				cRect.left=chCombo1p[Loop]*50;
-				cRect.right=cRect.left+50;
-				cRect.top=0;
-				cRect.bottom=65;
-				if(dwState>10)g_pDDSBack->BltFast(80+Loop*50,250+dwState*2-dwState*2,ComboFont,&cRect, DDBLTFAST_SRCCOLORKEY);
-				else g_pDDSBack->BltFast(80+Loop*50,250+dwState*2,ComboFont,&cRect, DDBLTFAST_SRCCOLORKEY);
+				cRect.x=chCombo1p[Loop]*50;
+				cRect.w=50;
+				cRect.y=0;
+				cRect.h=65;
+				if(dwState>10)  ComboFont.BltFast( 80+Loop*50, 250+dwState*2-dwState*2, gScreen, &cRect );
+				else            ComboFont.BltFast( 80+Loop*50, 250+dwState*2, gScreen, &cRect );
 
-				cRect.left=0;
-				cRect.right=150;
-				cRect.top=65;
-				cRect.bottom=100;
+				cRect.x=0;
+				cRect.w=150;
+				cRect.y=65;
+				cRect.h=100-65;
 				
-				if(dwState>10)g_pDDSBack->BltFast(80,320+dwState*2-dwState*2,ComboFont,&cRect, DDBLTFAST_SRCCOLORKEY);
-				else g_pDDSBack->BltFast(80,320+dwState*2,ComboFont,&cRect, DDBLTFAST_SRCCOLORKEY);
-			}/* ø©±‚±Ó¡ˆ */
+				if(dwState>10)  ComboFont.BltFast( 80,320+dwState*2-dwState*2, gScreen, &cRect );
+				else            ComboFont.BltFast( 80,320+dwState*2, gScreen, &cRect );
+			}
 		}
 	}
 
@@ -1795,134 +1700,121 @@ void DrawJudge1p(void)
 
 void DrawJudge2p(void)
 {
-	static DWORD cur, last;
+	static Uint32 cur, last;
 	static char LastJudge;
 
 	char chCombo2p[255];
 
-	static DWORD sec,delta;
+	static Uint32 sec,delta;
 
-	RECT rRect, cRect, destRect;
+	SDL_Rect rRect, cRect, destRect;
 	int Loop;
 
-	if(Judgement2p)
-	{
+	if(Judgement2p) {
 		dwState2=0;
-	}
-	else if(dwState2)
-	{
+	} else if(dwState2) {
 		Judgement2p=LastJudge;
 
-		delta=timeGetTime()-sec;
+		delta=SDL_GetTicks()-sec;
 		
-		if(delta>16)
-		{
-			sec=timeGetTime();
-			if(dwState2>=40)
-			{
+		if(delta>16) {
+			sec=SDL_GetTicks();
+			if(dwState2>=40) {
 				dwState2=0;
 				Judgement2p=NONE;
-			}
-			else
-			{
+			} else {
 				if(delta >16 && delta <32)dwState2+=2;
 				else if(delta >=32)dwState2+=4;
 			}
 		}
 	}
 
-	switch(Judgement2p)
-	{
+	switch(Judgement2p) {
 		case NONE:LastJudge=NONE;
 			break;
 		case PERFECT:
 			LastJudge=PERFECT;
-			rRect.top=0;
-			rRect.right=JUDGE_SIZE_X;
-			rRect.left=0;
-			rRect.bottom=JUDGE_SIZE_Y;
+			rRect.y=0;
+			rRect.w=JUDGE_SIZE_X;
+			rRect.x=0;
+			rRect.h=JUDGE_SIZE_Y;
 			if(dwState2==0)dwState2++;
 			break;
 		case GREAT:
 			LastJudge=GREAT;
-			rRect.top=JUDGE_SIZE_Y;
-			rRect.right=JUDGE_SIZE_X;
-			rRect.left=0;
-			rRect.bottom=JUDGE_SIZE_Y*2;
+			rRect.y=JUDGE_SIZE_Y;
+			rRect.w=JUDGE_SIZE_X;
+			rRect.x=0;
+			rRect.h=JUDGE_SIZE_Y;
 			if(dwState2==0)dwState2++;
 			break;
 		case GOOD:
 			LastJudge=GOOD;
-			rRect.top=JUDGE_SIZE_Y*2;
-			rRect.right=JUDGE_SIZE_X;
-			rRect.left=0;
-			rRect.bottom=JUDGE_SIZE_Y*3;
+			rRect.y=JUDGE_SIZE_Y*2;
+			rRect.w=JUDGE_SIZE_X;
+			rRect.x=0;
+			rRect.h=JUDGE_SIZE_Y;
 			if(dwState2==0)dwState2++;
 			break;
 		case BAD:
 			LastJudge=BAD;
-			rRect.top=JUDGE_SIZE_Y*3;
-			rRect.right=JUDGE_SIZE_X;
-			rRect.left=0;
-			rRect.bottom=JUDGE_SIZE_Y*4;
+			rRect.y=JUDGE_SIZE_Y*3;
+			rRect.w=JUDGE_SIZE_X;
+			rRect.x=0;
+			rRect.h=JUDGE_SIZE_Y;
 			if(dwState2==0)dwState2++;
 			break;
 		case MISS:
 			LastJudge=MISS;
-			rRect.top=JUDGE_SIZE_Y*4;
-			rRect.right=JUDGE_SIZE_X;
-			rRect.left=0;
-			rRect.bottom=JUDGE_SIZE_Y*5;
+			rRect.y=JUDGE_SIZE_Y*4;
+			rRect.w=JUDGE_SIZE_X;
+			rRect.x=0;
+			rRect.h=JUDGE_SIZE_Y;
 			if(dwState2==0)dwState2++;
 			break;
 	}
 
-	if(dwState2>15)
-	{
-		destRect.top=200;
-		destRect.left=350;
-		destRect.right=350+JUDGE_SIZE_X;
-		destRect.bottom=200+JUDGE_SIZE_Y;
-	}
-	else
-	{
-		destRect.top=200-30+(dwState2*2);
-		destRect.left=350-60+(dwState2*4);
-		destRect.right=350+JUDGE_SIZE_X+60-(dwState2*4);
-		destRect.bottom=200+JUDGE_SIZE_Y+30-(dwState2*2);
+	if(dwState2>15) {
+		destRect.y=200;
+		destRect.x=350;
+		destRect.w=JUDGE_SIZE_X;
+		destRect.h=JUDGE_SIZE_Y;
+	} else {
+		destRect.y = static_cast<int>( 200-30+(dwState2*2) );
+		destRect.x = static_cast<int>( 350-60+(dwState2*4) );
+		destRect.w=JUDGE_SIZE_X;
+		destRect.h=JUDGE_SIZE_Y;
 	}
 
-	if(Judgement2p)
-	{
-//		g_pDDSBack->BltFast(400,200+dwState22/2,JudgeFont,&rRect, DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
+	if(Judgement2p) {
+        JudgeFont.BltFast( destRect.x, destRect.y, gScreen, &rRect );
 
-		g_pDDSBack->Blt(&destRect, JudgeFont, &rRect,DDBLT_WAIT | DDBLT_KEYSRC , NULL);
-
-		/* ƒﬁ∫∏ √‚∑¬∫Œ ¿‘¥œ¥Ÿ. */
-		if((Judgement2p==PERFECT || Judgement2p==GREAT) && Combo2p>3)
-		{
+        /* ÏΩ§Î≥¥ Ï∂úÎ†•Î∂Ä ÏûÖÎãàÎã§. */
+		if((Judgement2p==PERFECT || Judgement2p==GREAT) && Combo2p>3) {
 			sprintf(chCombo2p,"%03d",Combo2p);
 			
-			for(Loop=0;;Loop++)
-			{
-				if(chCombo2p[Loop]==NULL)break;
+			for(Loop=0;;Loop++) {
+				if(chCombo2p[Loop]==0)break;
 				chCombo2p[Loop]-=48;
-				cRect.left=chCombo2p[Loop]*50;
-				cRect.right=cRect.left+50;
-				cRect.top=0;
-				cRect.bottom=65;
-//				g_pDDSBack->BltFast(380+Loop*30+dwState22*2,250,NumberFont,&cRect, DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
-				if(dwState2>10)g_pDDSBack->BltFast(400+Loop*50,250+dwState2*2-dwState2*2,ComboFont,&cRect, DDBLTFAST_SRCCOLORKEY);
-				else g_pDDSBack->BltFast(400+Loop*50,250+dwState2*2,ComboFont,&cRect, DDBLTFAST_SRCCOLORKEY);
+				cRect.x=chCombo2p[Loop]*50;
+				cRect.w=50;
+				cRect.y=0;
+				cRect.h=65;
+                if(dwState2>10)
+					ComboFont.BltFast( 400+Loop*50, 250+dwState2*2-dwState2*2, gScreen, &cRect );
+				else
+					ComboFont.BltFast( 400+Loop*50,250+dwState2*2, gScreen, &cRect );
 
-				cRect.left=0;
-				cRect.right=150;
-				cRect.top=65;
-				cRect.bottom=100;
+				cRect.x=0;
+				cRect.w=150;
+				cRect.y=65;
+				cRect.h=100;
 				
-				if(dwState2>10)g_pDDSBack->BltFast(400,320+dwState2*2-dwState2*2,ComboFont,&cRect, DDBLTFAST_SRCCOLORKEY);
-				else g_pDDSBack->BltFast(400,320+dwState2*2,ComboFont,&cRect, DDBLTFAST_SRCCOLORKEY);
-			}/* ø©±‚±Ó¡ˆ */
+				if(dwState2>10)
+					ComboFont.BltFast( 400,320+dwState2*2-dwState2*2, gScreen, &cRect );
+				else
+					ComboFont.BltFast( 400,320+dwState2*2, gScreen, &cRect );
+			}
 		}
 	}
 
@@ -1930,32 +1822,32 @@ void DrawJudge2p(void)
 }
 
 
-void DrawArrow1p(DWORD cur)
+void DrawArrow1p(Uint32 cur)
 {
 	static int arrow_l[20]={0,0,72,72,144,144,216,216,288,288,360,360,432,432,504,504,576,576,648,648};
-	static int arrow_r[20]={72,72,144,144,216,216,288,288,360,360,432,432,504,504,576,576,648,648,720,720};
+	static int arrow_r[20]={72,72,144,144,216,216,288,288,360,360,432,432,504,504,576,576,648,648,720,720}; // DELETE ME
 
 	static int Carrow_l[20]={0,0,80,80,160,160,240,240,320,320,400,400,480,480,560,560,640,640};
-	static int Carrow_r[20]={80,80,160,160,240,240,320,320,400,400,480,480,560,560,640,640,720,720};
+	static int Carrow_r[20]={80,80,160,160,240,240,320,320,400,400,480,480,560,560,640,640,720,720};    // DELETE ME
 
-	static BYTE s1,s3,s5,s7,s9;
-	static DWORD stat1,stat3,stat5,stat7,stat9;
-	static DWORD cur2;
+	static Uint8 s1,s3,s5,s7,s9;
+	static Uint32 stat1,stat3,stat5,stat7,stat9;
+	static Uint32 cur2;
 	static int beat;
 
-	static BOOL Crash1, Crash3, Crash5, Crash7, Crash9;
-	static BOOL	On1, On3, On5, On7, On9;
+	static bool Crash1, Crash3, Crash5, Crash7, Crash9;
+	static bool	On1, On3, On5, On7, On9;
 
-	static RECT pArr1,pArr3,pArr5,pArr7,pArr9;
-	static RECT cArr1,cArr3,cArr5,cArr7,cArr9;
+	static SDL_Rect pArr1,pArr3,pArr5,pArr7,pArr9;
+	static SDL_Rect cArr1,cArr3,cArr5,cArr7,cArr9;
 
 
-	BYTE JudgeTemp=0;
-	BYTE	count;
+	Uint8 JudgeTemp=0;
+	Uint8	count;
 
 	if(cur2!=cur)
 	{
-		if(bModeRandomS1p == TRUE)
+		if(bModeRandomS1p == true)
 		{
 			HighSpeed1p_1 = HighSpeed1p_3 = HighSpeed1p_5 = HighSpeed1p_7 = HighSpeed1p_9 = 1 + rand() % 8 ;
 		}
@@ -1969,8 +1861,8 @@ void DrawArrow1p(DWORD cur)
 	}
 
 	ReadGameInput();
-// ø¿≈‰ πˆ∆∞ ¡ˆø¯ ∫Œ∫– 
-	if(KCFG.auto1_1p==TRUE)
+	// Ïò§ÌÜ† Î≤ÑÌäº ÏßÄÏõê Î∂ÄÎ∂Ñ
+	if(KCFG.auto1_1p==true)
 	{
 		for(count=0;count<10;count++)
 		{
@@ -1981,7 +1873,7 @@ void DrawArrow1p(DWORD cur)
 					Data_Judge[cur+count][0]='0';
 					stat1=cur+count;
 					s1=1;
-					Crash1=TRUE;
+					Crash1=true;
 					break;
 				}
 			}
@@ -1989,7 +1881,7 @@ void DrawArrow1p(DWORD cur)
 		}
 	}
 
-	if(KCFG.auto7_1p==TRUE)
+	if(KCFG.auto7_1p==true)
 	{
 		for(count=0;count<10;count++)
 		{
@@ -2000,7 +1892,7 @@ void DrawArrow1p(DWORD cur)
 					Data_Judge[cur+count][1]='0';
 					stat7=cur+count;
 					s7=1;
-					Crash7=TRUE;
+					Crash7=true;
 					break;
 				}
 			}
@@ -2008,7 +1900,7 @@ void DrawArrow1p(DWORD cur)
 		}
 	}
 
-	if(KCFG.auto5_1p==TRUE)
+	if(KCFG.auto5_1p==true)
 	{
 		for(count=0;count<10;count++)
 		{
@@ -2019,7 +1911,7 @@ void DrawArrow1p(DWORD cur)
 					Data_Judge[cur+count][2]='0';
 					stat5=cur+count;
 					s5=1;
-					Crash5=TRUE;
+					Crash5=true;
 					break;
 				}
 			}
@@ -2027,7 +1919,7 @@ void DrawArrow1p(DWORD cur)
 		}
 	}
 
-	if(KCFG.auto9_1p==TRUE)
+	if(KCFG.auto9_1p==true)
 	{
 		for(count=0;count<10;count++)
 		{
@@ -2038,14 +1930,14 @@ void DrawArrow1p(DWORD cur)
 					Data_Judge[cur+count][3]='0';
 					stat9=cur+count;
 					s9=1;
-					Crash9=TRUE;
+					Crash9=true;
 					break;
 				}
 			}
 		}
 	}
 
-	if(KCFG.auto3_1p==TRUE)
+	if(KCFG.auto3_1p==true)
 	{
 		for(count=0;count<10;count++)
 		{
@@ -2056,7 +1948,7 @@ void DrawArrow1p(DWORD cur)
 					Data_Judge[cur+count][4]='0';
 					stat3=cur+count;
 					s3=1;
-					Crash3=TRUE;
+					Crash3=true;
 					break;
 				}
 			}
@@ -2064,18 +1956,18 @@ void DrawArrow1p(DWORD cur)
 		}
 	}
 
-	if(s1 || (PressedKey1p[1]==TRUE) )
+	if(s1 || (PressedKey1p[1]==true) )
 	{
 		if(s1==20)
 		{
 			s1=0;
-			Crash1=FALSE;
+			Crash1=false;
 		}
 		else
 		{
 			s1++;
 		}
-		if(PressedKey1p[1]==TRUE)
+		if(PressedKey1p[1]==true)
 		for(count=0;count<18;count++)
 		{
 			if( ZONE_U*HighSpeed1p_1 < Data_y[cur+count] && 
@@ -2088,11 +1980,11 @@ void DrawArrow1p(DWORD cur)
 					{
 						Data_Judge[cur+count][0]='0';
 						stat1=cur+count;
-						On1=TRUE;
+						On1=true;
 						s1=1;
 						if(Data_Judge[stat1][0]=='0' && Data_Judge[stat1][1]=='0' && Data_Judge[stat1][2]=='0' && Data_Judge[stat1][3]=='0' && Data_Judge[stat1][4]=='0' )
 						{
-							Crash1=TRUE;
+							Crash1=true;
 							JudgeTemp=PERFECT;
 						}
 						break;
@@ -2105,11 +1997,11 @@ void DrawArrow1p(DWORD cur)
 					{
 						Data_Judge[cur+count][0]='0';
 						stat1=cur+count;
-						On1=TRUE;
+						On1=true;
 						s1=1;
 						if(Data_Judge[stat1][0]=='0' && Data_Judge[stat1][1]=='0' && Data_Judge[stat1][2]=='0' && Data_Judge[stat1][3]=='0' && Data_Judge[stat1][4]=='0' )
 						{
-							Crash1=TRUE;
+							Crash1=true;
 							JudgeTemp=GREAT;
 						}
 						break;
@@ -2149,18 +2041,18 @@ void DrawArrow1p(DWORD cur)
 		}
 	}
 
-	if(s3 || (PressedKey1p[3]==TRUE))
+	if(s3 || (PressedKey1p[3]==true))
 	{
 		if(s3==20)
 		{
 			s3=0;
-			Crash3=FALSE;
+			Crash3=false;
 		}
 		else
 		{
 			s3++;
 		}
-		if(PressedKey1p[3]==TRUE)
+		if(PressedKey1p[3]==true)
 		for(count=0;count<18;count++)
 		{
 			if( ZONE_U*HighSpeed1p_3 < Data_y[cur+count] &&
@@ -2173,11 +2065,11 @@ void DrawArrow1p(DWORD cur)
 					{
 						Data_Judge[cur+count][4]='0';
 						stat3=cur+count;
-						On3=TRUE;
+						On3=true;
 						s3=1;
 						if(Data_Judge[stat3][0]=='0' && Data_Judge[stat3][1]=='0' && Data_Judge[stat3][2]=='0' && Data_Judge[stat3][3]=='0' && Data_Judge[stat3][4]=='0' )
 						{
-							Crash3=TRUE;
+							Crash3=true;
 							JudgeTemp=PERFECT;
 						}
 						break;
@@ -2190,11 +2082,11 @@ void DrawArrow1p(DWORD cur)
 					{
 						Data_Judge[cur+count][4]='0';
 						stat3=cur+count;
-						On3=TRUE;
+						On3=true;
 						s3=1;
 						if(Data_Judge[stat3][0]=='0' && Data_Judge[stat3][1]=='0' && Data_Judge[stat3][2]=='0' && Data_Judge[stat3][3]=='0' && Data_Judge[stat3][4]=='0' )
 						{
-							Crash3=TRUE;
+							Crash3=true;
 							JudgeTemp=GREAT;
 						}
 						break;
@@ -2234,18 +2126,18 @@ void DrawArrow1p(DWORD cur)
 		}
 	}
 
-	if(s5 || (PressedKey1p[5]==TRUE))
+	if(s5 || (PressedKey1p[5]==true))
 	{
 		if(s5==20)
 		{
 			s5=0;
-			Crash5=FALSE;
+			Crash5=false;
 		}
 		else
 		{
 			s5++;
 		}
-		if(PressedKey1p[5]==TRUE)
+		if(PressedKey1p[5]==true)
 		for(count=0;count<18;count++)
 		{
 			if( ZONE_U*HighSpeed1p_5<Data_y[cur+count] &&
@@ -2258,11 +2150,11 @@ void DrawArrow1p(DWORD cur)
 					{
 						Data_Judge[cur+count][2]='0';
 						stat5=cur+count;
-						On5=TRUE;
+						On5=true;
 						s5=1;
 						if(Data_Judge[stat5][0]=='0' && Data_Judge[stat5][1]=='0' && Data_Judge[stat5][2]=='0' && Data_Judge[stat5][3]=='0' && Data_Judge[stat5][4]=='0' )
 						{
-							Crash5=TRUE;
+							Crash5=true;
 							JudgeTemp=PERFECT;
 						}
 						break;
@@ -2275,11 +2167,11 @@ void DrawArrow1p(DWORD cur)
 					{
 						Data_Judge[cur+count][2]='0';
 						stat5=cur+count;
-						On5=TRUE;
+						On5=true;
 						s5=1;
 						if(Data_Judge[stat5][0]=='0' && Data_Judge[stat5][1]=='0' && Data_Judge[stat5][2]=='0' && Data_Judge[stat5][3]=='0' && Data_Judge[stat5][4]=='0' )
 						{
-							Crash5=TRUE;
+							Crash5=true;
 							JudgeTemp=GREAT;
 						}
 						break;
@@ -2321,18 +2213,18 @@ void DrawArrow1p(DWORD cur)
 
 	}
 
-	if(s7 || (PressedKey1p[7]==TRUE) )
+	if(s7 || (PressedKey1p[7]==true) )
 	{
 		if(s7==20)
 		{
 			s7=0;
-			Crash7=FALSE;
+			Crash7=false;
 		}
 		else
 		{
 			s7++;
 		}
-		if(PressedKey1p[7]==TRUE)
+		if(PressedKey1p[7]==true)
 		for(count=0;count<18;count++)
 		{
 			if( ZONE_U*HighSpeed1p_7 < Data_y[cur+count] &&
@@ -2345,11 +2237,11 @@ void DrawArrow1p(DWORD cur)
 					{
 						Data_Judge[cur+count][1]='0';
 						stat7=cur+count;
-						On7=TRUE;
+						On7=true;
 						s7=1;
 						if(Data_Judge[stat7][0]=='0' && Data_Judge[stat7][1]=='0' && Data_Judge[stat7][2]=='0' && Data_Judge[stat7][3]=='0' && Data_Judge[stat7][4]=='0' )
 						{
-							Crash7=TRUE;
+							Crash7=true;
 							JudgeTemp=PERFECT;
 						}
 						break;
@@ -2362,11 +2254,11 @@ void DrawArrow1p(DWORD cur)
 					{
 						Data_Judge[cur+count][1]='0';
 						stat7=cur+count;
-						On7=TRUE;
+						On7=true;
 						s7=1;
 						if(Data_Judge[stat7][0]=='0' && Data_Judge[stat7][1]=='0' && Data_Judge[stat7][2]=='0' && Data_Judge[stat7][3]=='0' && Data_Judge[stat7][4]=='0' )
 						{
-							Crash7=TRUE;
+							Crash7=true;
 							JudgeTemp=GREAT;
 						}
 						break;
@@ -2407,19 +2299,19 @@ void DrawArrow1p(DWORD cur)
 		}
 	}
 
-	if(s9 || (PressedKey1p[9]==TRUE))
+	if(s9 || (PressedKey1p[9]==true))
 	{
 		if(s9==20)
 		{
 
 			s9=0;
-			Crash9=FALSE;
+			Crash9=false;
 		}
 		else
 		{
 			s9++;
 		}
-		if(PressedKey1p[9]==TRUE)
+		if(PressedKey1p[9]==true)
 		for(count=0;count<18;count++)
 		{
 			if( ZONE_U*HighSpeed1p_9<Data_y[cur+count] &&
@@ -2432,11 +2324,11 @@ void DrawArrow1p(DWORD cur)
 					{
 						Data_Judge[cur+count][3]='0';
 						stat9=cur+count;
-						On9=TRUE;
+						On9=true;
 						s9=1;
 						if(Data_Judge[stat9][0]=='0' && Data_Judge[stat9][1]=='0' && Data_Judge[stat9][2]=='0' && Data_Judge[stat9][3]=='0' && Data_Judge[stat9][4]=='0' )
 						{
-							Crash9=TRUE;
+							Crash9=true;
 							JudgeTemp=PERFECT;
 						}
 						break;
@@ -2449,11 +2341,11 @@ void DrawArrow1p(DWORD cur)
 					{
 						Data_Judge[cur+count][3]='0';
 						stat9=cur+count;
-						On9=TRUE;
+						On9=true;
 						s9=1;
 						if(Data_Judge[stat9][0]=='0' && Data_Judge[stat9][1]=='0' && Data_Judge[stat9][2]=='0' && Data_Judge[stat9][3]=='0' && Data_Judge[stat9][4]=='0' )
 						{
-							Crash9=TRUE;
+							Crash9=true;
 							JudgeTemp=GREAT;
 						}
 						break;
@@ -2496,7 +2388,7 @@ void DrawArrow1p(DWORD cur)
 	
 	Judgement1p=JudgeTemp;
 	
-	// πÃΩ∫√≥∏Æ¿‘¥œ¥Ÿ.
+	// ÎØ∏Ïä§Ï≤òÎ¶¨ÏûÖÎãàÎã§.
 	for(count=0;count<10;count++)
 	if(Data_y[cur+count] < ZONE_U
 		&& (Data_Judge[cur+count][0]!='0' || Data_Judge[cur+count][1]!='0' || Data_Judge[cur+count][2]!='0' || Data_Judge[cur+count][3]!='0' || Data_Judge[cur+count][4]!='0')
@@ -2562,12 +2454,9 @@ void DrawArrow1p(DWORD cur)
 
 	if(Judgement1p==PERFECT || Judgement1p==GREAT)
 	{
-		if(g_dsBeat)
-		{
-			g_dsBeat->Stop();
-			g_dsBeat->SetCurrentPosition(0);
-			g_dsBeat->Play(0,0,0);
-		}
+        gBeat.Halt();
+        gBeat.Play();
+
 		if(Judgement1p==PERFECT)cPerfect1p++;
 		if(Judgement1p==GREAT)cGreat1p++;
 
@@ -2585,7 +2474,7 @@ void DrawArrow1p(DWORD cur)
 		Crash7=On7;
 		Crash9=On9;
 
-		On1=On3=On5=On7=On9=FALSE;
+		On1=On3=On5=On7=On9=false;
 	}
 	else if(Judgement1p==GOOD || Judgement1p==BAD || Judgement1p==MISS)
 	{
@@ -2626,9 +2515,8 @@ void DrawArrow1p(DWORD cur)
 			{
 				if(SongFlag)
 				{
-					song->OnMediaStop();
-					delete song;
-					SongFlag=FALSE;
+					gSong.Halt();
+					SongFlag=false;
 				}
 				g_ProgramState=DEAD;
 			}
@@ -2639,9 +2527,8 @@ void DrawArrow1p(DWORD cur)
 			{
 				if(SongFlag)
 				{
-					song->OnMediaStop();
-					delete song;
-					SongFlag=FALSE;
+					gSong.Halt();
+					SongFlag=false;
 				}
 				g_ProgramState=DEAD;
 			}
@@ -2650,103 +2537,107 @@ void DrawArrow1p(DWORD cur)
 
 	if(Score1p<0)Score1p=0;
 
-	if (beat) g_pDDSBack->BltFast(32,50,Arrow2,NULL,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
-	else g_pDDSBack->BltFast(32,50,Arrow1,NULL,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
+	if (beat)
+        gArrow2.BltFast( 32, 50, gScreen );
+	else
+        gArrow1.BltFast( 32, 50, gScreen );
 
-	pArr1.top=0;
-	pArr1.left=arrow_l[s1];
-	pArr1.right=arrow_r[s1];
-	pArr1.bottom=70;
+	pArr1.y=0;
+	pArr1.x=arrow_l[s1];
+    pArr1.w=arrow_r[0];
+	pArr1.h=70;
 
-	pArr3.top=0;
-	pArr3.left=arrow_l[s3];
-	pArr3.right=arrow_r[s3];
-	pArr3.bottom=70;
+	pArr3.y=0;
+	pArr3.x=arrow_l[s3];
+	pArr3.w=arrow_r[0];
+	pArr3.h=70;
 
-	pArr5.top=0;
-	pArr5.left=arrow_l[s5];
-	pArr5.right=arrow_r[s5];
-	pArr5.bottom=70;
+	pArr5.y=0;
+	pArr5.x=arrow_l[s5];
+	pArr5.w=arrow_r[0];
+	pArr5.h=70;
 
-	pArr7.top=0;
-	pArr7.left=arrow_l[s7];
-	pArr7.right=arrow_r[s7];
-	pArr7.bottom=70;
+	pArr7.y=0;
+	pArr7.x=arrow_l[s7];
+	pArr7.w=arrow_r[0];
+	pArr7.h=70;
 
-	pArr9.top=0;
-	pArr9.left=arrow_l[s9];
-	pArr9.right=arrow_r[s9];
-	pArr9.bottom=70;
+	pArr9.y=0;
+	pArr9.x=arrow_l[s9];
+	pArr9.w=arrow_r[0];
+	pArr9.h=70;
 
-	cArr1.top=0;
-	cArr1.left=Carrow_l[s1];
-	cArr1.right=Carrow_r[s1];
-	cArr1.bottom=80;
+	cArr1.y=0;
+	cArr1.x=Carrow_l[s1];
+    cArr1.w=Carrow_r[0];
+	cArr1.h=80;
 
-	cArr3.top=0;
-	cArr3.left=Carrow_l[s3];
-	cArr3.right=Carrow_r[s3];
-	cArr3.bottom=80;
+	cArr3.y=0;
+	cArr3.x=Carrow_l[s3];
+	cArr3.w=Carrow_r[0];
+	cArr3.h=80;
 
-	cArr5.top=0;
-	cArr5.left=Carrow_l[s5];
-	cArr5.right=Carrow_r[s5];
-	cArr5.bottom=80;
+	cArr5.y=0;
+	cArr5.x=Carrow_l[s5];
+	cArr5.w=Carrow_r[0];
+	cArr5.h=80;
 
-	cArr7.top=0;
-	cArr7.left=Carrow_l[s7];
-	cArr7.right=Carrow_r[s7];
-	cArr7.bottom=80;
+	cArr7.y=0;
+	cArr7.x=Carrow_l[s7];
+	cArr7.w=Carrow_r[0];
+	cArr7.h=80;
 
-	cArr9.top=0;
-	cArr9.left=Carrow_l[s9];
-	cArr9.right=Carrow_r[s9];
-	cArr9.bottom=80;
-
-	if(Crash1)g_pDDSBack->BltFast(25,43,cArrow1,&cArr1,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
-	else if(s1)g_pDDSBack->BltFast(27,45,pArrow1,&pArr1,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
+	cArr9.y=0;
+	cArr9.x=Carrow_l[s9];
+	cArr9.w=Carrow_r[0];
+	cArr9.h=80;
+   
+    
+	if(Crash1)cArrow1.BltFast( 25, 43, gScreen, &cArr1 );
+	else if(s1)pArrow1.BltFast( 27, 45, gScreen, &pArr1 );
 	
-	if(Crash7)g_pDDSBack->BltFast(75,43,cArrow7,&cArr7,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
-	else if(s7)g_pDDSBack->BltFast(77,45,pArrow7,&pArr7,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
+ 	if(Crash7)cArrow7.BltFast( 75, 43, gScreen, &cArr7 );
+	else if(s7)pArrow7.BltFast( 77, 45, gScreen, &pArr7 );
 	
-	if(Crash5)g_pDDSBack->BltFast(125,43,cArrow5,&cArr5,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
-	else if(s5)g_pDDSBack->BltFast(127,45,pArrow5,&pArr5,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
+	if(Crash5)cArrow5.BltFast( 125, 43, gScreen, &cArr5 );
+	else if(s5)pArrow5.BltFast( 127, 45, gScreen, &pArr5 );
 
-	if(Crash9)g_pDDSBack->BltFast(175,43,cArrow9,&cArr9,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
-	else if(s9)g_pDDSBack->BltFast(177,45,pArrow9,&pArr9,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
+	if(Crash9)cArrow9.BltFast( 175, 43, gScreen, &cArr9 );
+	else if(s9)pArrow9.BltFast( 177, 45, gScreen, &pArr9 );
 	
-	if(Crash3)g_pDDSBack->BltFast(225,43,cArrow3,&cArr3,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
-	else if(s3)g_pDDSBack->BltFast(227,45,pArrow3,&pArr3,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
+	if(Crash3)cArrow3.BltFast( 225, 43, gScreen, &cArr3 );
+	else if(s3)pArrow3.BltFast( 227, 45, gScreen, &pArr3 );
+ 
 }
 
-void DrawArrow2p(DWORD cur)
+void DrawArrow2p(Uint32 cur)
 {
-	static int arrow_l[20]={0,0,72,72,144,144,216,216,288,288,360,360,432,432,504,504,576,576,648,648};
-	static int arrow_r[20]={72,72,144,144,216,216,288,288,360,360,432,432,504,504,576,576,648,648,720,720};
+	static const int arrow_l[20]={0,0,72,72,144,144,216,216,288,288,360,360,432,432,504,504,576,576,648,648};
+	static const int arrow_r[20]={72,72,144,144,216,216,288,288,360,360,432,432,504,504,576,576,648,648,720,720}; // DELETE ME
 
-	static int Carrow_l[20]={0,0,80,80,160,160,240,240,320,320,400,400,480,480,560,560,640,640};
-	static int Carrow_r[20]={80,80,160,160,240,240,320,320,400,400,480,480,560,560,640,640,720,720};
+	static const int Carrow_l[20]={0,0,80,80,160,160,240,240,320,320,400,400,480,480,560,560,640,640};
+	static const int Carrow_r[20]={80,80,160,160,240,240,320,320,400,400,480,480,560,560,640,640,720,720};        // DELETE ME
 
-	static BYTE s1,s3,s5,s7,s9;
-	static DWORD stat1,stat3,stat5,stat7,stat9;
-	static DWORD cur2;
+	static Uint8 s1,s3,s5,s7,s9;
+	static Uint32 stat1,stat3,stat5,stat7,stat9;
+	static Uint32 cur2;
 	static int beat;
 
-	static BOOL Crash1, Crash3, Crash5, Crash7, Crash9;
-	static BOOL	On1, On3, On5, On7, On9;
+	static bool Crash1, Crash3, Crash5, Crash7, Crash9;
+	static bool	On1, On3, On5, On7, On9;
 
-	static RECT pArr1,pArr3,pArr5,pArr7,pArr9;
-	static RECT cArr1,cArr3,cArr5,cArr7,cArr9;
+	static SDL_Rect pArr1, pArr3,pArr5,pArr7,pArr9;
+	static SDL_Rect cArr1, cArr3,cArr5,cArr7,cArr9;
 
 
-	BYTE JudgeTemp=0;
-	BYTE	count;
+	Uint8 JudgeTemp=0;
+	Uint8	count;
 
 	
-	if(Start2p==TRUE && Start1p==FALSE)ReadGameInput();
+	if(Start2p==true && Start1p==false)ReadGameInput();
 	if(cur2!=cur)
 	{
-		if(bModeRandomS2p == TRUE)
+		if(bModeRandomS2p == true)
 		{
 			HighSpeed2p_1 = HighSpeed2p_3 = HighSpeed2p_5 = HighSpeed2p_7 = HighSpeed2p_9 = 1 + rand() % 8 ;
 		}
@@ -2758,8 +2649,8 @@ void DrawArrow2p(DWORD cur)
 		beat--;
 		if(beat<=0)beat=0;
 	}
-// ø¿≈‰ πˆ∆∞ ¡ˆø¯ ∫Œ∫– 
-	if(KCFG.auto1_2p==TRUE)
+	// Ïò§ÌÜ† Î≤ÑÌäº ÏßÄÏõê Î∂ÄÎ∂Ñ
+	if(KCFG.auto1_2p==true)
 	{
 		for(count=0;count<10;count++)
 		{
@@ -2770,7 +2661,7 @@ void DrawArrow2p(DWORD cur)
 					Data_Judge1[cur+count][5]='0';
 					stat1=cur+count;
 					s1=1;
-					Crash1=TRUE;
+					Crash1=true;
 					break;
 				}
 			}
@@ -2778,7 +2669,7 @@ void DrawArrow2p(DWORD cur)
 		}
 	}
 
-	if(KCFG.auto7_2p==TRUE)
+	if(KCFG.auto7_2p==true)
 	{
 		for(count=0;count<10;count++)
 		{
@@ -2789,7 +2680,7 @@ void DrawArrow2p(DWORD cur)
 					Data_Judge1[cur+count][6]='0';
 					stat7=cur+count;
 					s7=1;
-					Crash7=TRUE;
+					Crash7=true;
 					break;
 				}
 			}
@@ -2797,7 +2688,7 @@ void DrawArrow2p(DWORD cur)
 		}
 	}
 
-	if(KCFG.auto5_2p==TRUE)
+	if(KCFG.auto5_2p==true)
 	{
 		for(count=0;count<10;count++)
 		{
@@ -2808,7 +2699,7 @@ void DrawArrow2p(DWORD cur)
 					Data_Judge1[cur+count][7]='0';
 					stat5=cur+count;
 					s5=1;
-					Crash5=TRUE;
+					Crash5=true;
 					break;
 				}
 			}
@@ -2816,7 +2707,7 @@ void DrawArrow2p(DWORD cur)
 		}
 	}
 
-	if(KCFG.auto9_2p==TRUE)
+	if(KCFG.auto9_2p==true)
 	{
 		for(count=0;count<10;count++)
 		{
@@ -2827,7 +2718,7 @@ void DrawArrow2p(DWORD cur)
 					Data_Judge1[cur+count][8]='0';
 					stat9=cur+count;
 					s9=1;
-					Crash9=TRUE;
+					Crash9=true;
 					break;
 				}
 			}
@@ -2835,7 +2726,7 @@ void DrawArrow2p(DWORD cur)
 		}
 	}
 
-	if(KCFG.auto3_2p==TRUE)
+	if(KCFG.auto3_2p==true)
 	{
 		for(count=0;count<10;count++)
 		{
@@ -2846,7 +2737,7 @@ void DrawArrow2p(DWORD cur)
 					Data_Judge1[cur+count][9]='0';
 					stat3=cur+count;
 					s3=1;
-					Crash3=TRUE;
+					Crash3=true;
 					break;
 				}
 			}
@@ -2854,18 +2745,18 @@ void DrawArrow2p(DWORD cur)
 		}
 	}
 
-	if(s1 || (PressedKey2p[1]==TRUE) )
+	if(s1 || (PressedKey2p[1]==true) )
 	{
 		if(s1==20)
 		{
 			s1=0;
-			Crash1=FALSE;
+			Crash1=false;
 		}
 		else
 		{
 			s1++;
 		}
-		if(PressedKey2p[1]==TRUE)
+		if(PressedKey2p[1]==true)
 		for(count=0;count<18;count++)
 		{
 			if( ZONE_U*HighSpeed2p_1 < Data_y1[cur+count] && 
@@ -2878,11 +2769,11 @@ void DrawArrow2p(DWORD cur)
 					{
 						Data_Judge1[cur+count][5]='0';
 						stat1=cur+count;
-						On1=TRUE;
+						On1=true;
 						s1=1;
 						if(Data_Judge1[stat1][5]=='0' && Data_Judge1[stat1][6]=='0' && Data_Judge1[stat1][7]=='0' && Data_Judge1[stat1][8]=='0' && Data_Judge1[stat1][9]=='0' )
 						{
-							Crash1=TRUE;
+							Crash1=true;
 							JudgeTemp=PERFECT;
 						}
 						break;
@@ -2895,11 +2786,11 @@ void DrawArrow2p(DWORD cur)
 					{
 						Data_Judge1[cur+count][5]='0';
 						stat1=cur+count;
-						On1=TRUE;
+						On1=true;
 						s1=1;
 						if(Data_Judge1[stat1][5]=='0' && Data_Judge1[stat1][6]=='0' && Data_Judge1[stat1][7]=='0' && Data_Judge1[stat1][8]=='0' && Data_Judge1[stat1][9]=='0' )
 						{
-							Crash1=TRUE;
+							Crash1=true;
 							JudgeTemp=GREAT;
 						}
 						break;
@@ -2939,18 +2830,18 @@ void DrawArrow2p(DWORD cur)
 		}
 	}
 
-	if(s3 || (PressedKey2p[3]==TRUE))
+	if(s3 || (PressedKey2p[3]==true))
 	{
 		if(s3==20)
 		{
 			s3=0;
-			Crash3=FALSE;
+			Crash3=false;
 		}
 		else
 		{
 			s3++;
 		}
-		if(PressedKey2p[3]==TRUE)
+		if(PressedKey2p[3]==true)
 		for(count=0;count<18;count++)
 		{
 			if( ZONE_U*HighSpeed2p_3 < Data_y1[cur+count] &&
@@ -2963,11 +2854,11 @@ void DrawArrow2p(DWORD cur)
 					{
 						Data_Judge1[cur+count][9]='0';
 						stat3=cur+count;
-						On3=TRUE;
+						On3=true;
 						s3=1;
 						if(Data_Judge1[stat3][5]=='0' && Data_Judge1[stat3][6]=='0' && Data_Judge1[stat3][7]=='0' && Data_Judge1[stat3][8]=='0' && Data_Judge1[stat3][9]=='0' )
 						{
-							Crash3=TRUE;
+							Crash3=true;
 							JudgeTemp=PERFECT;
 						}
 						break;
@@ -2980,11 +2871,11 @@ void DrawArrow2p(DWORD cur)
 					{
 						Data_Judge1[cur+count][9]='0';
 						stat3=cur+count;
-						On3=TRUE;
+						On3=true;
 						s3=1;
 						if(Data_Judge1[stat3][5]=='0' && Data_Judge1[stat3][6]=='0' && Data_Judge1[stat3][7]=='0' && Data_Judge1[stat3][8]=='0' && Data_Judge1[stat3][9]=='0' )
 						{
-							Crash3=TRUE;
+							Crash3=true;
 							JudgeTemp=GREAT;
 						}
 						break;
@@ -3024,18 +2915,18 @@ void DrawArrow2p(DWORD cur)
 		}
 	}
 
-	if(s5 || (PressedKey2p[5]==TRUE))
+	if(s5 || (PressedKey2p[5]==true))
 	{
 		if(s5==20)
 		{
 			s5=0;
-			Crash5=FALSE;
+			Crash5=false;
 		}
 		else
 		{
 			s5++;
 		}
-		if(PressedKey2p[5]==TRUE)
+		if(PressedKey2p[5]==true)
 		for(count=0;count<18;count++)
 		{
 			if( ZONE_U*HighSpeed2p_5<Data_y1[cur+count] &&
@@ -3048,11 +2939,11 @@ void DrawArrow2p(DWORD cur)
 					{
 						Data_Judge1[cur+count][7]='0';
 						stat5=cur+count;
-						On5=TRUE;
+						On5=true;
 						s5=1;
 						if(Data_Judge1[stat5][5]=='0' && Data_Judge1[stat5][6]=='0' && Data_Judge1[stat5][7]=='0' && Data_Judge1[stat5][8]=='0' && Data_Judge1[stat5][9]=='0' )
 						{
-							Crash5=TRUE;
+							Crash5=true;
 							JudgeTemp=PERFECT;
 						}
 						break;
@@ -3065,11 +2956,11 @@ void DrawArrow2p(DWORD cur)
 					{
 						Data_Judge1[cur+count][7]='0';
 						stat5=cur+count;
-						On5=TRUE;
+						On5=true;
 						s5=1;
 						if(Data_Judge1[stat5][5]=='0' && Data_Judge1[stat5][6]=='0' && Data_Judge1[stat5][7]=='0' && Data_Judge1[stat5][8]=='0' && Data_Judge1[stat5][9]=='0' )
 						{
-							Crash5=TRUE;
+							Crash5=true;
 							JudgeTemp=GREAT;
 						}
 						break;
@@ -3111,18 +3002,18 @@ void DrawArrow2p(DWORD cur)
 
 	}
 
-	if(s7 || (PressedKey2p[7]==TRUE) )
+	if(s7 || (PressedKey2p[7]==true) )
 	{
 		if(s7==20)
 		{
 			s7=0;
-			Crash7=FALSE;
+			Crash7=false;
 		}
 		else
 		{
 			s7++;
 		}
-		if(PressedKey2p[7]==TRUE)
+		if(PressedKey2p[7]==true)
 		for(count=0;count<18;count++)
 		{
 			if( ZONE_U*HighSpeed2p_7 < Data_y1[cur+count] &&
@@ -3135,11 +3026,11 @@ void DrawArrow2p(DWORD cur)
 					{
 						Data_Judge1[cur+count][6]='0';
 						stat7=cur+count;
-						On7=TRUE;
+						On7=true;
 						s7=1;
 						if(Data_Judge1[stat7][5]=='0' && Data_Judge1[stat7][6]=='0' && Data_Judge1[stat7][7]=='0' && Data_Judge1[stat7][8]=='0' && Data_Judge1[stat7][9]=='0' )
 						{
-							Crash7=TRUE;
+							Crash7=true;
 							JudgeTemp=PERFECT;
 						}
 						break;
@@ -3152,11 +3043,11 @@ void DrawArrow2p(DWORD cur)
 					{
 						Data_Judge1[cur+count][6]='0';
 						stat7=cur+count;
-						On7=TRUE;
+						On7=true;
 						s7=1;
 						if(Data_Judge1[stat7][5]=='0' && Data_Judge1[stat7][6]=='0' && Data_Judge1[stat7][7]=='0' && Data_Judge1[stat7][8]=='0' && Data_Judge1[stat7][9]=='0' )
 						{
-							Crash7=TRUE;
+							Crash7=true;
 							JudgeTemp=GREAT;
 						}
 						break;
@@ -3197,19 +3088,19 @@ void DrawArrow2p(DWORD cur)
 		}
 	}
 
-	if(s9 || (PressedKey2p[9]==TRUE))
+	if(s9 || (PressedKey2p[9]==true))
 	{
 		if(s9==20)
 		{
 
 			s9=0;
-			Crash9=FALSE;
+			Crash9=false;
 		}
 		else
 		{
 			s9++;
 		}
-		if(PressedKey2p[9]==TRUE)
+		if(PressedKey2p[9]==true)
 		for(count=0;count<18;count++)
 		{
 			if( ZONE_U*HighSpeed2p_9<Data_y1[cur+count] &&
@@ -3222,11 +3113,11 @@ void DrawArrow2p(DWORD cur)
 					{
 						Data_Judge1[cur+count][8]='0';
 						stat9=cur+count;
-						On9=TRUE;
+						On9=true;
 						s9=1;
 						if(Data_Judge1[stat9][5]=='0' && Data_Judge1[stat9][6]=='0' && Data_Judge1[stat9][7]=='0' && Data_Judge1[stat9][8]=='0' && Data_Judge1[stat9][9]=='0' )
 						{
-							Crash9=TRUE;
+							Crash9=true;
 							JudgeTemp=PERFECT;
 						}
 						break;
@@ -3239,11 +3130,11 @@ void DrawArrow2p(DWORD cur)
 					{
 						Data_Judge1[cur+count][8]='0';
 						stat9=cur+count;
-						On9=TRUE;
+						On9=true;
 						s9=1;
 						if(Data_Judge1[stat9][5]=='0' && Data_Judge1[stat9][6]=='0' && Data_Judge1[stat9][7]=='0' && Data_Judge1[stat9][8]=='0' && Data_Judge1[stat9][9]=='0' )
 						{
-							Crash9=TRUE;
+							Crash9=true;
 							JudgeTemp=GREAT;
 						}
 						break;
@@ -3286,7 +3177,7 @@ void DrawArrow2p(DWORD cur)
 	
 	Judgement2p=JudgeTemp;
 	
-	// πÃΩ∫√≥∏Æ¿‘¥œ¥Ÿ.
+	// ÎØ∏Ïä§Ï≤òÎ¶¨ÏûÖÎãàÎã§.
 	for(count=0;count<10;count++)
 	if(Data_y1[cur+count] < 40
 		&& (Data_Judge1[cur+count][5]!='0' || Data_Judge1[cur+count][6]!='0' || Data_Judge1[cur+count][7]!='0' || Data_Judge1[cur+count][8]!='0' || Data_Judge1[cur+count][9]!='0')
@@ -3351,13 +3242,10 @@ void DrawArrow2p(DWORD cur)
 
 	if(Judgement2p==PERFECT || Judgement2p==GREAT)
 	{
-		if(g_dsBeat)
-		{
-			g_dsBeat->Stop();
-			g_dsBeat->SetCurrentPosition(0);
-			g_dsBeat->Play(0,0,0);
-		}
-		Combo2p++;
+        gBeat.Halt();
+        gBeat.Play();
+
+        Combo2p++;
 		if(Judgement2p==PERFECT)cPerfect2p++;
 		else if(Judgement2p==GREAT)cGreat2p++;
 
@@ -3374,7 +3262,7 @@ void DrawArrow2p(DWORD cur)
 		Crash7=On7;
 		Crash9=On9;
 
-		On1=On3=On5=On7=On9=FALSE;
+		On1=On3=On5=On7=On9=false;
 	}
 	else if(Judgement2p==GOOD || Judgement2p==BAD || Judgement2p==MISS)
 	{
@@ -3415,9 +3303,8 @@ void DrawArrow2p(DWORD cur)
 			{
 				if(SongFlag)
 				{
-					song->OnMediaStop();
-					delete song;
-					SongFlag=FALSE;
+					gSong.Halt();
+					SongFlag=false;
 				}
 				g_ProgramState=DEAD;
 			}
@@ -3428,9 +3315,8 @@ void DrawArrow2p(DWORD cur)
 			{
 				if(SongFlag)
 				{
-					song->OnMediaStop();
-					delete song;
-					SongFlag=FALSE;
+					gSong.Halt();
+					SongFlag=false;
 				}
 				g_ProgramState=DEAD;
 			}
@@ -3439,424 +3325,92 @@ void DrawArrow2p(DWORD cur)
 
 	if(Score2p<0)Score2p=0;
 
-	if (beat) g_pDDSBack->BltFast(352,50,Arrow2,NULL,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
-	else g_pDDSBack->BltFast(352,50,Arrow1,NULL,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
+	if (beat)
+        gArrow2.BltFast( 352, 50, gScreen );
+	else
+        gArrow1.BltFast( 352, 50, gScreen );
 
-	pArr1.top=0;
-	pArr1.left=arrow_l[s1];
-	pArr1.right=arrow_r[s1];
-	pArr1.bottom=70;
+	pArr1.y=0;
+	pArr1.x=arrow_l[s1];
+	pArr1.w=arrow_r[0];
+	pArr1.h=70;
 
-	pArr3.top=0;
-	pArr3.left=arrow_l[s3];
-	pArr3.right=arrow_r[s3];
-	pArr3.bottom=70;
+ 	pArr3.y=0;
+	pArr3.x=arrow_l[s3];
+	pArr3.w=arrow_r[0];
+	pArr3.h=70;
 
-	pArr5.top=0;
-	pArr5.left=arrow_l[s5];
-	pArr5.right=arrow_r[s5];
-	pArr5.bottom=70;
+	pArr5.y=0;
+	pArr5.x=arrow_l[s5];
+	pArr5.w=arrow_r[0];
+	pArr5.h=70;
 
-	pArr7.top=0;
-	pArr7.left=arrow_l[s7];
-	pArr7.right=arrow_r[s7];
-	pArr7.bottom=70;
+	pArr7.y=0;
+	pArr7.x=arrow_l[s7];
+	pArr7.w=arrow_r[0];
+	pArr7.h=70;
 
-	pArr9.top=0;
-	pArr9.left=arrow_l[s9];
-	pArr9.right=arrow_r[s9];
-	pArr9.bottom=70;
+	pArr9.y=0;
+	pArr9.x=arrow_l[s9];
+	pArr9.w=arrow_r[0];
+	pArr9.h=70;
 
-	cArr1.top=0;
-	cArr1.left=Carrow_l[s1];
-	cArr1.right=Carrow_r[s1];
-	cArr1.bottom=80;
+	cArr1.y=0;
+	cArr1.x=Carrow_l[s1];
+	cArr1.w=Carrow_r[0];
+	cArr1.h=80;
 
-	cArr3.top=0;
-	cArr3.left=Carrow_l[s3];
-	cArr3.right=Carrow_r[s3];
-	cArr3.bottom=80;
+	cArr3.y=0;
+	cArr3.x=Carrow_l[s3];
+	cArr3.w=Carrow_r[0];
+	cArr3.h=80;
 
-	cArr5.top=0;
-	cArr5.left=Carrow_l[s5];
-	cArr5.right=Carrow_r[s5];
-	cArr5.bottom=80;
+	cArr5.y=0;
+	cArr5.x=Carrow_l[s5];
+	cArr5.w=Carrow_r[0];
+	cArr5.h=80;
 
-	cArr7.top=0;
-	cArr7.left=Carrow_l[s7];
-	cArr7.right=Carrow_r[s7];
-	cArr7.bottom=80;
+	cArr7.y=0;
+	cArr7.x=Carrow_l[s7];
+	cArr7.w=Carrow_r[0];
+	cArr7.h=80;
 
-	cArr9.top=0;
-	cArr9.left=Carrow_l[s9];
-	cArr9.right=Carrow_r[s9];
-	cArr9.bottom=80;
+	cArr9.y=0;
+	cArr9.x=Carrow_l[s9];
+	cArr9.w=Carrow_r[0];
+	cArr9.h=80;
 
-	if(Crash1)g_pDDSBack->BltFast(345,43,cArrow1,&cArr1,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
-	else if(s1)g_pDDSBack->BltFast(347,45,pArrow1,&pArr1,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
+	if(Crash1)  cArrow1.BltFast( 345, 43,  gScreen, &cArr1 );
+	else if(s1) pArrow1.BltFast( 347, 45,  gScreen, &pArr1 );
+
+	if(Crash7)  cArrow7.BltFast( 395, 43,  gScreen, &cArr7 );
+	else if(s7) pArrow7.BltFast( 397, 45,  gScreen, &pArr7 );
 	
-	if(Crash7)g_pDDSBack->BltFast(395,43,cArrow7,&cArr7,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
-	else if(s7)g_pDDSBack->BltFast(397,45,pArrow7,&pArr7,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
+	if(Crash5)  cArrow5.BltFast( 445, 43,  gScreen, &cArr5 );
+	else if(s5) pArrow5.BltFast( 447, 45,  gScreen, &pArr5 );
+
+	if(Crash9)  cArrow9.BltFast( 495, 43,  gScreen, &cArr9 );
+	else if(s9) pArrow9.BltFast( 497, 45,  gScreen, &pArr9 );
 	
-	if(Crash5)g_pDDSBack->BltFast(445,43,cArrow5,&cArr5,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
-	else if(s5)g_pDDSBack->BltFast(447,45,pArrow5,&pArr5,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
-
-	if(Crash9)g_pDDSBack->BltFast(495,43,cArrow9,&cArr9,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
-	else if(s9)g_pDDSBack->BltFast(497,45,pArrow9,&pArr9,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
-	
-	if(Crash3)g_pDDSBack->BltFast(545,43,cArrow3,&cArr3,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
-	else if(s3)g_pDDSBack->BltFast(547,45,pArrow3,&pArr3,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
-}
-
-HRESULT	RestoreAll(void)
-{
-	HRESULT	hRet;
-
-	hRet=g_pDDSPrimary->Restore();
- 
-	return hRet;
-}
-
-void Flipp(void)
-{
-	HRESULT hRet;
-
-	while(TRUE)
-	{
-		if(g_fullscreen)
-			hRet=g_pDDSPrimary->Flip(NULL,DDFLIP_WAIT);
-		else
-			hRet = g_pDDSPrimary->Blt(&g_rcScreen, g_pDDSBack,
-                                                  &g_rcViewport, DDBLT_WAIT,
-                                                  NULL);
-
-		if(hRet==DD_OK)
-			break;
-
-		if(hRet == DDERR_SURFACELOST)
-		{
-			hRet=RestoreAll();
-			if(hRet != DD_OK)
-				break;
-		}
-		if(hRet != DDERR_WASSTILLDRAWING)
-			break;
-	}
-}
-
-
-BOOL InitDSound(HWND hWnd, int Samples, int Bits, int nChannels)
-{
-	HRESULT			hRet;
-
-	hRet=DirectSoundCreate(NULL,&lpds,NULL);
-
-	if(hRet != DD_OK)
-		InitFail(hWnd,hRet,"Cannot create Dsound");
-
-	hRet=lpds->SetCooperativeLevel(hWnd,DSSCL_NORMAL);
-
-	if(hRet != DD_OK)
-		InitFail(hWnd,hRet,"Cannot cooperative (sound)");
-
-	DisplayMessage(0,16,"Loading Music Intro File.. please Wait...");
-
-	return TRUE;
-
-}
-
-void ReleaseDSound(void)
-{
-	int i;
-
-	for(i=0;i<512;i++)
-	{
-		if(CSONG[i].Int_Song != NULL)
-		{
-			CSONG[i].Int_Song->Release();
-			CSONG[i].Int_Song = NULL;
-		}
-	}
-
-/*	if (lpdsbd != NULL)
-	{
-		lpdsbd->Release();
-		lpdsbd = NULL;
-	}
-	if (g_DJVOICE_BUFFER != NULL)
-	{
-		g_DJVOICE_BUFFER->Release();
-		g_DJVOICE_BUFFER = NULL;
-	}
-	if (g_PUMPSONG_BUFFER != NULL)
-	{
-		g_PUMPSONG_BUFFER->Release();
-		g_PUMPSONG_BUFFER = NULL;
-	}
-	if (g_dsOpening != NULL)
-	{
-		g_dsOpening->Release();
-		g_dsOpening = NULL;
-	}
-	if (g_Select_Song != NULL)
-	{
-		g_Select_Song->Release();
-		g_Select_Song = NULL;
-	}
-	if (g_Cur_Song != NULL)
-	{
-		g_Cur_Song->Release();
-		g_Cur_Song = NULL;
-	}
-	if (g_dsDead != NULL)
-	{
-		g_dsDead->Release();
-		g_dsDead = NULL;
-	}
-*/
-	if(lpds)lpds->Release();
-}
-
-void ReleaseAllObjects(void)
-{
-    if (g_pDD != NULL)
-    {
-        if (g_pDDSPrimary != NULL)
-        {
-            g_pDDSPrimary->Release();
-            g_pDDSPrimary = NULL;
-
-        }
-		if (GameTITLE != NULL)
-		{
-			GameTITLE->Release();
-			GameTITLE = NULL;
-		}
-		if (Background != NULL)
-		{
-			Background->Release();
-			Background = NULL;
-		}
-		if (SongTitle != NULL)
-		{
-			SongTitle->Release();
-			SongTitle = NULL;
-		}
-
-		if (SongBack != NULL)
-		{
-			SongBack->Release();
-			SongBack = NULL;
-		}
-		if (SelectBack != NULL)
-		{
-			SelectBack->Release();
-			SelectBack = NULL;
-		}
-		if (JudgeFont != NULL)
-		{
-			JudgeFont->Release();
-			JudgeFont = NULL;
-		}
-		if (NumberFont != NULL)
-		{
-			NumberFont->Release();
-			NumberFont = NULL;
-		}
-		if (ComboFont != NULL)
-		{
-			ComboFont->Release();
-			ComboFont = NULL;
-		}
-		if (NoDISC != NULL)
-		{
-			NoDISC->Release();
-			NoDISC = NULL;
-		}
-		if (ShiftLeft != NULL)
-		{
-			ShiftLeft->Release();
-			ShiftRight = NULL;
-		}
-		if (ShiftRight != NULL)
-		{
-			ShiftRight->Release();
-			ShiftRight = NULL;
-		}
-		if (GaugeWaku != NULL)
-		{
-			GaugeWaku->Release();
-			GaugeWaku = NULL;
-		}
-		if (Gauge != NULL)
-		{
-			Gauge->Release();
-			Gauge = NULL;
-		}
-		if (SmallFont != NULL)
-		{
-			SmallFont->Release();
-			SmallFont = NULL;
-		}
-		if (Arrow1 != NULL)
-		{
-			Arrow1->Release();
-			Arrow1 = NULL;
-		}
-		if (Arrow2 != NULL)
-		{
-			Arrow2->Release();
-			Arrow2 = NULL;
-		}
-		if (wArrow != NULL)
-		{
-			wArrow->Release();
-			wArrow = NULL;
-		}
-		if (pArrow1 != NULL)
-		{
-			pArrow1->Release();
-			pArrow1 = NULL;
-		}
-		if (pArrow3 != NULL)
-		{
-			pArrow3->Release();
-			pArrow3 = NULL;
-		}
-		if (pArrow5 != NULL)
-		{
-			pArrow5->Release();
-			pArrow5 = NULL;
-		}
-		if (pArrow7 != NULL)
-		{
-			pArrow7->Release();
-			pArrow7 = NULL;
-		}
-		if (pArrow9 != NULL)
-		{
-			pArrow9->Release();
-			pArrow9 = NULL;
-		}
-		if(	cArrow1	!= NULL)
-		{
-			cArrow1->Release();
-			cArrow1 = NULL;
-		}
-		if(	cArrow3	!= NULL)
-		{
-			cArrow3->Release();
-			cArrow3 = NULL;
-		}
-		if(	cArrow5	!= NULL)
-		{
-			cArrow5->Release();
-			cArrow5 = NULL;
-		}
-		if(	cArrow7	!= NULL)
-		{
-			cArrow7->Release();
-			cArrow7 = NULL;
-		}
-		if(	cArrow9	!= NULL)
-		{
-			cArrow9->Release();
-			cArrow9 = NULL;
-		}
-		if(	ModeIcon != NULL)
-		{
-			ModeIcon->Release();
-			ModeIcon = NULL;
-		}
-		if( g_cFont != NULL)
-		{
-			g_cFont->Release();
-			g_cFont = NULL;
-		}
-		if( ResultFont != NULL)
-		{
-			ResultFont->Release();
-			ResultFont = NULL;
-		}
-		if( ResultBack != NULL)
-		{
-			ResultBack->Release();
-			ResultBack = NULL;
-		}
-		if( StageCount != NULL)
-		{
-			StageCount->Release();
-			StageCount = NULL;
-		}
-		if( Score != NULL)
-		{
-			Score->Release();
-			Score = NULL;
-		}
-		if( DeadScreen != NULL)
-		{
-			DeadScreen->Release();
-			DeadScreen = NULL;
-		}
-		if( GameOver != NULL)
-		{
-			GameOver->Release();
-			GameOver=NULL;
-		}
-		if( Logo != NULL)
-		{
-			Logo->Release();
-			Logo=NULL;
-		}
-		if( Diff != NULL)
-		{
-			Diff->Release();
-			Diff=NULL;
-		}
-		if( DoubleIcon != NULL)
-		{
-			DoubleIcon->Release();
-			DoubleIcon=NULL;
-		}
-		if( CrazyIcon != NULL)
-		{
-			CrazyIcon->Release();
-			CrazyIcon=NULL;
-		}
-		if( EasyIcon != NULL)
-		{
-			EasyIcon->Release();
-			EasyIcon=NULL;
-		}
-		if( HardIcon != NULL)
-		{
-			HardIcon->Release();
-			HardIcon=NULL;
-		}
-        g_pDD->Release();
-        g_pDD = NULL;
-
-		ReleaseDSound();
-		CleanupInput();
-	}
+	if(Crash3)  cArrow3.BltFast( 545, 43,  gScreen, &cArr3 );
+	else if(s3) pArrow3.BltFast( 547, 45,  gScreen, &pArr3 );
 }
 
 void UpdateFrame(void)
 {
 	// FPS count start
-	static DWORD lastTime, fpsTime,framesRendered,fps;
+	static Uint32 lastTime, fpsTime,framesRendered,fps;
 
 	char	buff[50];
-	DWORD	cur = timeGetTime();
-	DWORD	deltaTime = cur - lastTime;
+	Uint32	cur = SDL_GetTicks();
+	Uint32	deltaTime = cur - lastTime;
 	lastTime = cur;
 
 	fpsTime += deltaTime;
 
 	++framesRendered;
 
-	if(fpsTime>1000)
-	{
+	if(fpsTime>1000) {
 		fps = framesRendered;
 		framesRendered = 0;
 		fpsTime = 0;
@@ -3866,8 +3420,8 @@ void UpdateFrame(void)
 	sprintf(buff,"FPS:%3d",fps);
 	DisplayMessage(583,463,buff);
 
-	switch(g_ProgramState)
-	{
+	gpSystem->update();
+	switch(g_ProgramState) {
 		case GAMETITLE:
 			StageTitle();
 			break;
@@ -3877,7 +3431,7 @@ void UpdateFrame(void)
 		case STAGE1:
 			KIU_STAGE();
 			break;
-		case DOUBLE:
+		case DOUBLEST:
 			KIU_STAGE_DOUBLE();
 			break;
 		case COUPLE:
@@ -3896,7 +3450,9 @@ void UpdateFrame(void)
 			GameOver1();
 			break;
 		case END:
-			PostMessage(hWnd, WM_CLOSE, 0, 0);
+            SDL_Event   event;
+            event.type = SDL_QUIT;
+            SDL_PushEvent( &event );
 			break;
 		default:
 			break;
@@ -3904,1110 +3460,442 @@ void UpdateFrame(void)
 
 }
 
-long FAR PASCAL WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
-{
-	switch (message)
-    {
-			case WM_MOVE:
-				if(!g_fullscreen)
-				{
-					GetClientRect(hWnd, &g_rcViewport);
-					GetClientRect(hWnd, &g_rcScreen);
-					ClientToScreen(hWnd, (POINT*)&g_rcScreen.left);
-					ClientToScreen(hWnd, (POINT*)&g_rcScreen.right);
-				}
-				break;
-			/*case WM_PAINT:
-				UpdateFrame();
-				break;*/
-
-			case WM_ACTIVATEAPP:
-				g_bActive=wParam;
-				break;
-
-			case WM_KEYDOWN:
-            // Handle any non-accelerated key commands
-            switch (wParam)
-            {
-				case VK_F12:
-					PostMessage(hWnd, WM_CLOSE, 0, 0);
-					return 0L;
-/* SelectSong, StageTitleø°º≠ ¬¸¡∂«’¥œ¥Ÿ.
-   √ﬂ»ƒø° πŸ≤„¡÷æÓæﬂ «’¥œ¥Ÿ.
-   */
-				case VK_F2:
-					First=0;
-					switch(g_ProgramState)
-					{
-						case GAMETITLE:
-							First=0;
-							if(g_dsOpening)g_dsOpening->Stop();
-							g_ProgramState=CONFIG;
-
-							break;
-
-						case SELECTSONG:
-							g_ProgramState=CONFIG;
-							if(IntroFlag){intro->OnMediaStop();delete intro;IntroFlag=FALSE;}
-							if(g_dsSelectSong)g_dsSelectSong->Stop();
-							First=0;
-							break;
-
-						case STAGE1:
-							if(SongFlag)
-							{
-								song->OnMediaStop();
-								delete song;
-								SongFlag=FALSE;
-							}
-							g_ProgramState=CONFIG;
-							break;
-						case DOUBLE:
-							if(SongFlag)
-							{
-								song->OnMediaStop();
-								delete song;
-								SongFlag=FALSE;
-							}
-							g_ProgramState=CONFIG;
-							break;
-						case COUPLE:
-							if(SongFlag)
-							{
-								song->OnMediaStop();
-								delete song;
-								SongFlag=FALSE;
-							}
-							g_ProgramState=CONFIG;
-							break;
-						case CONFIG:
-							g_ProgramState=CONFIG;
-							break;
-					}
-					break;
-
-				case VK_UP:
-					switch(g_ProgramState)
-					{
-						case GAMETITLE:
-							PressedKey2p[0]=8;
-							break;
-						case SELECTSONG:
-							PressedKey2p[0]=8;
-							break;
-						case CONFIG:
-							PressedKey2p[0]=8;
-							break;
-					}
-					break;
-				case VK_DOWN:
-					switch(g_ProgramState)
-					{
-						case GAMETITLE:
-							PressedKey2p[0]=2;
-							break;
-						case SELECTSONG:
-							PressedKey2p[0]=2;
-						case CONFIG:
-							PressedKey2p[0]=2;
-							break;
-					}
-					break;
-
-				case VK_LEFT:
-					switch(g_ProgramState)
-					{
-						case SELECTSONG:
-							PressedKey2p[0]=4;
-							break;
-						case CONFIG:
-							PressedKey2p[0]=4;
-							break;
-					}
-					break;
-				case VK_RIGHT:
-					switch(g_ProgramState)
-					{
-						case SELECTSONG:
-							PressedKey2p[0]=6;
-							break;
-						case CONFIG:
-							PressedKey2p[0]=6;
-							break;
-					}
-					break;
-
-				case VK_RETURN:
-					switch(g_ProgramState)
-					{
-						case SELECTSONG:
-							PressedKey2p[0]=3;
-							break;
-						case CONFIG:
-							PressedKey2p[0]=3;
-							break;
-					}
-					break;
-
-/* ø©±‚±Ó¡ˆ ¿‘¥œ¥Ÿ. */
-
-				case VK_ESCAPE:
-				{
-					switch(g_ProgramState)
-					{
-						case GAMETITLE:
-							CFGWrite();
-							PostMessage(hWnd, WM_CLOSE, 0, 0);
-							return 0L;
-							break;
-
-						case SELECTSONG:
-							g_ProgramState=GAMETITLE;
-							if(IntroFlag){intro->OnMediaStop();delete intro;IntroFlag=FALSE;}
-							if(g_dsSelectSong)g_dsSelectSong->Stop();
-							First=0;
-							break;
-
-						case STAGE1:
-							if(SongFlag)
-							{
-								song->OnMediaStop();
-								delete song;
-								SongFlag=FALSE;
-							}
-							First=0;
-							g_ProgramState=RESULT;
-							break;
-						case DOUBLE:
-							if(SongFlag)
-							{
-								song->OnMediaStop();
-								delete song;
-								SongFlag=FALSE;
-							}
-							First=0;
-							g_ProgramState=RESULT;
-							break;
-						case COUPLE:
-							if(SongFlag)
-							{
-								song->OnMediaStop();
-								delete song;
-								SongFlag=FALSE;
-							}
-							First=0;
-							g_ProgramState=RESULT;
-							break;
-						case CONFIG:
-							First=0;
-							CFGWrite();
-							g_ProgramState=GAMETITLE;
-							break;
-						case RESULT:
-							First=0;
-							g_ProgramState=SELECTSONG;
-							break;
-					}
-				}
-
-			}
-            break;
-
-			case WM_DESTROY:
-				ReleaseAllObjects();
-				PostQuitMessage(0);
-				return 0L;
-			case WM_SETCURSOR:
-            // Turn off the cursor since this is a full-screen app
-	            SetCursor(NULL);
-            return TRUE;
-
-    }
-    return DefWindowProc(hWnd, message, wParam, lParam);
-}
-
-HRESULT InitFail(HWND hWnd, HRESULT hRet, LPCTSTR szError,...)
-{
-	char                        szBuff[128];
-	va_list                     vl;
-
-	va_start(vl, szError);
-	vsprintf(szBuff, szError, vl);
-	ReleaseAllObjects();
-	MessageBox(hWnd, szBuff, TITLE, MB_OK);
-	DestroyWindow(hWnd);
-	va_end(vl);
-	return hRet;
-}
-
-HRESULT	InitWin(HINSTANCE hInstance, DWORD Width, DWORD Height, int nCmdShow)
-{
-	WNDCLASS	wc;
-
-	DWORD		dwExStyle;				// Window Extended Style
-	DWORD		dwStyle;				// Window Style
-
-	RECT		WindowRect;				// Grabs Rectangle Upper Left / Lower Right Values
-	WindowRect.left=(long)0;			// Set Left Value To 0
-	WindowRect.right=(long)Width;		// Set Right Value To Requested Width
-	WindowRect.top=(long)0;				// Set Top Value To 0
-	WindowRect.bottom=(long)Height;		// Set Bottom Value To Requested Height
-
-// Detect os version (for title bar)
-	OSVERSIONINFO osver;
-
-	osver.dwOSVersionInfoSize=sizeof(osver);
-	GetVersionEx(&osver);
-// Os ver detect finished.
-
-	// Set up and register window class
-    wc.style = CS_HREDRAW | CS_VREDRAW;
-    wc.lpfnWndProc = WindowProc;
-    wc.cbClsExtra = 0;
-    wc.cbWndExtra = 0;
-    wc.hInstance = hInstance;
-    wc.hIcon = LoadIcon(0, MAKEINTRESOURCE(IDI_ICON));
-    wc.hCursor = LoadCursor(NULL, IDC_ARROW);
-    wc.hbrBackground = (HBRUSH )GetStockObject(BLACK_BRUSH);
-    wc.lpszMenuName = PRGNAME;
-    wc.lpszClassName = PRGNAME;
-
-    RegisterClass(&wc);
-
-	if (g_fullscreen)												// Are We Still In Fullscreen Mode?
-	{
-		dwExStyle=WS_EX_APPWINDOW;								// Window Extended Style
-		dwStyle=WS_POPUP;										// Windows Style
-		ShowCursor(FALSE);										// Hide Mouse Pointer
-	}
-	else
-	{
-		dwExStyle=WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;			// Window Extended Style
-		dwStyle=WS_POPUP | WS_SYSMENU | WS_CAPTION;							// Windows Style
-	}
-
-	AdjustWindowRectEx(&WindowRect, dwStyle, FALSE, dwExStyle);		// Adjust Window To True Requested Size
-
-	sprintf(TITLE, "KICK IT UP! beta version v%s - Minor release / Compiled at %s / %s / Windows %d.%d.%d" ,VER_NUM, __DATE__, __TIME__, osver.dwMajorVersion, osver.dwMinorVersion, LOWORD(osver.dwBuildNumber));
-
-    // Create a window
-    hWnd = CreateWindowEx(dwExStyle ,	
-							PRGNAME,
-							TITLE,
-							dwStyle,
-							0, 0,								// Window Position
-							WindowRect.right-WindowRect.left,	// Calculate Window Width
-							WindowRect.bottom-WindowRect.top,	// Calculate Window Height
-							NULL,
-							NULL,
-							hInstance,
-							NULL);
-    if (!hWnd)
-        return FALSE;
-    ShowWindow(hWnd, nCmdShow);
-    UpdateWindow(hWnd);
-    SetFocus(hWnd);
-
-	g_hInst=hInstance;
-	return DD_OK;
-
-}
-
-HRESULT InitDD(void)
-{
-	DDSURFACEDESC			ddsd;
-	DDSCAPS					ddscaps;
-
-	HRESULT					hRet;
-
-	LPDIRECTDRAWCLIPPER		pClipper;
-
-	hRet=DirectDrawCreate(NULL,&g_pDD,NULL);
-	if(hRet !=DD_OK)
-		return	InitFail(hWnd,hRet,"Cannot Creat DirectDraw");
-
-	if(g_fullscreen)
-	{
-		hRet=g_pDD->SetCooperativeLevel(hWnd,DDSCL_EXCLUSIVE|DDSCL_FULLSCREEN|DDSCL_ALLOWREBOOT);
-		if(hRet !=DD_OK)
-			return InitFail(hWnd,hRet,"Cannot set cooperative");
-
-		hRet=g_pDD->SetDisplayMode(640,480,16);
-		if(hRet !=DD_OK)
-			return InitFail(hWnd,hRet,"Cannot set display mode");
-
-		// Create the primary surface
-		memset(&ddsd, 0, sizeof(ddsd));
-		ddsd.dwSize = sizeof(ddsd);
-		ddsd.dwFlags = DDSD_CAPS | DDSD_BACKBUFFERCOUNT; 
-		ddsd.ddsCaps.dwCaps = DDSCAPS_PRIMARYSURFACE |
-							  DDSCAPS_FLIP |
-							  DDSCAPS_COMPLEX;
-		ddsd.dwBackBufferCount = 2;
-
-		g_pDD->CreateSurface(&ddsd,&g_pDDSPrimary,NULL);
-
-		ddsd.ddsCaps.dwCaps=DDSCAPS_OFFSCREENPLAIN;
-
-		// Get a pointer to the back buffer
-		ddscaps.dwCaps = DDSCAPS_BACKBUFFER;
-		hRet=g_pDDSPrimary->GetAttachedSurface(&ddscaps, &g_pDDSBack);
-		if(hRet != DD_OK)
-		{
-			return InitFail(hWnd,hRet,"Cannot Attached surface");
-		}
-	}
-	else
-	{
-		hRet=g_pDD->SetCooperativeLevel(hWnd,DDSCL_NORMAL);
-		if(hRet !=DD_OK)
-			return InitFail(hWnd,hRet,"Cannot set cooperative");
-
-    	GetClientRect(hWnd, &g_rcViewport);
-    	GetClientRect(hWnd, &g_rcScreen);
-    	ClientToScreen(hWnd, (POINT*)&g_rcScreen.left);
-    	ClientToScreen(hWnd, (POINT*)&g_rcScreen.right);
-
-		// Create the primary surface
-		memset(&ddsd, 0, sizeof(ddsd));
-		ddsd.dwSize = sizeof(ddsd);
-		ddsd.dwFlags = DDSD_CAPS ; 
-		ddsd.ddsCaps.dwCaps = DDSCAPS_PRIMARYSURFACE;
-
-		g_pDD->CreateSurface(&ddsd,&g_pDDSPrimary,NULL);
-
-		hRet=g_pDD->CreateClipper(0, &pClipper, NULL);
-		
-		if(hRet != DD_OK)
-		return InitFail(hWnd,hRet,"CreateClipper() : FAILED");
-
-		pClipper->SetHWnd(0, hWnd);
-//	MessageBox(hWnd, "hi","hi", MB_OK);
-
-		g_pDDSPrimary->SetClipper(pClipper);
-
-		pClipper->Release();
-		pClipper=NULL;
-
-        ddsd.dwFlags        = DDSD_WIDTH | DDSD_HEIGHT | DDSD_CAPS;
-        ddsd.dwWidth        = 640;
-        ddsd.dwHeight       = 480;
-		ddsd.ddsCaps.dwCaps=DDSCAPS_OFFSCREENPLAIN;
-
-		// Get a pointer to the back buffer
-		//ddscaps.dwCaps = DDSCAPS_BACKBUFFER;
-        hRet = g_pDD->CreateSurface(&ddsd, &g_pDDSBack, NULL);
-		if(hRet != DD_OK)
-		{
-			return InitFail(hWnd,hRet,"Cannot Attached surface");
-		}
-	}
-	return	hRet;
-}
-
-HRESULT KLoadImage(void)
+bool KLoadImage(void)
 {
 	// Loading image here
 	
-	SmallFont=DDLoadBitmap(g_pDD,"images\\sfont.bmp",0,0);
-	if(SmallFont==NULL)
-	{
-		MessageBox(hWnd,"Cannot Load Font.","ERROR",0);
-		return FALSE;
-	}
-	DDSetColorKey(SmallFont,CLR_INVALID);
-
+	if( !gGameTitle.LoadBmp( "images/title.bmp" ) )
+		return false;
+	
+	if( !gStateComment.LoadBmp( "images/c_font.bmp" ) )
+		return false;
+	gStateComment.SetColorKey();
+	
+	if( !gSmallFont.LoadBmp( "images/s_font.bmp" ) )
+		return false;
+	gSmallFont.SetColorKey();
+	
+	if( !gSelectBack.LoadBmp( "images/select_back.bmp" ) )
+	return false;
+	
 	DisplayMessage(0,0,"Loading Image");
-
-	GameTITLE = DDLoadBitmap(g_pDD,"images\\Title.bmp",0,0);
-	if(GameTITLE == NULL)
-	{
-		MessageBox(hWnd,"Cannot Load GAMETITLE","ERROR",0);
-		return FALSE;
-	}
-
-	Background = DDLoadBitmap(g_pDD,"images\\back.bmp",0,0);
-	if(Background==NULL)
-	{
-		MessageBox(hWnd,"Cannot Load Background.","ERROR",0);
-		return FALSE;
-	}
-
-	SelectBack = DDLoadBitmap(g_pDD,"images\\SelectBack.bmp",0,0);
-	if(SelectBack==NULL)
-	{
-		MessageBox(hWnd,"Cannot Load Select Background.","ERROR",0);
-		return FALSE;
-	}
-
-	JudgeFont = DDLoadBitmap(g_pDD,"images\\Judgement.bmp",0,0);
-	if(JudgeFont==NULL)
-	{
-		MessageBox(hWnd,"Cannot Load Judgement Font.","ERROR",0);
-		return FALSE;
-	}
-	DDSetColorKey(JudgeFont,CLR_INVALID);
 	
-	NumberFont = DDLoadBitmap(g_pDD,"images\\Number.bmp",0,0);
-	if(NumberFont==NULL)
-	{
-		MessageBox(hWnd,"Cannot Load Number Font.","ERROR",0);
-		return FALSE;
+	if( !JudgeFont.LoadBmp( "images/judgement.bmp" ) ) {
+		MsgBox("Cannot Load judgement Font.","ERROR",0);
+		return false;
 	}
-	DDSetColorKey(NumberFont,CLR_INVALID);
-
-	ComboFont = DDLoadBitmap(g_pDD,"images\\Combo.bmp",0,0);
-	if(ComboFont==NULL)
-	{
-		MessageBox(hWnd,"Cannot Load Combo Font.","ERROR",0);
-		return FALSE;
-	}
-	DDSetColorKey(ComboFont,CLR_INVALID);
-
-	NoDISC=DDLoadBitmap(g_pDD,"images\\nodisc.bmp",0,0);
-	if(NoDISC==NULL)
-	{
-		MessageBox(hWnd,"Cannot Load NoDISC.bmp",0,0);
-		return FALSE;
-	}
-	DDSetColorKey(NoDISC,CLR_INVALID);
-
-	ShiftLeft=DDLoadBitmap(g_pDD,"images\\Shiftl.bmp",0,0);
-	if(ShiftLeft==NULL)
-	{
-		MessageBox(hWnd,"Cannot Load Shiftl.bmp",0,0);
-		return FALSE;
-	}
-	DDSetColorKey(ShiftLeft,CLR_INVALID);
-
-	ShiftRight=DDLoadBitmap(g_pDD,"images\\Shiftr.bmp",0,0);
-	if(ShiftRight==NULL)
-	{
-		MessageBox(hWnd,"Cannot Load Shiftr.bmp",0,0);
-		return FALSE;
-	}
-	DDSetColorKey(ShiftRight,CLR_INVALID);
-
-	GaugeWaku=DDLoadBitmap(g_pDD,"images\\GaugeWaku.bmp",0,0);
-	if(GaugeWaku==NULL)
-	{
-		MessageBox(hWnd,"Cannot Load GaugeWaku.bmp",0,0);
-		return FALSE;
-	}
-	DDSetColorKey(GaugeWaku,CLR_INVALID);
-
-	Gauge=DDLoadBitmap(g_pDD,"images\\Gauge.bmp",0,0);
-	if(Gauge==NULL)
-	{
-		MessageBox(hWnd,"Cannot Load Gauge.bmp",0,0);
-		return FALSE;
-	}
-	DDSetColorKey(Gauge,CLR_INVALID);
+	JudgeFont.SetColorKey();
 	
-	Arrow1=DDLoadBitmap(g_pDD,MAKEINTRESOURCE(IDB_ARROW1),0,0);
-	if(Arrow1==NULL)
-	{
-		MessageBox(hWnd,"Cannot Load Arrow1.bmp",0,0);
-		return FALSE;
+	if( !gNumberFont.LoadBmp( "images/number.bmp" ) ) {
+		MsgBox("Cannot Load number Font.","ERROR",0);
+		return false;
 	}
-	DDSetColorKey(Arrow1,CLR_INVALID);
-	Arrow2=DDLoadBitmap(g_pDD,MAKEINTRESOURCE(IDB_ARROW2),0,0);
-	if(Arrow2==NULL)
-	{
-		MessageBox(hWnd,"Cannot Load arrow2.bmp",0,0);
-		return FALSE;
+	gNumberFont.SetColorKey();
+	
+	if( !ComboFont.LoadBmp( "images/combo.bmp" ) ) {
+		MsgBox("Cannot Load combo Font.","ERROR",0);
+		return false;
 	}
-	DDSetColorKey(Arrow2,CLR_INVALID);
+	ComboFont.SetColorKey();
+	
+	if( !gNoDISC.LoadBmp( "images/no_disc.bmp" ) ) {
+		MsgBox("Cannot Load nodisc.bmp",0,0);
+		return false;
+	}
+	gNoDISC.SetColorKey();
+	
+	if( !gShiftLeft.LoadBmp( "images/shift_l.bmp" ) ) {
+		MsgBox("Cannot Load shift_l.bmp",0,0);
+		return false;
+	}
+	gShiftLeft.SetColorKey();
+	
+	if( !gShiftRight.LoadBmp( "images/shift_r.bmp" ) ) {
+		MsgBox("Cannot Load shift_r.bmp",0,0);
+		return false;
+	}
+	gShiftRight.SetColorKey();
+	
+	if( !GaugeWaku.LoadBmp( "images/gauge_waku.bmp" ) ) {
+		MsgBox("Cannot Load gauge_waku.bmp",0,0);
+		return false;
+	}
+	GaugeWaku.SetColorKey();
+	
+	if( !Gauge.LoadBmp( "images/gauge.bmp" ) ) {
+		MsgBox("Cannot Load gauge.bmp",0,0);
+		return false;
+	}
+	Gauge.SetColorKey();
+	
+	if( !gArrow1.LoadBmp( "images/arrow1.bmp" ) ) {
+		MsgBox("Cannot Load arrow1.bmp",0,0);
+		return false;
+	}
+	gArrow1.SetColorKey();
+	
+	if( !gArrow2.LoadBmp( "images/arrow2.bmp" ) ) {
+		MsgBox("Cannot Load Arrow2.bmp",0,0);
+		return false;
+	}
+	gArrow2.SetColorKey();
+	
+	if( !gWArrow.LoadBmp( "images/arrow.bmp" ) ) {
+		MsgBox("Cannot Load arrow.bmp",0,0);
+		return false;
+	}
+	gWArrow.SetColorKey();
+	
+	if( !pArrow1.LoadBmp( "images/p_arrow1.bmp" ) ) {
+		MsgBox("Cannot Load p_arrow1.bmp",0,0);
+		return false;
+	}
+	pArrow1.SetColorKey();
+	
+	if( !pArrow3.LoadBmp( "images/p_arrow3.bmp" ) ) {
+		MsgBox("Cannot Load p_arrow3.bmp",0,0);
+		return false;
+	}
+	pArrow3.SetColorKey();
+	
+	if( !pArrow5.LoadBmp( "images/p_arrow5.bmp" ) ) {
+		MsgBox("Cannot Load p_arrow5.bmp",0,0);
+		return false;
+	}
+	pArrow5.SetColorKey();
+	
+	if( !pArrow7.LoadBmp( "images/p_arrow7.bmp" ) ) {
+		MsgBox("Cannot Load p_arrow7.bmp",0,0);
+		return false;
+	}
+	pArrow7.SetColorKey();
+	
+	if( !pArrow9.LoadBmp( "images/p_arrow9.bmp" ) ) {
+		MsgBox("Cannot Load p_arrow9.bmp",0,0);
+		return false;
+	}
+	pArrow9.SetColorKey();
+	
+	if( !cArrow1.LoadBmp( "images/c_arrow1.bmp" ) ) {
+		MsgBox("Cannot Load c_arrow.bmp",0,0);
+		return false;
+	}
+	cArrow1.SetColorKey();
+	
+	if( !cArrow3.LoadBmp( "images/c_arrow3.bmp" ) ) {
+		MsgBox("Cannot Load c_arrow3.bmp",0,0);
+		return false;
+	}
+	cArrow3.SetColorKey();
+	
+	if( !cArrow5.LoadBmp( "images/c_arrow5.bmp" ) ) {
+		MsgBox("Cannot Load c_arrow5.bmp",0,0);
+		return false;
+	}
+	cArrow5.SetColorKey();
+	
+	if( !cArrow7.LoadBmp( "images/c_arrow7.bmp" ) ) {
+		MsgBox("Cannot Load c_arrow7.bmp",0,0);
+		return false;
+	}
+	cArrow7.SetColorKey();
+	
+	if( !cArrow9.LoadBmp( "images/c_arrow9.bmp" ) ) {
+	MsgBox("Cannot Load c_arrow9.bmp",0,0);
+	return false;
+	}
+	cArrow9.SetColorKey();
+	
+	
+	if( !gModeIcon.LoadBmp( "images/mode_icon.bmp" ) ) {
+		MsgBox("Cannot Load mode_Icon.bmp",0,0);
+		return false;
+	}
+	gModeIcon.SetColorKey();
+	
+	if( !ResultFont.LoadBmp( "images/res_font.bmp" ) ) {
+		MsgBox("Cannot Load res_font.bmp",0,0);
+		return	false;
+	}
+	ResultFont.SetColorKey();
+	
+	if( !ResultBack.LoadBmp( "images/res_back.bmp" ) ) {
+		MsgBox("Cannot Load res_back.bmp",0,0);
+		return false;
+	}
+	if( !gStageCount.LoadBmp( "images/stage_count.bmp" ) ) {
+		MsgBox("Cannot Load stage_count.bmp",0,0);
+		return false;
+	}
+	gStageCount.SetColorKey();
+	
+	if( !DeadScreen.LoadBmp( "images/dead.bmp" ) ) {
+		MsgBox("Cannot Load dead.bmp",0,0);
+		return false;
+	}
+	
+	if( !GameOver.LoadBmp( "images/game_over.bmp" ) ) {
+		MsgBox("Cannot Load game_over.bmp",0,0);
+		return false;
+	 }
+	
+	 if( !Score.LoadBmp( "images/score.bmp" ) ) {
+		MsgBox("Cannot Load score.bmp",0,0);
+		return false;
+	}
+	Score.SetColorKey();
 
-	wArrow=DDLoadBitmap(g_pDD,MAKEINTRESOURCE(ID_ARROW),0,0);
-	if(wArrow==NULL)
-	{
-		MessageBox(hWnd,"Cannot Load arrow.bmp",0,0);
-		return FALSE;
+	if( !gDoubleIcon.LoadBmp("images/double_icon.bmp") ) {
+		MsgBox( "Cannot Load double_icon.bmp", 0, 0 );
 	}
-	DDSetColorKey(wArrow,CLR_INVALID);
-	CKey_Arr=DDColorMatch(wArrow,CLR_INVALID);
+	gDoubleIcon.SetColorKey();
 
-	pArrow1=DDLoadBitmap(g_pDD,MAKEINTRESOURCE(IDB_PARROW1),0,0);
-	if(pArrow1==NULL)
-	{
-		MessageBox(hWnd,"Cannot Load pArrow.bmp",0,0);
-		return FALSE;
+	if( !gCrazyIcon.LoadBmp("images/crazy_icon.bmp") )  {
+		MsgBox( "Cannot Load crazy_icon.bmp", 0, 0 );
 	}
-	DDSetColorKey(pArrow1,CLR_INVALID);
+    	gCrazyIcon.SetColorKey();
 
-	pArrow3=DDLoadBitmap(g_pDD,MAKEINTRESOURCE(IDB_PARROW3),0,0);
-	if(pArrow3==NULL)
-	{
-		MessageBox(hWnd,"Cannot Load pArrow.bmp",0,0);
-		return FALSE;
+    	if( !gEasyIcon.LoadBmp("images/easy_icon.bmp") ) {
+		MsgBox( "Cannot Load crazy_icon.bmp", 0, 0 );
 	}
-	DDSetColorKey(pArrow3,CLR_INVALID);
+    	gEasyIcon.SetColorKey();
 
-	pArrow5=DDLoadBitmap(g_pDD,MAKEINTRESOURCE(IDB_PARROW5),0,0);
-	if(pArrow5==NULL)
-	{
-		MessageBox(hWnd,"Cannot Load pArrow5.bmp",0,0);
-		return FALSE;
+	if( !gHardIcon.LoadBmp("images/hard_icon.bmp") ) {
+		MsgBox( "Cannot Load hard_icon.bmp", 0, 0 );
 	}
-	DDSetColorKey(pArrow5,CLR_INVALID);
+    	gHardIcon.SetColorKey();
 
-	pArrow7=DDLoadBitmap(g_pDD,MAKEINTRESOURCE(IDB_PARROW7),0,0);
-	if(pArrow7==NULL)
-	{
-		MessageBox(hWnd,"Cannot Load pArrow7.bmp",0,0);
-		return FALSE;
-	}
-	DDSetColorKey(pArrow7,CLR_INVALID);
-	pArrow9=DDLoadBitmap(g_pDD,MAKEINTRESOURCE(IDB_PARROW9),0,0);
-	if(pArrow9==NULL)
-	{
-		MessageBox(hWnd,"Cannot Load pArrow9.bmp",0,0);
-		return FALSE;
-	}
-	DDSetColorKey(pArrow9,CLR_INVALID);
-
-	cArrow1=DDLoadBitmap(g_pDD,MAKEINTRESOURCE(IDB_CARROW1),0,0);
-	if(cArrow1==NULL)
-	{
-		MessageBox(hWnd,"Cannot Load cArrow.bmp",0,0);
-		return FALSE;
-	}
-	DDSetColorKey(cArrow1,CLR_INVALID);
-	cArrow3=DDLoadBitmap(g_pDD,MAKEINTRESOURCE(IDB_CARROW3),0,0);
-	if(cArrow3==NULL)
-	{
-		MessageBox(hWnd,"Cannot Load cArrow.bmp",0,0);
-		return FALSE;
-	}
-	DDSetColorKey(cArrow3,CLR_INVALID);
-
-	cArrow5=DDLoadBitmap(g_pDD,MAKEINTRESOURCE(IDB_CARROW5),0,0);
-	if(cArrow5==NULL)
-	{
-		MessageBox(hWnd,"Cannot Load cArrow5.bmp",0,0);
-		return FALSE;
-	}
-	DDSetColorKey(cArrow5,CLR_INVALID);
-
-	cArrow7=DDLoadBitmap(g_pDD,MAKEINTRESOURCE(IDB_CARROW7),0,0);
-	if(cArrow7==NULL)
-	{
-		MessageBox(hWnd,"Cannot Load cArrow7.bmp",0,0);
-		return FALSE;
-	}
-	DDSetColorKey(cArrow7,CLR_INVALID);
-	cArrow9=DDLoadBitmap(g_pDD,MAKEINTRESOURCE(IDB_CARROW9),0,0);
-	if(cArrow9==NULL)
-	{
-		MessageBox(hWnd,"Cannot Load cArrow9.bmp",0,0);
-		return FALSE;
-	}
-	DDSetColorKey(cArrow9,CLR_INVALID);
-	ModeIcon=DDLoadBitmap(g_pDD, "images\\ModeIcon.bmp",0,0);
-	if(ModeIcon==NULL)
-	{
-		MessageBox(hWnd,"Cannot Load ModeIcon.bmp",0,0);
-		return FALSE;
-	}
-	DDSetColorKey(ModeIcon, CLR_INVALID);
-	g_cFont=DDLoadBitmap(g_pDD, "images\\CFont.bmp",0,0);
-	if(g_cFont==NULL)
-	{
-		MessageBox(hWnd,"Cannot Load CFont.bmp",0,0);
-		return	FALSE;
-	}
-	DDSetColorKey(g_cFont, CLR_INVALID);
-	CKey_CFont=DDColorMatch(g_cFont,CLR_INVALID);
-
-	ResultFont=DDLoadBitmap(g_pDD, "images\\ResFont.bmp",0,0);
-	if(ResultFont==NULL)
-	{
-		MessageBox(hWnd,"Cannot Load ResFont.bmp",0,0);
-		return	FALSE;
-	}
-	DDSetColorKey(ResultFont, CLR_INVALID);
-	ResultBack=DDLoadBitmap(g_pDD, "images\\ResBack.bmp",0,0);
-	if(ResultBack==NULL)
-	{
-		MessageBox(hWnd,"Cannot Load ResBack.bmp",0,0);
-		return FALSE;
-	}
-	StageCount=DDLoadBitmap(g_pDD, "images\\StageCount.bmp",0,0);
-	if(StageCount==NULL)
-	{
-		MessageBox(hWnd,"Cannot Load StageCount.bmp",0,0);
-		return FALSE;
-	}
-	DDSetColorKey(StageCount, CLR_INVALID);
-
-	Score=DDLoadBitmap(g_pDD,"images\\Score.bmp",0,0);
-	if(Score==NULL)
-	{
-		MessageBox(hWnd,"Cannot Load Score.bmp",0,0);
-		return FALSE;
-	}
-	DDSetColorKey(Score,CLR_INVALID);
-
-	DeadScreen=DDLoadBitmap(g_pDD,"images\\Dead.bmp",0,0);
-	if(DeadScreen==NULL)
-	{
-		MessageBox(hWnd,"Cannot Load DeadScreen.bmp",0,0);
-		return FALSE;
-	}
-	GameOver=DDLoadBitmap(g_pDD,"images\\GameOver.bmp",0,0);
-	if(GameOver==NULL)
-	{
-		MessageBox(hWnd,"Cannot Load GameOver.bmp",0,0);
-		return FALSE;
-	}
-	Logo=DDLoadBitmap(g_pDD,"images\\Logo.bmp",0,0);
-	if(Logo==NULL)
-	{
-		MessageBox(hWnd,"Cannot Load Logo.bmp",0,0);
-		return FALSE;
-	}
-	DDSetColorKey(Logo,CLR_INVALID);
-	Diff=DDLoadBitmap(g_pDD,"images\\Diff.bmp",0,0);
-	if(Diff==NULL)
-	{
-		MessageBox(hWnd,"Cannot Load Diff.bmp",0,0);
-		return FALSE;
-	}
-	DDSetColorKey(Diff,CLR_INVALID);
-	DoubleIcon=DDLoadBitmap(g_pDD,"images\\DoubleIcon.bmp",0,0);
-	if(DoubleIcon==NULL)
-	{
-		MessageBox(hWnd,"Cannot Load DoubleIcon.bmp",0,0);
-		return FALSE;
-	}
-	DDSetColorKey(DoubleIcon,CLR_INVALID);
-	CrazyIcon=DDLoadBitmap(g_pDD,"images\\CrazyIcon.bmp",0,0);
-	if(CrazyIcon==NULL)
-	{
-		MessageBox(hWnd,"Cannot Load CrazyIcon.bmp",0,0);
-		return FALSE;
-	}
-	DDSetColorKey(CrazyIcon,CLR_INVALID);
-	EasyIcon=DDLoadBitmap(g_pDD,"images\\EasyIcon.bmp",0,0);
-	if(EasyIcon==NULL)
-	{
-		MessageBox(hWnd,"Cannot Load EasyIcon.bmp",0,0);
-		return FALSE;
-	}
-	DDSetColorKey(EasyIcon,CLR_INVALID);
-	HardIcon=DDLoadBitmap(g_pDD,"images\\HardIcon.bmp",0,0);
-	if(HardIcon==NULL)
-	{
-		MessageBox(hWnd,"Cannot Load HardIcon.bmp",0,0);
-		return FALSE;
-	}
-	DDSetColorKey(HardIcon,CLR_INVALID);
-
-	return DD_OK;
+	return true;
 }
 
-int PASCAL WinMain(HINSTANCE hInstance,HINSTANCE hPrevInstance, LPSTR lpCmdLine,int nCmdShow)
+void ERRCHECK(FMOD_RESULT result)
 {
-    MSG							msg;
+	if (result != FMOD_OK)
+	{
+		printf("FMOD error! (%d) %s\n", result, FMOD_ErrorString(result));
+		exit(-1);
+	}
+}
 
-// Debug File name definition
-	time_t	ltime;
-	struct tm *today;
 
-	time(&ltime);
-	today=localtime(&ltime);
-	sprintf(g_szDebugName,"%d%d%d.txt",today->tm_year+1900, today->tm_mon+1, today->tm_mday);
-// define end :)
+bool init()
+{
+    // Start SDL
+    if( SDL_Init( SDL_INIT_VIDEO | SDL_INIT_AUDIO ) < 0 || !SDL_GetVideoInfo() )
+        return false;
 
-	CoInitialize(NULL);
+	if( ! gScreen.SetVideoMode( 640, 480, SDL_GetVideoInfo()->vfmt->BitsPerPixel, SDL_RESIZABLE ) )
+		return false;
+
+    // initialize Sound
 	
-	if(FAILED(InitWin(hInstance, 640, 480, nCmdShow)))return FALSE;
+	ERRCHECK( FMOD::System_Create(&gpSystem) );
+	unsigned int      version;
+	ERRCHECK( gpSystem->getVersion(&version) );
 
-	if(FAILED(InitDD()))return FALSE;
-	if(FAILED(KLoadImage()))return FALSE;
+	if (version < FMOD_VERSION)
+	{
+		char	buff[128];
+		sprintf(buff, "Error!  You are using an old version of FMOD %08x.  This program requires %08x\n", version, FMOD_VERSION);
+		MsgBox( buff, "error", 0 );
+		return 0;
+	}
 
-	Read();
- 	if(FAILED(InitDSound(hWnd,22050,8,2)))return FALSE;
-	
-	WaveSet_Loading();
- 	if(FAILED(InitDI(hInstance)))return FALSE;
+	ERRCHECK(gpSystem->init(32, FMOD_INIT_NORMAL, 0));
 
-	CFGInitialize();
 
-	while (TRUE)
-    {
-        if (PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE))
-        {
-            if (!GetMessage(&msg, NULL, 0, 0))
-                return msg.wParam;
-            TranslateMessage(&msg);
-            DispatchMessage(&msg);
-        }
-        else if (g_bActive)
-        {
-            UpdateFrame();
-        }
-        else
-        {
-            // Make sure we go to sleep if we have nothing else to do
-            WaitMessage();
+    sprintf(TITLE, "KICK IT UP! beta version v%s - Minor release / Compiled at %s / %s", VER_NUM, __DATE__, __TIME__ );
+    
+    SDL_WM_SetCaption( TITLE, NULL );
+
+    if( !KLoadImage() )
+        return false;
+
+    Read();
+
+    WaveSet_Loading();
+
+    CFGInitialize();
+    g_bActive = true;
+
+    return true;
+}
+
+void clean_up()
+{
+    gOpening.Free();
+    gDead.Free();
+    gMode.Free();
+    gCancel.Free();
+    gMove.Free();
+    gBeat.Free();
+    gSelectSong.Free();
+
+    gIntro.Free();
+	gSong.Free();
+
+    gSongTitle.Free();
+    gSongBack.Free();
+    gSelectBack.Free();
+    gNumberFont.Free();
+    gSmallFont.Free();
+    gStateComment.Free();
+    gGameTitle.Free();
+    gScreen.Free();
+    gNoDISC.Free();
+    JudgeFont.Free();
+    ComboFont.Free();
+    GaugeWaku.Free();
+    Gauge.Free();
+
+    gArrow1.Free();
+    gArrow2.Free();
+    gWArrow.Free();
+    pArrow1.Free();
+    pArrow3.Free();
+    pArrow5.Free();
+    pArrow7.Free();
+    pArrow9.Free();
+    cArrow1.Free();
+    cArrow3.Free();
+    cArrow5.Free();
+    cArrow7.Free();
+    cArrow9.Free();
+    gModeIcon.Free();
+
+    gShiftLeft.Free();
+    gShiftRight.Free();
+    gDoubleIcon.Free();
+    gCrazyIcon.Free();
+    gEasyIcon.Free();
+    gHardIcon.Free();
+    GameOver.Free();
+    DeadScreen.Free();
+    ResultFont.Free();
+    ResultBack.Free();
+    gStageCount.Free();
+    Score.Free();
+    
+	ERRCHECK(gpSystem->close());
+	ERRCHECK(gpSystem->release());
+
+    SDL_Quit();
+}
+
+void process_Keydown( const SDLKey & keyValue )
+{
+    if( keyValue == SDLK_ESCAPE ) {
+        switch(g_ProgramState) {
+            case GAMETITLE:
+                CFGWrite();
+                SDL_Event   event;
+                event.type = SDL_QUIT;
+                SDL_PushEvent( &event );
+                break;
+
+            case SELECTSONG:
+                g_ProgramState=GAMETITLE;
+                if(IntroFlag){
+                    gIntro.Halt();
+                    IntroFlag=false;
+                }
+                gSelectSong.Halt();
+                First=0;
+                break;
+
+            case STAGE1:
+                if(SongFlag) {
+                    gSong.Halt();
+                    SongFlag=false;
+                }
+                First=0;
+                g_ProgramState=RESULT;
+                break;
+            case DOUBLEST:
+                if(SongFlag){
+                    gSong.Halt();
+                    SongFlag=false;
+                }
+                First=0;
+                g_ProgramState=RESULT;
+                break;
+            case COUPLE:
+                if(SongFlag) {
+                    gSong.Halt();
+                    SongFlag=false;
+                }
+                First=0;
+                g_ProgramState=RESULT;
+                break;
+            case CONFIG:
+                First=0;
+                CFGWrite();
+                g_ProgramState=GAMETITLE;
+                break;
+            case RESULT:
+                First=0;
+                g_ProgramState=SELECTSONG;
+                break;
         }
     }
-
 }
 
-HRESULT TransAlphaImproved(LPDIRECTDRAWSURFACE src, LPDIRECTDRAWSURFACE dest, 
-				   LONG lDestX, LONG lDestY, RECT srcRect, WORD ALPHA, DWORD ColorKey, WORD BPP)
+int main( int argc, char * argv[] )
 {
-	int register i,j;
-	int height,width;
-	BYTE* lpSprite;
-	BYTE* lpDest;
-	WORD dPitch, SpritePitch;
-	DWORD sColorKey;
-	DWORD sTemp,dTemp;
-	DWORD sr,sg,sb,dr,dg,db;
-	WORD sbuf,dbuf;
-	DWORD Result;
-	BOOL oddWidth = FALSE;
-	DDSURFACEDESC srcDDSD, destDDSD;
-	DWORD REDC,GREENC, BLUEC;
-	DWORD PLUS64;
-	DWORD ALPHABY4;
-	DWORD doubleColorKey;
 
+    if( init() == false )
+        return 1;
 
-	// Check the ALPHA value
-	if (ALPHA < 0)
-		ALPHA = 0;
-	else if (ALPHA > 256)
-		ALPHA = 256;
+	int		frame = 0;	// Keep track of the frame count
+	Timer	fps;		// Timer used to calculate the frames per second
+	Timer	update;		// Timer used to update the caption
 
-	// Set height and width of SPRITE
-    height = srcRect.bottom - srcRect.top;
-    width = srcRect.right - srcRect.left; 
+	update.Start();
+	fps.Start();
 
-	// Lock down both surfaces for read and write
-	memset(&srcDDSD, 0, sizeof(srcDDSD));
-	srcDDSD.dwSize = sizeof(srcDDSD);
-	src->Lock(NULL, &srcDDSD, DDLOCK_WAIT, NULL);
-    
-	memset(&destDDSD, 0, sizeof(destDDSD));
-	destDDSD.dwSize = sizeof(destDDSD);
-	dest->Lock(NULL, &destDDSD, DDLOCK_WAIT, NULL);
+    bool quit = false;
 
-    // Get the color key for sprite surface
-    sColorKey = ColorKey;
+    std::string strFps;
 
-	// Set the pitch for both surfaces
-    SpritePitch = (WORD)srcDDSD.lPitch;
-    dPitch      = (WORD)destDDSD.lPitch;
+    while( !quit ) {
+        SDL_Event   event;
+		fps.Start();
 
-    // Initialize the pointers to the upper left hand corner of surface
-    lpSprite = (BYTE*)srcDDSD.lpSurface;
-    lpDest   = (BYTE*)destDDSD.lpSurface;
+        while( SDL_PollEvent( &event)) {
+            switch( event.type ) {
+                case SDL_KEYDOWN:
+                    process_Keydown( event.key.keysym.sym );
+                    break;
+                case SDL_QUIT:
+                    quit = true;
+                    break;
+            }            
+		}
 
-	// Do some work outside of the loop
-	PLUS64         = 64 | (64 << 16);
-	ALPHABY4      = (ALPHA / 4) | ((ALPHA / 4) << 16);
-	doubleColorKey = ColorKey | (ColorKey << 16);
+		if( g_bActive )
+			UpdateFrame();
+		else
+			SDL_Delay( 0 );
 
-	switch(BPP)
-	{
-	case 8:
-		// IMHO paletized modes are a thing of the past please feel free to 
-		// implement this if you so desire.
-		break;
+		++frame;	// Increment the frame counter
 
-	case 15:  ////////////////////////////////////////////////////////////////////////
-		      //
-		      //  WARNING!!!: I do not have a video card that uses the 5-5-5 format 
-		      //              this barnch of code has not be tested.
-		      //
-		      ////////////////////////////////////////////////////////////////////////
+		if( 1000 < update.GetTicks() ) {
+			std::stringstream	buf;
+			buf << "FPS :" << frame / (update.GetTicks() / 1000.0);
+            strFps = buf.str();
+			update.Start();
+			frame = 0;
+		}
+        DisplayMessage( 10, 10, strFps.c_str() );
+
+		gScreen.Flip();
 		
-		// Initialize the pointers to the first pixel in the rectangle
-		lpSprite += (srcRect.top * SpritePitch) + (srcRect.left * 2);
-		lpDest   += (lDestY * dPitch) + (lDestX * 2);
+		Uint32 curFps = static_cast<Uint32>( 1000 / 100 );
+		if( fps.GetTicks() < curFps )	//60fps
+			SDL_Delay( curFps - fps.GetTicks() );
+    }
 
-		// Set the horizontal padding
-		sbuf = (WORD)(SpritePitch - (2 * width));
-		dbuf = (WORD)(dPitch - (2 * width));
-
-		// Is the Sprite width odd or even?
-		if (width % 2 == 1)
-		{
-			oddWidth = TRUE;
-			width = (width - 1) / 2; //div by 2, processing 2 pixels at a time.
-		}
-		else
-			width = width / 2;  //div by 2, processing 2 pixels at a time.
-
-		i = height;
-		do
-		{
-			if (oddWidth)
-			{
-				sTemp = *((WORD*)lpSprite);
-
-				if (sTemp != sColorKey)
-				{
-					dTemp = *((WORD*)lpDest);
-					sb = sTemp & 0x1f;
-					db = dTemp & 0x1f;
-					sg = (sTemp >> 5) & 0x1f;
-					dg = (dTemp >> 5) & 0x1f;
-					sr = (sTemp >> 10) & 0x1f;
-					dr = (dTemp >> 10) & 0x1f;
-
-					*((WORD*)lpDest) = (WORD)((ALPHA * (db - sb) >> 8) + sb |
-						((ALPHA * (dg - sg) >> 8) + sg) << 5 |
-						((ALPHA * (dr - sr) >> 8) + sr) << 10);
-				}
-
-				lpDest += 2;
-				lpSprite += 2;
-			}
-			j = width;
-			do
-			{
-				sTemp = *((DWORD*)lpSprite);
-
-				if ( sTemp != doubleColorKey )
-				{
-					dTemp = *((DWORD*)lpDest);
-
-					sb = sTemp & 0x001F001F;
-					db = dTemp & 0x001F001F;
-					sg = (sTemp >> 5)  & 0x001F001F;
-					dg = (dTemp >> 5)  & 0x001F001F;
-					sr = (sTemp >> 10) & 0x001F001F;
-					dr = (dTemp >> 10) & 0x001F001F;
-
-					BLUEC  = ((((ALPHA * ((sb + PLUS64) - db)) >> 8) + db) - ALPHABY4) & 0x001F001F;
-					GREENC = (((((ALPHA * ((sg + PLUS64) - dg)) >> 8) + dg) - ALPHABY4) & 0x001F001F) << 5;
-					REDC   = (((((ALPHA * ((sr + PLUS64) - dr)) >> 8) + dr) - ALPHABY4) & 0x001F001F) << 10;
-
-					Result = BLUEC | GREENC | REDC;
-
-					if ( (sTemp >> 16) == ColorKey )
-							Result = (Result & 0xFFFF) | (dTemp & 0xFFFF0000);
-					else if ( (sTemp & 0xFFFF) == ColorKey )
-							Result = (Result & 0xFFFF0000) | (dTemp & 0xFFFF);
-
-					*((DWORD*)lpDest) = Result;
-				}
-				lpDest    += 4;
-				lpSprite  += 4;
-
-			}while (--j > 0);
-
-			lpDest   += dbuf;
-			lpSprite += sbuf;
-
-		}while (--i > 0);
-
-		break;
-
-	case 16:
-
-		// Initialize the pointers to the first pixel in the rectangle
-		lpSprite += (srcRect.top * SpritePitch) + (srcRect.left * 2);
-		lpDest   += (lDestY * dPitch) + (lDestX * 2);
-
-		// Set the horizontal padding
-		sbuf = (WORD)(SpritePitch - (2 * width));
-		dbuf = (WORD)(dPitch - (2 * width));
-
-		// Is the Sprite width odd or even?
-		if (width % 2 == 1)
-		{
-			oddWidth = TRUE;
-			width = (width - 1) / 2; //div by 2, processing 2 pixels at a time.
-		}
-		else
-			width = width / 2;  //div by 2, processing 2 pixels at a time.
-
-
-		i = height;
-		do
-		{
-			if (oddWidth)
-			{
-				sTemp = *((WORD*)lpSprite);
-
-				if (sTemp != ColorKey)
-				{
-					dTemp = *((WORD*)lpDest);
-					sb = sTemp & 0x1f;
-					db = dTemp & 0x1f;
-					sg = (sTemp >> 5) & 0x3f;
-					dg = (dTemp >> 5) & 0x3f;
-					sr = (sTemp >> 11) & 0x1f;
-					dr = (dTemp >> 11) & 0x1f;
-
-					*((WORD*)lpDest) = (WORD)((ALPHA * (sb - db) >> 8) + db |
-						((ALPHA * (sg - dg) >> 8) + dg) << 5 |
-						((ALPHA * (sr - dr) >> 8) + dr) << 11);
-				}
-
-				lpDest   += 2;
-				lpSprite += 2;
-			}
-			j = width;
-			do
-			{
-				sTemp = *((DWORD*)lpSprite);
-
-				if ( sTemp != doubleColorKey )
-				{
-					dTemp = *((DWORD*)lpDest);
-
-					sb = sTemp & 0x001F001F;
-					db = dTemp & 0x001F001F;
-					sg = (sTemp >> 5)  & 0x003F003F;
-					dg = (dTemp >> 5)  & 0x003F003F;
-					sr = (sTemp >> 11) & 0x001F001F;
-					dr = (dTemp >> 11) & 0x001F001F;
-
-					BLUEC  = ((((ALPHA * ((sb + PLUS64) - db)) >> 8) + db) - ALPHABY4) & 0x001F001F;
-					GREENC = (((((ALPHA * ((sg + PLUS64) - dg)) >> 8) + dg) - ALPHABY4) & 0x003F003F) << 5;
-					REDC   = (((((ALPHA * ((sr + PLUS64) - dr)) >> 8) + dr) - ALPHABY4) & 0x001F001F) << 11;
-
-					Result = BLUEC | GREENC | REDC;
-
-					if ( (sTemp >> 16) == ColorKey )
-							Result = (Result & 0xFFFF) | (dTemp & 0xFFFF0000);
-					else if ( (sTemp & 0xFFFF) == ColorKey )
-							Result = (Result & 0xFFFF0000) | (dTemp & 0xFFFF);
-
-					*((DWORD*)lpDest) = Result;
-				}
-				lpDest    += 4;
-				lpSprite  += 4;
-
-			}while (--j > 0);
-
-			lpDest   += dbuf;
-			lpSprite += sbuf;
-
-		}while (--i > 0);
-
-		break;
-
-	case 24:  ////////////////////////////////////////////////////////////////////////
-		      //
-		      //  WARNING!!!: I do not have a video card capable of 24bit rendering 
-		      //              this barnch of code has not be tested.
-		      //
-		      ////////////////////////////////////////////////////////////////////////
-
-		// Initialize the pointers to the first pixel in the rectangle
-		lpSprite += (srcRect.top * SpritePitch) + (srcRect.left * 3);
-		lpDest   += (lDestY * dPitch) + (lDestX * 3);
-
-		// Set the horizontal padding
-		sbuf = (WORD)(SpritePitch - (3 * width));
-		dbuf = (WORD)(dPitch - (3 * width));
-
-		i = height;
-		do
-		{
-			j = width;
-			do
-			{
-				sTemp = *((DWORD*)lpSprite);
-
-				if ((sTemp & 0xFFFFFF) != sColorKey)
-				{
-					dTemp = *((DWORD*)lpDest);
-					sb = sTemp & 0xFF;
-					db = dTemp & 0xFF;
-					sg = (sTemp >> 8) & 0xFF;
-					dg = (dTemp >> 8) & 0xFF;
-					sr = (sTemp >> 16) & 0xFF;
-					dr = (dTemp >> 16) & 0xFF;
-
-					Result = (DWORD)((ALPHA * (db - sb) >> 8) + sb |
-						((ALPHA * (dg - sg) >> 8) + sg) << 8 |
-						((ALPHA * (dr - sr) >> 8) + sr) << 16);
-
-					*((WORD*)lpDest) = (WORD)(Result & 0xFFFF);
-					lpDest += 2;
-					*lpDest = (BYTE)(Result >> 16);
-					lpDest++;
-				}
-				else
-				{
-					lpDest += 3;
-				}
-
-				lpSprite += 3;
-
-			}while (--j > 0);
-			lpDest   += dbuf;
-			lpSprite += sbuf;
-
-		}while (--i > 0);
-		break;
-
-	case 32:
-
-		// Initialize the pointers to the first pixel in the rectangle
-		lpSprite += (srcRect.top * SpritePitch) + (srcRect.left * 4);
-		lpDest   += (lDestY * dPitch) + (lDestX * 4);
-
-		// Set the horizontal padding
-		sbuf = (WORD)(SpritePitch - (4 * width));
-		dbuf = (WORD)(dPitch - (4 * width));
-
-		i = height;
-		do
-		{
-			j = width;
-			do
-			{
-				sTemp = *((DWORD*)lpSprite);
-
-				if ((sTemp & 0xFFFFFF) != sColorKey)
-				{
-					dTemp = *((DWORD*)lpDest);
-					sb = sTemp & 0xFF;
-					db = dTemp & 0xFF;
-					sg = (sTemp >> 8) & 0xFF;
-					dg = (dTemp >> 8) & 0xFF;
-					sr = (sTemp >> 16) & 0xFF;
-					dr = (dTemp >> 16) & 0xFF;
-
-					Result = (DWORD)((ALPHA * (db - sb) >> 8) + sb |
-						((ALPHA * (dg - sg) >> 8) + sg) << 8 |
-						((ALPHA * (dr - sr) >> 8) + sr) << 16);
-
-					*((WORD*)lpDest) = (WORD)(Result & 0xFFFF);
-					lpDest += 2;
-					*lpDest = (BYTE)(Result >> 16);
-					lpDest += 2;
-				}
-				else
-				{
-					lpDest += 4;
-				}
-
-				lpSprite += 4;
-
-			}while (--j > 0);
-			lpDest   += dbuf;
-			lpSprite += sbuf;
-
-		}while (--i > 0);
-		break;
-	} // End RGB Format switch statement
-
-
-	src->Unlock(NULL);
-	dest->Unlock(NULL);
-
-	return DD_OK;
+    clean_up();
+    
+    return 0;
 }
-
