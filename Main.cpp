@@ -39,7 +39,7 @@ char	TITLE[PATH_LEN];
 
 #define	PRGNAME		"Kick It UP!"
 
-FMOD::System *	gpSystem;
+FMOD_SYSTEM  *	gpSystem;
 
 Surface gScreen;
 Surface	gGameTitle;
@@ -335,7 +335,7 @@ void DrawScore1p(void)
 	SDL_Rect	cRect;
 	char chScore[11];
 
-	sprintf(chScore,"%07d",Score1p);
+	sprintf(chScore,"%07ld",Score1p);
 			
 	for(int i=0;;i++) {
 		if(chScore[i]==0)
@@ -355,7 +355,7 @@ void DrawScore2p(void)
 	SDL_Rect	cRect;
 	char chScore[11];
 
-	sprintf(chScore,"%07d",Score2p);
+	sprintf(chScore,"%07ld",Score2p);
 			
 	for(int i=0;;i++) {
 		if(chScore[i]==0)
@@ -506,9 +506,9 @@ void KIU_STAGE(void)
 	DisplayMessage(0,64,s);
 	sprintf(s, "bpm 3:%g", bpm3);
 	DisplayMessage(0,80,s);
-	sprintf(s, "bunki :%ld", bunki);
+	sprintf(s, "bunki :%uld", bunki);
 	DisplayMessage(0,96,s);
-	sprintf(s, "bunki2:%ld", bunki2);
+	sprintf(s, "bunki2:%uld", bunki2);
 	DisplayMessage(0,112,s);
 
 	if(start1==0)
@@ -1580,7 +1580,6 @@ void StageTitle(void)
 
 void DrawJudge1p(void)
 {
-	static Uint32 cur, last;
 	static char LastJudge;
 
 	char chCombo1p[255];
@@ -1700,7 +1699,6 @@ void DrawJudge1p(void)
 
 void DrawJudge2p(void)
 {
-	static Uint32 cur, last;
 	static char LastJudge;
 
 	char chCombo2p[255];
@@ -2401,59 +2399,55 @@ void DrawArrow1p(Uint32 cur)
 	}
 
 
-	if(Crash1)
-	{
-		if(s1==2)if(Data_Judge[stat1][0]=='0' && Data_Judge[stat1][1]=='0' && Data_Judge[stat1][2]=='0' && Data_Judge[stat1][3]=='0' && Data_Judge[stat1][4]=='0' )
-		{
+	if(Crash1 && s1==2) {
+		if(Data_Judge[stat1][0]=='0' && Data_Judge[stat1][1]=='0' && Data_Judge[stat1][2]=='0' && Data_Judge[stat1][3]=='0' && Data_Judge[stat1][4]=='0' ) {
 			Data[stat1][0]=Data[stat1][1]=Data[stat1][2]=Data[stat1][3]=Data[stat1][4]='0';
 			//Judgement1p=PERFECT;
 			Judgement1p=JudgeTemp;
+		} else {
+			Judgement1p=NONE;
 		}
-		else Judgement1p=NONE;
 	}
-	if(Crash7)
-	{
-		if(s7==2)if(Data_Judge[stat7][0]=='0' && Data_Judge[stat7][1]=='0' && Data_Judge[stat7][2]=='0' && Data_Judge[stat7][3]=='0' && Data_Judge[stat7][4]=='0' )
-		{
+
+	if(Crash7 && s7==2)	{
+		if(Data_Judge[stat7][0]=='0' && Data_Judge[stat7][1]=='0' && Data_Judge[stat7][2]=='0' && Data_Judge[stat7][3]=='0' && Data_Judge[stat7][4]=='0' )	{
 			Data[stat7][0]=Data[stat7][1]=Data[stat7][2]=Data[stat7][3]=Data[stat7][4]='0';
 			//Judgement1p=PERFECT;
 			Judgement1p=JudgeTemp;
+		} else {
+			Judgement1p=NONE;
 		}
-		else Judgement1p=NONE;
 	}
-	if(Crash5)
-	{
-		if(s5==2)if(Data_Judge[stat5][0]=='0' && Data_Judge[stat5][1]=='0' && Data_Judge[stat5][2]=='0' && Data_Judge[stat5][3]=='0' && Data_Judge[stat5][4]=='0' )
-		{
+	if(Crash5 && s5==2)	{
+		if(Data_Judge[stat5][0]=='0' && Data_Judge[stat5][1]=='0' && Data_Judge[stat5][2]=='0' && Data_Judge[stat5][3]=='0' && Data_Judge[stat5][4]=='0' ) {
 			Data[stat5][0]=Data[stat5][1]=Data[stat5][2]=Data[stat5][3]=Data[stat5][4]='0';
 			//Judgement1p=PERFECT;
 			Judgement1p=JudgeTemp;
+		} else {
+			Judgement1p=NONE;
 		}
-		else Judgement1p=NONE;
 	}
-	if(Crash9)
-	{
-		if(s9==2)if(Data_Judge[stat9][0]=='0' && Data_Judge[stat9][1]=='0' && Data_Judge[stat9][2]=='0' && Data_Judge[stat9][3]=='0' && Data_Judge[stat9][4]=='0' )
-		{
+	if(Crash9 && s9==2)	{
+		if(Data_Judge[stat9][0]=='0' && Data_Judge[stat9][1]=='0' && Data_Judge[stat9][2]=='0' && Data_Judge[stat9][3]=='0' && Data_Judge[stat9][4]=='0' ) {
 			Data[stat9][0]=Data[stat9][1]=Data[stat9][2]=Data[stat9][3]=Data[stat9][4]='0';
 			//Judgement1p=PERFECT;
 			Judgement1p=JudgeTemp;
+		} else {
+			Judgement1p=NONE;
 		}
-		else Judgement1p=NONE;
 	}
-	if(Crash3)
+	if(Crash3 && s3==2)
 	{
-		if(s3==2)if(Data_Judge[stat3][0]=='0' && Data_Judge[stat3][1]=='0' && Data_Judge[stat3][2]=='0' && Data_Judge[stat3][3]=='0' && Data_Judge[stat3][4]=='0' )
-		{
+		if(Data_Judge[stat3][0]=='0' && Data_Judge[stat3][1]=='0' && Data_Judge[stat3][2]=='0' && Data_Judge[stat3][3]=='0' && Data_Judge[stat3][4]=='0' ) {
 			Data[stat3][0]=Data[stat3][1]=Data[stat3][2]=Data[stat3][3]=Data[stat3][4]='0';
 			//Judgement1p=PERFECT;
 			Judgement1p=JudgeTemp;
+		} else {
+			Judgement1p=NONE;
 		}
-		else Judgement1p=NONE;
 	}
 
-	if(Judgement1p==PERFECT || Judgement1p==GREAT)
-	{
+	if(Judgement1p==PERFECT || Judgement1p==GREAT)	{
         gBeat.Halt();
         gBeat.Play();
 
@@ -3189,59 +3183,58 @@ void DrawArrow2p(Uint32 cur)
 		Combo2p=0;
 	}
 
-	if(Crash1)
-	{
-		if(s1==2)if(Data_Judge1[stat1][5]=='0' && Data_Judge1[stat1][6]=='0' && Data_Judge1[stat1][7]=='0' && Data_Judge1[stat1][8]=='0' && Data_Judge1[stat1][9]=='0' )
-		{
+	if(Crash1 && s1==2)	{
+		if(Data_Judge1[stat1][5]=='0' && Data_Judge1[stat1][6]=='0' && Data_Judge1[stat1][7]=='0' && Data_Judge1[stat1][8]=='0' && Data_Judge1[stat1][9]=='0' )	{
 			Data1[stat1][5]=Data1[stat1][6]=Data1[stat1][7]=Data1[stat1][8]=Data1[stat1][9]='0';
 			//Judgement2p=PERFECT;
 			Judgement2p=JudgeTemp;
+		} else {
+			Judgement2p=NONE;
 		}
-		else Judgement2p=NONE;
 	}
-	if(Crash7)
-	{
-		if(s7==2)if(Data_Judge1[stat7][5]=='0' && Data_Judge1[stat7][6]=='0' && Data_Judge1[stat7][7]=='0' && Data_Judge1[stat7][8]=='0' && Data_Judge1[stat7][9]=='0' )
+
+	if(Crash7 && s7==2)	{
+		if(Data_Judge1[stat7][5]=='0' && Data_Judge1[stat7][6]=='0' && Data_Judge1[stat7][7]=='0' && Data_Judge1[stat7][8]=='0' && Data_Judge1[stat7][9]=='0' )
 		{
 			Data1[stat7][5]=Data1[stat7][6]=Data1[stat7][7]=Data1[stat7][8]=Data1[stat7][9]='0';
 			//Judgement2p=PERFECT;
 			Judgement2p=JudgeTemp;
+		} else {
+			Judgement2p=NONE;
 		}
-		else Judgement2p=NONE;
 	}
-	if(Crash5)
-	{
-		if(s5==2)if(Data_Judge1[stat5][5]=='0' && Data_Judge1[stat5][6]=='0' && Data_Judge1[stat5][7]=='0' && Data_Judge1[stat5][8]=='0' && Data_Judge1[stat5][9]=='0' )
-		{
+
+	if(Crash5 && s5==2) {
+		if(Data_Judge1[stat5][5]=='0' && Data_Judge1[stat5][6]=='0' && Data_Judge1[stat5][7]=='0' && Data_Judge1[stat5][8]=='0' && Data_Judge1[stat5][9]=='0' )	{
 			Data1[stat5][5]=Data1[stat5][6]=Data1[stat5][7]=Data1[stat5][8]=Data1[stat5][9]='0';
 			//Judgement2p=PERFECT;
 			Judgement2p=JudgeTemp;
+		} else {
+			Judgement2p=NONE;
 		}
-		else Judgement2p=NONE;
 	}
-	if(Crash9)
-	{
-		if(s9==2)if(Data_Judge1[stat9][5]=='0' && Data_Judge1[stat9][6]=='0' && Data_Judge1[stat9][7]=='0' && Data_Judge1[stat9][8]=='0' && Data_Judge1[stat9][9]=='0' )
-		{
+
+	if(Crash9 && s9==2)	{
+		if(Data_Judge1[stat9][5]=='0' && Data_Judge1[stat9][6]=='0' && Data_Judge1[stat9][7]=='0' && Data_Judge1[stat9][8]=='0' && Data_Judge1[stat9][9]=='0' ) {
 			Data1[stat9][5]=Data1[stat9][6]=Data1[stat9][7]=Data1[stat9][8]=Data1[stat9][9]='0';
 			//Judgement2p=PERFECT;
 			Judgement2p=JudgeTemp;
+		} else {
+			Judgement2p=NONE;
 		}
-		else Judgement2p=NONE;
 	}
-	if(Crash3)
-	{
-		if(s3==2)if(Data_Judge1[stat3][5]=='0' && Data_Judge1[stat3][6]=='0' && Data_Judge1[stat3][7]=='0' && Data_Judge1[stat3][8]=='0' && Data_Judge1[stat3][9]=='0' )
-		{
+
+	if(Crash3 && s3==2) {
+		if(Data_Judge1[stat3][5]=='0' && Data_Judge1[stat3][6]=='0' && Data_Judge1[stat3][7]=='0' && Data_Judge1[stat3][8]=='0' && Data_Judge1[stat3][9]=='0' ) {
 			Data1[stat3][5]=Data1[stat3][6]=Data1[stat3][7]=Data1[stat3][8]=Data1[stat3][9]='0';
 			//Judgement2p=PERFECT;
 			Judgement2p=JudgeTemp;
+		} else {
+			Judgement2p=NONE;
 		}
-		else Judgement2p=NONE;
 	}
 
-	if(Judgement2p==PERFECT || Judgement2p==GREAT)
-	{
+	if(Judgement2p==PERFECT || Judgement2p==GREAT) {
         gBeat.Halt();
         gBeat.Play();
 
@@ -3420,7 +3413,8 @@ void UpdateFrame(void)
 	sprintf(buff,"FPS:%3d",fps);
 	DisplayMessage(583,463,buff);
 
-	gpSystem->update();
+	FMOD_System_Update(gpSystem);
+	// gpSystem->update();
 	switch(g_ProgramState) {
 		case GAMETITLE:
 			StageTitle();
@@ -3689,9 +3683,9 @@ bool init()
 
     // initialize Sound
 	
-	ERRCHECK( FMOD::System_Create(&gpSystem) );
+	ERRCHECK(  FMOD_System_Create(&gpSystem) );
 	unsigned int      version;
-	ERRCHECK( gpSystem->getVersion(&version) );
+	ERRCHECK( FMOD_System_GetVersion(gpSystem, &version) );
 
 	if (version < FMOD_VERSION)
 	{
@@ -3701,7 +3695,10 @@ bool init()
 		return 0;
 	}
 
-	ERRCHECK(gpSystem->init(32, FMOD_INIT_NORMAL, 0));
+	ERRCHECK(
+			FMOD_System_Init(gpSystem, 32, FMOD_INIT_NORMAL, 0)
+			);
+	// ERRCHECK(gpSystem->init(32, FMOD_INIT_NORMAL, 0));
 
 
     sprintf(TITLE, "KICK IT UP! beta version v%s - Minor release / Compiled at %s / %s", VER_NUM, __DATE__, __TIME__ );
@@ -3775,9 +3772,12 @@ void clean_up()
     ResultBack.Free();
     gStageCount.Free();
     Score.Free();
-    
-	ERRCHECK(gpSystem->close());
-	ERRCHECK(gpSystem->release());
+
+    ERRCHECK(FMOD_System_Close(gpSystem));
+    ERRCHECK(FMOD_System_Release(gpSystem));
+
+//	ERRCHECK(gpSystem->close());
+//	ERRCHECK(gpSystem->release());
 
     SDL_Quit();
 }

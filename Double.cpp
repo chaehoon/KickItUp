@@ -39,11 +39,9 @@
 extern	int					start,start2,start3,tick;
 extern	Uint32				bunki,bunki2;
 extern	int					start1;
-extern	char				Title[PATH_LEN+1];
 extern	double				bpm;
 extern	double				bpm2;
 extern	double				bpm3;
-extern	char				SongName[PATH_LEN+1];
 
 extern	Surface gWArrow;
 
@@ -62,7 +60,6 @@ extern	Surface 	gArrow1;
 extern	Surface 	gArrow2;
 
 extern Surface      gSongBack;
-extern Surface      gNumberFont;
 extern Surface      JudgeFont;
 extern	Surface	ComboFont;
 
@@ -193,7 +190,6 @@ void DrawGaugeDB_2p(void)
 }
 void DrawJudgeDB(void)
 {
-	static Uint32 cur, last;
 	static char LastJudge;
 
 	char chCombo1p[255];
@@ -348,14 +344,14 @@ void DrawArrow_DB(Uint32 cur)
 
     static SDL_Rect pArrl1;
     static SDL_Rect cArrl1;
-    static SDL_Rect pArrr1;
-    static SDL_Rect cArrr1;
 
 	static SDL_Rect pArrl3,pArrl5,pArrl7,pArrl9;
 	static SDL_Rect cArrl3,cArrl5,cArrl7,cArrl9;
 
-	static SDL_Rect pArrr3,pArrr5,pArrr7,pArrr9;
-	static SDL_Rect cArrr3,cArrr5,cArrr7,cArrr9;
+	/*
+	static SDL_Rect pArrr1, pArrr3,pArrr5,pArrr7,pArrr9;
+	static SDL_Rect cArrr1, cArrr3,cArrr5,cArrr7,cArrr9;
+	*/
 
 //	KCFG.auto1_2p = KCFG.auto3_2p = KCFG.auto5_2p = KCFG.auto7_2p = KCFG.auto9_2p = true;
 
@@ -1458,8 +1454,8 @@ void DrawArrow_DB(Uint32 cur)
 			}
 		}
 	}
-// 2 player routine end
 
+	// 2 player routine end
 	Judgement1p=JudgeTemp;
 	
 	// 미스처리입니다.
@@ -1474,96 +1470,100 @@ void DrawArrow_DB(Uint32 cur)
 		Combo1p=0;
 	}
 
-	if(Crashl1)
+	if(Crashl1 && sl1==2)
 	{
-		if(sl1==2)if(Data_Double_Judge[statl1][0]=='0' && Data_Double_Judge[statl1][1]=='0' && Data_Double_Judge[statl1][2]=='0' && Data_Double_Judge[statl1][3]=='0' && Data_Double_Judge[statl1][4]=='0' && Data_Double_Judge[statl1][5]=='0' && Data_Double_Judge[statl1][6]=='0' && Data_Double_Judge[statl1][7]=='0' && Data_Double_Judge[statl1][8]=='0' && Data_Double_Judge[statl1][9]=='0')
-		{
+		if(Data_Double_Judge[statl1][0]=='0' && Data_Double_Judge[statl1][1]=='0' && Data_Double_Judge[statl1][2]=='0' && Data_Double_Judge[statl1][3]=='0' && Data_Double_Judge[statl1][4]=='0' && Data_Double_Judge[statl1][5]=='0' && Data_Double_Judge[statl1][6]=='0' && Data_Double_Judge[statl1][7]=='0' && Data_Double_Judge[statl1][8]=='0' && Data_Double_Judge[statl1][9]=='0')	{
 			Data_Double[statl1][0]=Data_Double[statl1][1]=Data_Double[statl1][2]=Data_Double[statl1][3]=Data_Double[statl1][4]=Data_Double[statl1][5]=Data_Double[statl1][6]=Data_Double[statl1][7]=Data_Double[statl1][8]=Data_Double[statl1][9]='0';
 			Judgement1p=JudgeTemp;
+		} else {
+			Judgement1p=NONE;
 		}
-		else Judgement1p=NONE;
 	}
-	if(Crashl7)
-	{
-		if(sl7==2)if(Data_Double_Judge[statl7][0]=='0' && Data_Double_Judge[statl7][1]=='0' && Data_Double_Judge[statl7][2]=='0' && Data_Double_Judge[statl7][3]=='0' && Data_Double_Judge[statl7][4]=='0' && Data_Double_Judge[statl7][5]=='0' && Data_Double_Judge[statl7][6]=='0' && Data_Double_Judge[statl7][7]=='0' && Data_Double_Judge[statl7][8]=='0' && Data_Double_Judge[statl7][9]=='0')
-		{
+
+	if(Crashl7 && sl7==2) {
+		if(Data_Double_Judge[statl7][0]=='0' && Data_Double_Judge[statl7][1]=='0' && Data_Double_Judge[statl7][2]=='0' && Data_Double_Judge[statl7][3]=='0' && Data_Double_Judge[statl7][4]=='0' && Data_Double_Judge[statl7][5]=='0' && Data_Double_Judge[statl7][6]=='0' && Data_Double_Judge[statl7][7]=='0' && Data_Double_Judge[statl7][8]=='0' && Data_Double_Judge[statl7][9]=='0')	{
 			Data_Double[statl7][0]=Data_Double[statl7][1]=Data_Double[statl7][2]=Data_Double[statl7][3]=Data_Double[statl7][4]=Data_Double[statl7][5]=Data_Double[statl7][6]=Data_Double[statl7][7]=Data_Double[statl7][8]=Data_Double[statl7][9]='0';
 			Judgement1p=JudgeTemp;
 		}
-		else Judgement1p=NONE;
+		else {
+			Judgement1p=NONE;
+		}
 	}
-	if(Crashl5)
-	{
-		if(sl5==2)if(Data_Double_Judge[statl5][0]=='0' && Data_Double_Judge[statl5][1]=='0' && Data_Double_Judge[statl5][2]=='0' && Data_Double_Judge[statl5][3]=='0' && Data_Double_Judge[statl5][4]=='0' && Data_Double_Judge[statl5][5]=='0' && Data_Double_Judge[statl5][6]=='0' && Data_Double_Judge[statl5][7]=='0' && Data_Double_Judge[statl5][8]=='0' && Data_Double_Judge[statl5][9]=='0')
-		{
+	if(Crashl5 && sl5==2) {
+		if(Data_Double_Judge[statl5][0]=='0' && Data_Double_Judge[statl5][1]=='0' && Data_Double_Judge[statl5][2]=='0' && Data_Double_Judge[statl5][3]=='0' && Data_Double_Judge[statl5][4]=='0' && Data_Double_Judge[statl5][5]=='0' && Data_Double_Judge[statl5][6]=='0' && Data_Double_Judge[statl5][7]=='0' && Data_Double_Judge[statl5][8]=='0' && Data_Double_Judge[statl5][9]=='0')	{
 			Data_Double[statl5][0]=Data_Double[statl5][1]=Data_Double[statl5][2]=Data_Double[statl5][3]=Data_Double[statl5][4]=Data_Double[statl5][5]=Data_Double[statl5][6]=Data_Double[statl5][7]=Data_Double[statl5][8]=Data_Double[statl5][9]='0';
 			Judgement1p=JudgeTemp;
+		} else {
+			Judgement1p=NONE;
 		}
-		else Judgement1p=NONE;
 	}
-	if(Crashl9)
-	{
-		if(sl9==2)if(Data_Double_Judge[statl9][0]=='0' && Data_Double_Judge[statl9][1]=='0' && Data_Double_Judge[statl9][2]=='0' && Data_Double_Judge[statl9][3]=='0' && Data_Double_Judge[statl9][4]=='0' && Data_Double_Judge[statl9][5]=='0' && Data_Double_Judge[statl9][6]=='0' && Data_Double_Judge[statl9][7]=='0' && Data_Double_Judge[statl9][8]=='0' && Data_Double_Judge[statl9][9]=='0')
-		{
+
+	if(Crashl9 && sl9==2) {
+		if(Data_Double_Judge[statl9][0]=='0' && Data_Double_Judge[statl9][1]=='0' && Data_Double_Judge[statl9][2]=='0' && Data_Double_Judge[statl9][3]=='0' && Data_Double_Judge[statl9][4]=='0' && Data_Double_Judge[statl9][5]=='0' && Data_Double_Judge[statl9][6]=='0' && Data_Double_Judge[statl9][7]=='0' && Data_Double_Judge[statl9][8]=='0' && Data_Double_Judge[statl9][9]=='0') {
 			Data_Double[statl9][0]=Data_Double[statl9][1]=Data_Double[statl9][2]=Data_Double[statl9][3]=Data_Double[statl9][4]=Data_Double[statl9][5]=Data_Double[statl9][6]=Data_Double[statl9][7]=Data_Double[statl9][8]=Data_Double[statl9][9]='0';
 			Judgement1p=JudgeTemp;
 		}
-		else Judgement1p=NONE;
+		else {
+			Judgement1p=NONE;
+		}
 	}
-	if(Crashl3)
+
+	if(Crashl3 && sl3==2)
 	{
-		if(sl3==2)if(Data_Double_Judge[statl3][0]=='0' && Data_Double_Judge[statl3][1]=='0' && Data_Double_Judge[statl3][2]=='0' && Data_Double_Judge[statl3][3]=='0' && Data_Double_Judge[statl3][4]=='0' && Data_Double_Judge[statl3][5]=='0' && Data_Double_Judge[statl3][6]=='0' && Data_Double_Judge[statl3][7]=='0' && Data_Double_Judge[statl3][8]=='0' && Data_Double_Judge[statl3][9]=='0')
-		{
+		if(Data_Double_Judge[statl3][0]=='0' && Data_Double_Judge[statl3][1]=='0' && Data_Double_Judge[statl3][2]=='0' && Data_Double_Judge[statl3][3]=='0' && Data_Double_Judge[statl3][4]=='0' && Data_Double_Judge[statl3][5]=='0' && Data_Double_Judge[statl3][6]=='0' && Data_Double_Judge[statl3][7]=='0' && Data_Double_Judge[statl3][8]=='0' && Data_Double_Judge[statl3][9]=='0') {
 			Data_Double[statl3][0]=Data_Double[statl3][1]=Data_Double[statl3][2]=Data_Double[statl3][3]=Data_Double[statl3][4]=Data_Double[statl3][5]=Data_Double[statl3][6]=Data_Double[statl3][7]=Data_Double[statl3][8]=Data_Double[statl3][9]='0';
 			Judgement1p=JudgeTemp;
+		} else {
+			Judgement1p=NONE;
 		}
-		else Judgement1p=NONE;
 	}
-// 2 player
-	if(Crashr1)
+
+	// 2 player
+	if(Crashr1 && sr1==2)
 	{
-		if(sr1==2)if(Data_Double_Judge[statr1][0]=='0' && Data_Double_Judge[statr1][1]=='0' && Data_Double_Judge[statr1][2]=='0' && Data_Double_Judge[statr1][3]=='0' && Data_Double_Judge[statr1][4]=='0' && Data_Double_Judge[statr1][5]=='0' && Data_Double_Judge[statr1][6]=='0' && Data_Double_Judge[statr1][7]=='0' && Data_Double_Judge[statr1][8]=='0' && Data_Double_Judge[statr1][9]=='0')
-		{
+		if(Data_Double_Judge[statr1][0]=='0' && Data_Double_Judge[statr1][1]=='0' && Data_Double_Judge[statr1][2]=='0' && Data_Double_Judge[statr1][3]=='0' && Data_Double_Judge[statr1][4]=='0' && Data_Double_Judge[statr1][5]=='0' && Data_Double_Judge[statr1][6]=='0' && Data_Double_Judge[statr1][7]=='0' && Data_Double_Judge[statr1][8]=='0' && Data_Double_Judge[statr1][9]=='0') {
 			Data_Double[statr1][0]=Data_Double[statr1][1]=Data_Double[statr1][2]=Data_Double[statr1][3]=Data_Double[statr1][4]=Data_Double[statr1][5]=Data_Double[statr1][6]=Data_Double[statr1][7]=Data_Double[statr1][8]=Data_Double[statr1][9]='0';
 			Judgement1p=JudgeTemp;
+		} else {
+			Judgement1p=NONE;
 		}
-		else Judgement1p=NONE;
 	}
-	if(Crashr7)
-	{
-		if(sr7==2)if(Data_Double_Judge[statr7][0]=='0' && Data_Double_Judge[statr7][1]=='0' && Data_Double_Judge[statr7][2]=='0' && Data_Double_Judge[statr7][3]=='0' && Data_Double_Judge[statr7][4]=='0' && Data_Double_Judge[statr7][5]=='0' && Data_Double_Judge[statr7][6]=='0' && Data_Double_Judge[statr7][7]=='0' && Data_Double_Judge[statr7][8]=='0' && Data_Double_Judge[statr7][9]=='0')
-		{
+
+	if(Crashr7 && sr7==2) {
+		if(Data_Double_Judge[statr7][0]=='0' && Data_Double_Judge[statr7][1]=='0' && Data_Double_Judge[statr7][2]=='0' && Data_Double_Judge[statr7][3]=='0' && Data_Double_Judge[statr7][4]=='0' && Data_Double_Judge[statr7][5]=='0' && Data_Double_Judge[statr7][6]=='0' && Data_Double_Judge[statr7][7]=='0' && Data_Double_Judge[statr7][8]=='0' && Data_Double_Judge[statr7][9]=='0') {
 			Data_Double[statr7][0]=Data_Double[statr7][1]=Data_Double[statr7][2]=Data_Double[statr7][3]=Data_Double[statr7][4]=Data_Double[statr7][5]=Data_Double[statr7][6]=Data_Double[statr7][7]=Data_Double[statr7][8]=Data_Double[statr7][9]='0';
 			Judgement1p=JudgeTemp;
+		} else {
+			Judgement1p=NONE;
 		}
-		else Judgement1p=NONE;
 	}
-	if(Crashr5)
-	{
-		if(sr5==2)if(Data_Double_Judge[statr5][0]=='0' && Data_Double_Judge[statr5][1]=='0' && Data_Double_Judge[statr5][2]=='0' && Data_Double_Judge[statr5][3]=='0' && Data_Double_Judge[statr5][4]=='0' && Data_Double_Judge[statr5][5]=='0' && Data_Double_Judge[statr5][6]=='0' && Data_Double_Judge[statr5][7]=='0' && Data_Double_Judge[statr5][8]=='0' && Data_Double_Judge[statr5][9]=='0')
-		{
+
+	if(Crashr5 && sr5==2) {
+		if(Data_Double_Judge[statr5][0]=='0' && Data_Double_Judge[statr5][1]=='0' && Data_Double_Judge[statr5][2]=='0' && Data_Double_Judge[statr5][3]=='0' && Data_Double_Judge[statr5][4]=='0' && Data_Double_Judge[statr5][5]=='0' && Data_Double_Judge[statr5][6]=='0' && Data_Double_Judge[statr5][7]=='0' && Data_Double_Judge[statr5][8]=='0' && Data_Double_Judge[statr5][9]=='0') {
 			Data_Double[statr5][0]=Data_Double[statr5][1]=Data_Double[statr5][2]=Data_Double[statr5][3]=Data_Double[statr5][4]=Data_Double[statr5][5]=Data_Double[statr5][6]=Data_Double[statr5][7]=Data_Double[statr5][8]=Data_Double[statr5][9]='0';
 			Judgement1p=JudgeTemp;
+		} else {
+			Judgement1p=NONE;
 		}
-		else Judgement1p=NONE;
 	}
-	if(Crashr9)
-	{
-		if(sr9==2)if(Data_Double_Judge[statr9][0]=='0' && Data_Double_Judge[statr9][1]=='0' && Data_Double_Judge[statr9][2]=='0' && Data_Double_Judge[statr9][3]=='0' && Data_Double_Judge[statr9][4]=='0' && Data_Double_Judge[statr9][5]=='0' && Data_Double_Judge[statr9][6]=='0' && Data_Double_Judge[statr9][7]=='0' && Data_Double_Judge[statr5][8]=='0' && Data_Double_Judge[statr9][9]=='0')
-		{
+
+	if(Crashr9 && sr9==2) {
+		if(Data_Double_Judge[statr9][0]=='0' && Data_Double_Judge[statr9][1]=='0' && Data_Double_Judge[statr9][2]=='0' && Data_Double_Judge[statr9][3]=='0' && Data_Double_Judge[statr9][4]=='0' && Data_Double_Judge[statr9][5]=='0' && Data_Double_Judge[statr9][6]=='0' && Data_Double_Judge[statr9][7]=='0' && Data_Double_Judge[statr5][8]=='0' && Data_Double_Judge[statr9][9]=='0') {
 			Data_Double[statr9][0]=Data_Double[statr9][1]=Data_Double[statr9][2]=Data_Double[statr9][3]=Data_Double[statr9][4]=Data_Double[statr9][5]=Data_Double[statr9][6]=Data_Double[statr9][7]=Data_Double[statr9][8]=Data_Double[statr9][9]='0';
 			Judgement1p=JudgeTemp;
+		} else {
+			Judgement1p=NONE;
 		}
-		else Judgement1p=NONE;
 	}
-	if(Crashr3)
-	{
-		if(sr3==2)if(Data_Double_Judge[statr3][0]=='0' && Data_Double_Judge[statr3][1]=='0' && Data_Double_Judge[statr3][2]=='0' && Data_Double_Judge[statr3][3]=='0' && Data_Double_Judge[statr3][4]=='0' && Data_Double_Judge[statr3][5]=='0' && Data_Double_Judge[statr3][6]=='0' && Data_Double_Judge[statr3][7]=='0' && Data_Double_Judge[statr3][8]=='0' && Data_Double_Judge[statr3][9]=='0')
-		{
+
+	if(Crashr3 && sr3==2) {
+		if(Data_Double_Judge[statr3][0]=='0' && Data_Double_Judge[statr3][1]=='0' && Data_Double_Judge[statr3][2]=='0' && Data_Double_Judge[statr3][3]=='0' && Data_Double_Judge[statr3][4]=='0' && Data_Double_Judge[statr3][5]=='0' && Data_Double_Judge[statr3][6]=='0' && Data_Double_Judge[statr3][7]=='0' && Data_Double_Judge[statr3][8]=='0' && Data_Double_Judge[statr3][9]=='0') {
 			Data_Double[statr3][0]=Data_Double[statr3][1]=Data_Double[statr3][2]=Data_Double[statr3][3]=Data_Double[statr3][4]=Data_Double[statr3][5]=Data_Double[statr3][6]=Data_Double[statr3][7]=Data_Double[statr3][8]=Data_Double[statr3][9]='0';
 			Judgement1p=JudgeTemp;
 		}
-		else Judgement1p=NONE;
+		else {
+			Judgement1p=NONE;
+		}
 	}
 
 	if(Judgement1p==PERFECT || Judgement1p==GREAT)
@@ -1743,7 +1743,8 @@ void DrawArrow_DB(Uint32 cur)
 	cArrl9.w=cArrow_r[0];
 	cArrl9.h=80;
 
-// 2player
+	// 2player
+	/*
 	pArrr1.y=0;
 	pArrr1.x=arrow_l[sr1];
 	pArrr1.w=arrow_r[sr1];
@@ -1793,7 +1794,7 @@ void DrawArrow_DB(Uint32 cur)
 	cArrr9.x=cArrow_l[sr9];
 	cArrr9.w=cArrow_r[0];
 	cArrr9.h=80;
-
+*/
 	if(Crashl1)
         cArrow1.BltFast( 57, 43, gScreen, &cArrl1 );
 	else if(sl1)
@@ -1867,7 +1868,7 @@ void KIU_STAGE_DOUBLE(void)
 			bModeUnion=bModeUnion1p;
 			bModeRandom=bModeRandom1p;
 			b4dMix=b4dMix1p;
-			bModeVanish=bModeVanish;
+			//bModeVanish=bModeVanish;
 		}
 
 		else if(Start2p)
@@ -1884,7 +1885,7 @@ void KIU_STAGE_DOUBLE(void)
 			bModeUnion=bModeUnion2p;
 			bModeRandom=bModeRandom2p;
 			b4dMix=b4dMix2p;
-			bModeVanish=bModeVanish;
+			//bModeVanish=bModeVanish;
 		}
 
 		if(b4dMix)
