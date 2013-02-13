@@ -239,52 +239,6 @@ void Read()
 
 #else // _WIN32
 
-#include <sys/types.h>
-#include <dirent.h>
-#include <strings.h>
-
-/**
- * 파일이나 디렉토리명을 대소문자 구분없이 찾아 파일명을 반환한다.
- * @param	filename	찾을 파일명이나 디렉토리명.
- * @param	buff		반환할 찾은 파일명.
- * @param	size		buff size.
- * @return	해당 파일이나 디렉토리명이 있는지.
- */
-bool FindFile ( const char * filename, char * buff, size_t size )
-{
-	struct dirent * item;
-
-	DIR * dp = opendir ( "." );
-	bool	bFound = false;
-	if ( dp != NULL )
-	{
-		while ( true )
-		{
-			item = readdir ( dp );
-			if ( item == NULL )
-				break;
-
-			if ( strcasecmp ( item->d_name, filename ) == 0 )
-			{
-				strncpy ( buff, item->d_name, size );
-				bFound = true;
-				break;
-			}
-		}
-	}
-
-	closedir ( dp );
-
-	if ( !bFound )
-	{
-		std::stringstream	str ( filename );
-		str << "directory or file is not found :" << filename;
-		MsgBox ( str.str().c_str(),"KICKITUP ERROR",MB_OK );
-		return false;
-	}
-	return true;
-}
-
 #include <vector>
 #include <string>
 #include <sys/stat.h>
@@ -339,70 +293,67 @@ void Read()
 	char  cPathStr[PATH_LEN+1] = { 0, };
 	int	Count=0;
 
-	if ( !FindFile ( "song", cPathStr, sizeof ( cPathStr ) ) )
+	if ( !GetRealFileName( "song", cPathStr, sizeof ( cPathStr ) ) )
 		return;
+
 	chdir ( cPathStr );
 	vector<string> dirs;
-	if ( !GetDirs ( dirs ) )
-	{
+	if ( !GetDirs ( dirs ) ) {
 		chdir ( ".." );
 		return;
 	}
 
-	for ( vector<string>::iterator i = dirs.begin() ;
-	        i != dirs.end();
-	        ++i )
-	{
+	for ( vector<string>::iterator i = dirs.begin() ; i != dirs.end(); ++i ){
 		string dirName = *i;
 		chdir ( dirName.c_str() );
 
-		if ( FindFile ( "crazy_2.stf", cPathStr, sizeof ( cPathStr ) ) )
+		if ( GetRealFileName("crazy_2.stf", cPathStr, sizeof ( cPathStr ) ) )
 			CSONG[Count].ReadCrazy_2( cPathStr );
-		else if ( FindFile ( "crazy_2.ksf", cPathStr, sizeof ( cPathStr ) ) )
+		else if ( GetRealFileName("crazy_2.ksf", cPathStr, sizeof ( cPathStr ) ) )
 			CSONG[Count].ReadCrazy_2( cPathStr );
 
-		if ( FindFile ( "crazy_1.stf", cPathStr, sizeof ( cPathStr ) ) ) {
+		if ( GetRealFileName("crazy_1.stf", cPathStr, sizeof ( cPathStr ) ) ) {
 			CSONG[Count].ReadCrazy_1( cPathStr );
 			++Count;
 		}
-		else if ( FindFile ( "crazy_1.ksf", cPathStr, sizeof ( cPathStr ) ) ) {
+		else if ( GetRealFileName("crazy_1.ksf", cPathStr, sizeof ( cPathStr ) ) ) {
 			CSONG[Count].ReadCrazy_1( cPathStr );
 			++Count;
 		}
 
-		if ( FindFile ( "hard_2.stf", cPathStr, sizeof ( cPathStr ) ) )
+		if ( GetRealFileName("hard_2.stf", cPathStr, sizeof ( cPathStr ) ) )
 			CSONG[Count].ReadHard_2( cPathStr );
-		else if ( FindFile ( "hard_2.ksf", cPathStr, sizeof ( cPathStr ) ) )
+		else if ( GetRealFileName("hard_2.ksf", cPathStr, sizeof ( cPathStr ) ) )
 			CSONG[Count].ReadHard_2( cPathStr );
 
-		if ( FindFile ( "hard_1.stf", cPathStr, sizeof ( cPathStr ) ) ) {
+		if ( GetRealFileName("hard_1.stf", cPathStr, sizeof ( cPathStr ) ) ) {
 			CSONG[Count].ReadHard_1( cPathStr );
 			++Count;
 		}
-		else if ( FindFile ( "hard_1.ksf", cPathStr, sizeof ( cPathStr ) ) ) {
+		else if ( GetRealFileName("hard_1.ksf", cPathStr, sizeof ( cPathStr ) ) ) {
 			CSONG[Count].ReadHard_1( cPathStr );
 			++Count;
 		}
 
-		if ( FindFile ( "easy_2.stf", cPathStr, sizeof ( cPathStr ) ) )
+		if ( GetRealFileName("easy_2.stf", cPathStr, sizeof ( cPathStr ) ) )
 			CSONG[Count].ReadEasy_2( cPathStr );
-		else if ( FindFile ( "easy_2.ksf", cPathStr, sizeof ( cPathStr ) ) )
+		else if ( GetRealFileName("easy_2.ksf", cPathStr, sizeof ( cPathStr ) ) )
 			CSONG[Count].ReadEasy_2( cPathStr );
 
-		if ( FindFile ( "easy_1.stf", cPathStr, sizeof ( cPathStr ) ) ) {
+		if ( GetRealFileName("easy_1.stf", cPathStr, sizeof ( cPathStr ) ) ) {
 			CSONG[Count].ReadEasy_1( cPathStr );
 			++Count;
 		}
-		else if ( FindFile ( "easy_1.ksf", cPathStr, sizeof ( cPathStr ) ) ) {
+		else if ( GetRealFileName("easy_1.ksf", cPathStr, sizeof ( cPathStr ) ) ) {
 			CSONG[Count].ReadEasy_1( cPathStr );
 			++Count;
 		}
 
-		if ( FindFile ( "double.stf", cPathStr, sizeof ( cPathStr ) ) ) {
+		if ( GetRealFileName("double.stf", cPathStr, sizeof ( cPathStr ) ) ) {
 			CSONG[Count].ReadDouble( cPathStr );
 			++Count;
 		}
-		else if ( FindFile ( "double.ksf", cPathStr, sizeof ( cPathStr ) ) ) {
+		else if ( GetRealFileName("double.ksf", cPathStr, sizeof ( cPathStr ) ) ) {
 			CSONG[Count].ReadDouble( cPathStr );
 			++Count;
 		}

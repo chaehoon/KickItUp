@@ -283,11 +283,13 @@ bool _getFullPathName( const char * fileName, char * outputDir, const size_t siz
     if( getcwd( buff, sizeof( buff ) ) == NULL )
         return false;
 
-    snprintf( outputDir, size, "%s/%s", buff, fileName );
+    char realFileName[64] = {0, };
+
+    GetRealFileName(fileName, realFileName, sizeof(realFileName));
+    snprintf(outputDir, size, "%s/%s", buff, realFileName);
     return true;
 
 }
-
 
 /**
  * 파일에서 KickItUp Crazy Mode Step Data를 읽어 들인다.
@@ -372,7 +374,7 @@ void Song::_readStep(const char *fileName, KIUStep * pStep)
 	const char * extPtr = fileName + strlen(fileName) - 3;
 
 	// 확장자 구분.	".stf", ".ksf"
-	if(stricmp(extPtr, "ksf") == 0) {
+	if(strcasecmp(extPtr, "ksf") == 0) {
 		_readKSF(fileName, pStep);
 	} else {
 		_readSTF(fileName, pStep);

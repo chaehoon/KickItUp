@@ -281,37 +281,37 @@ void	DisplayStageCount(const int count)
 
 void ClearMode(void)
 {
-		HighSpeed1p=1;
-		bModeMirror1p=false;
-		bModeNonstep1p=false;
-		bModeSynchro=false;
-		bModeUnion1p=false;
-		bModeRandom1p=false;
-		b4dMix1p=false;
-		HighSpeed1p_1=1;
-		HighSpeed1p_3=1;
-		HighSpeed1p_5=1;
-		HighSpeed1p_7=1;
-		HighSpeed1p_9=1;
-		bModeVanish1p=false;
-		bModeRandomS1p=false;
-		bModeSuddenR1p=false;
+	HighSpeed1p=1;
+	bModeMirror1p=false;
+	bModeNonstep1p=false;
+	bModeSynchro=false;
+	bModeUnion1p=false;
+	bModeRandom1p=false;
+	b4dMix1p=false;
+	HighSpeed1p_1=1;
+	HighSpeed1p_3=1;
+	HighSpeed1p_5=1;
+	HighSpeed1p_7=1;
+	HighSpeed1p_9=1;
+	bModeVanish1p=false;
+	bModeRandomS1p=false;
+	bModeSuddenR1p=false;
 
-		HighSpeed2p=1;
-		bModeMirror2p=false;
-		bModeNonstep2p=false;
-		bModeUnion2p=false;
-		bModeRandom2p=false;
-		b4dMix2p=false;
-		HighSpeed2p_1=1;
-		HighSpeed2p_3=1;
-		HighSpeed2p_5=1;
-		HighSpeed2p_7=1;
-		HighSpeed2p_9=1;
-		bModeVanish2p=false;
-		Double=false;
-		bModeRandomS2p=false;
-		bModeSuddenR2p=false;
+	HighSpeed2p=1;
+	bModeMirror2p=false;
+	bModeNonstep2p=false;
+	bModeUnion2p=false;
+	bModeRandom2p=false;
+	b4dMix2p=false;
+	HighSpeed2p_1=1;
+	HighSpeed2p_3=1;
+	HighSpeed2p_5=1;
+	HighSpeed2p_7=1;
+	HighSpeed2p_9=1;
+	bModeVanish2p=false;
+	Double=false;
+	bModeRandomS2p=false;
+	bModeSuddenR2p=false;
 }
 
 void	GameOver1(void)
@@ -3890,7 +3890,7 @@ int main( int argc, char * argv[] )
 
 		gScreen.Flip();
 		
-		Uint32 curFps = static_cast<Uint32>( 1000 / 100 );
+		Uint32 curFps = static_cast<Uint32>( 1000 / 60 );
 		if( fps.GetTicks() < curFps )	//60fps
 			SDL_Delay( curFps - fps.GetTicks() );
     }
