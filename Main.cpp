@@ -164,7 +164,7 @@ int start1;
 bool				Start1p;
 bool				Start2p;
 
-SONG				CSONG[512];
+Song				CSONG[512];
 
 bool	SongFlag;
 bool	IntroFlag;

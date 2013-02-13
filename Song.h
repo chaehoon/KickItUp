@@ -34,7 +34,7 @@ struct KIUStep
 	char step[MAX_DATA][14];	///< Step Data
 };
 
-class SONG  
+class Song  
 {
 private:
 	KIUStep	mStep[2];	// crazy1, crazy2, heard1, heard2, ....
@@ -48,23 +48,16 @@ public:
 		return mStep[1];
 	}
 
-	void ReadCrazy_1_STF(const char *fileName);
-	void ReadCrazy_1_KSF(const char *fileName);
-	void ReadCrazy_2_STF(const char *fileName);
-	void ReadCrazy_2_KSF(const char *fileName);
+	void ReadCrazy_1(const char *fileName);
+	void ReadCrazy_2(const char *fileName);
 
-	void ReadHard_1_STF(const char *fileName);
-	void ReadHard_1_KSF(const char *fileName);
-	void ReadHard_2_STF(const char *fileName);
-	void ReadHard_2_KSF(const char *fileName);
+	void ReadHard_1(const char *fileName);
+	void ReadHard_2(const char *fileName);
 	
-	void ReadEasy_1_STF(const char *fileName);
-	void ReadEasy_1_KSF(const char *fileName);
-	void ReadEasy_2_STF(const char *fileName);
-	void ReadEasy_2_KSF(const char *fileName);
+	void ReadEasy_1(const char *fileName);
+	void ReadEasy_2(const char *fileName);
 	
-	void ReadDouble_STF(const char *fileName);
-	void ReadDouble_KSF(const char *fileName);
+	void ReadDouble(const char *fileName);
 
     Surface *   mpDiskImage;
     Surface     mThisSongDiskImage;
@@ -91,11 +84,12 @@ public:
 	char PlayMp3Path[PATH_LEN+1];
 	char PlayMpgPath[PATH_LEN+1];
 
-	SONG();
-	virtual ~SONG();
+	Song();
+	virtual ~Song();
 
 private:
-    void LoadDiskImage();
+    void _loadDiskImage();
+    void _readStep(const char *fileName, KIUStep * pStep);
 };
 
 #endif // _SONG_H

@@ -20,12 +20,12 @@ using namespace std;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-SONG::SONG()
+Song::Song()
 {
     mpDiskImage = & mThisSongDiskImage;
 }
 
-SONG::~SONG()
+Song::~Song()
 {
 }
 
@@ -83,7 +83,7 @@ bool _getValue( const string & context, const string & key, float * value )
 	return ret;
 }
 
-bool	ReadSTF(const char *fileName, KIUStep * pStep)
+bool _readSTF(const char *fileName, KIUStep * pStep)
 {
 	char tmpStep[MAX_DATA][14];
 
@@ -124,7 +124,7 @@ bool	ReadSTF(const char *fileName, KIUStep * pStep)
 	return true;
 }
 
-bool	ReadKSF(const char *fileName, KIUStep * pStep)
+bool _readKSF(const char *fileName, KIUStep * pStep)
 {
 	KIUStep & step = *pStep;
 
@@ -212,7 +212,7 @@ bool	ReadKSF(const char *fileName, KIUStep * pStep)
 	return true;
 }
 
-bool GetFullPathName( const char * fileName, char * outputDir, const size_t size )
+bool _getFullPathName( const char * fileName, char * outputDir, const size_t size )
 {
     char    buff[PATH_LEN+1] = { 0, };
     if( getcwd( buff, sizeof( buff ) ) == NULL )
@@ -223,265 +223,50 @@ bool GetFullPathName( const char * fileName, char * outputDir, const size_t size
 
 }
 
-void SONG::ReadCrazy_1_STF(const char *fileName)
+void Song::ReadCrazy_1(const char *fileName)
 {
-	ReadSTF(fileName, &mStep[0]);
-
-	HaveCrazy = true;
-
-	sprintf(SongTitle,"%s", mStep[0].name);
-
-	char    buff[PATH_LEN-1] = { 0, };
-	getcwd( buff, sizeof( buff ) );
-
-	GetFullPathName("Title.bmp",TitleImgPath,PATH_LEN);
-	GetFullPathName("Back.bmp",BgImgPath,PATH_LEN);
-	GetFullPathName("Song.wav",PlayWavPath,PATH_LEN);
-	GetFullPathName("Song.mp3",PlayMp3Path,PATH_LEN);
-	GetFullPathName("Song.mpg",PlayMpgPath,PATH_LEN);
-	GetFullPathName("Intro.wav",IntroWavPath,PATH_LEN);
-	GetFullPathName("Intro.mp3",IntroMp3Path,PATH_LEN);
-    LoadDiskImage();
-}
-
-void SONG::ReadCrazy_1_KSF(const char *fileName)
-{
-	ReadKSF(fileName, &mStep[0]);
-
 	HaveCrazy=true;
-
-	sprintf(SongTitle,"%s",mStep[0].name);
-
-	GetFullPathName("Title.bmp",TitleImgPath,PATH_LEN);
-	GetFullPathName("Back.bmp",BgImgPath,PATH_LEN);
-	GetFullPathName("Song.wav",PlayWavPath,PATH_LEN);
-	GetFullPathName("Song.mp3",PlayMp3Path,PATH_LEN);
-	GetFullPathName("Song.mpg",PlayMpgPath,PATH_LEN);
-	GetFullPathName("Intro.wav",IntroWavPath,PATH_LEN);
-	GetFullPathName("Intro.mp3",IntroMp3Path,PATH_LEN);
-    LoadDiskImage();
+	_readStep(fileName, &mStep[0]);
 }
 
-void SONG::ReadCrazy_2_STF(const char *fileName)
+void Song::ReadCrazy_2(const char *fileName)
 {
-	ReadSTF(fileName, &mStep[1]);
-
 	HaveCouple=true;
-
-	sprintf(SongTitle,"%s",mStep[1].name);
-
-	GetFullPathName("Title.bmp",TitleImgPath,PATH_LEN);
-	GetFullPathName("Back.bmp",BgImgPath,PATH_LEN);
-	GetFullPathName("Song.wav",PlayWavPath,PATH_LEN);
-	GetFullPathName("Song.mp3",PlayMp3Path,PATH_LEN);
-	GetFullPathName("Song.mpg",PlayMpgPath,PATH_LEN);
-	GetFullPathName("Intro.wav",IntroWavPath,PATH_LEN);
-	GetFullPathName("Intro.mp3",IntroMp3Path,PATH_LEN);
-    LoadDiskImage();
+	_readStep(fileName, &mStep[1]);
 }
 
-void SONG::ReadCrazy_2_KSF(const char *fileName)
+void Song::ReadHard_1(const char *fileName)
 {
-	ReadKSF(fileName, &mStep[1]);
-
-	HaveCouple=true;
-
-	sprintf(SongTitle,"%s",mStep[1].name);
-
-	GetFullPathName("Title.bmp",TitleImgPath,PATH_LEN);
-	GetFullPathName("Back.bmp",BgImgPath,PATH_LEN);
-	GetFullPathName("Song.wav",PlayWavPath,PATH_LEN);
-	GetFullPathName("Song.mp3",PlayMp3Path,PATH_LEN);
-	GetFullPathName("Song.mpg",PlayMpgPath,PATH_LEN);
-	GetFullPathName("Intro.wav",IntroWavPath,PATH_LEN);
-	GetFullPathName("Intro.mp3",IntroMp3Path,PATH_LEN);
-    LoadDiskImage();
-}
-
-void SONG::ReadHard_1_STF(const char *fileName)
-{
-	ReadKSF(fileName, &mStep[0]);
-
 	HaveHard=true;
-
-	sprintf(SongTitle,"%s", mStep[0].name);
-
-	GetFullPathName("Title.bmp",TitleImgPath,PATH_LEN);
-	GetFullPathName("Back.bmp",BgImgPath,PATH_LEN);
-	GetFullPathName("Song.wav",PlayWavPath,PATH_LEN);
-	GetFullPathName("Song.mp3",PlayMp3Path,PATH_LEN);
-	GetFullPathName("Song.mpg",PlayMpgPath,PATH_LEN);
-	GetFullPathName("Intro.wav",IntroWavPath,PATH_LEN);
-	GetFullPathName("Intro.mp3",IntroMp3Path,PATH_LEN);
-    LoadDiskImage();
+	_readStep(fileName, &mStep[0]);
 }
 
-void SONG::ReadHard_1_KSF(const char *fileName)
+void Song::ReadHard_2(const char *fileName)
 {
-	ReadKSF(fileName, &mStep[0]);
-
-	HaveHard=true;
-
-	sprintf(SongTitle,"%s",mStep[0].name);
-
-	GetFullPathName("Title.bmp",TitleImgPath,PATH_LEN);
-	GetFullPathName("Back.bmp",BgImgPath,PATH_LEN);
-	GetFullPathName("Song.wav",PlayWavPath,PATH_LEN);
-	GetFullPathName("Song.mp3",PlayMp3Path,PATH_LEN);
-	GetFullPathName("Song.mpg",PlayMpgPath,PATH_LEN);
-	GetFullPathName("Intro.wav",IntroWavPath,PATH_LEN);
-	GetFullPathName("Intro.mp3",IntroMp3Path,PATH_LEN);
-    LoadDiskImage();
-}
-
-void SONG::ReadHard_2_STF(const char *fileName)
-{
-	ReadSTF(fileName, &mStep[1]);
-
 	HaveCouple=true;
-
-	sprintf(SongTitle,"%s",mStep[1].name);
-
-	GetFullPathName("Title.bmp",TitleImgPath,PATH_LEN);
-	GetFullPathName("Back.bmp",BgImgPath,PATH_LEN);
-	GetFullPathName("Song.wav",PlayWavPath,PATH_LEN);
-	GetFullPathName("Song.mp3",PlayMp3Path,PATH_LEN);
-	GetFullPathName("Song.mpg",PlayMpgPath,PATH_LEN);
-	GetFullPathName("Intro.wav",IntroWavPath,PATH_LEN);
-	GetFullPathName("Intro.mp3",IntroMp3Path,PATH_LEN);
-    LoadDiskImage();
+	_readStep(fileName, &mStep[1]);
 }
 
-void SONG::ReadHard_2_KSF(const char *fileName)
+void Song::ReadEasy_1(const char *fileName)
 {
-	ReadKSF(fileName, &mStep[1]);
-
-	HaveCouple=true;
-
-	sprintf(SongTitle,"%s",mStep[1].name);
-
-	GetFullPathName("Title.bmp",TitleImgPath,PATH_LEN);
-	GetFullPathName("Back.bmp",BgImgPath,PATH_LEN);
-	GetFullPathName("Song.wav",PlayWavPath,PATH_LEN);
-	GetFullPathName("Song.mp3",PlayMp3Path,PATH_LEN);
-	GetFullPathName("Song.mpg",PlayMpgPath,PATH_LEN);
-	GetFullPathName("Intro.wav",IntroWavPath,PATH_LEN);
-	GetFullPathName("Intro.mp3",IntroMp3Path,PATH_LEN);
-    LoadDiskImage();
-}
-
-void SONG::ReadEasy_1_STF(const char *fileName)
-{
-	ReadSTF(fileName, &mStep[0]);
-
 	HaveEasy=true;
-
-	sprintf(SongTitle,"%s",mStep[0].name);
-
-	GetFullPathName("Title.bmp",TitleImgPath,PATH_LEN);
-	GetFullPathName("Back.bmp",BgImgPath,PATH_LEN);
-	GetFullPathName("Song.wav",PlayWavPath,PATH_LEN);
-	GetFullPathName("Song.mp3",PlayMp3Path,PATH_LEN);
-	GetFullPathName("Song.mpg",PlayMpgPath,PATH_LEN);
-	GetFullPathName("Intro.wav",IntroWavPath,PATH_LEN);
-	GetFullPathName("Intro.mp3",IntroMp3Path,PATH_LEN);
-    LoadDiskImage();
+	_readStep(fileName, &mStep[0]);
 }
 
-void SONG::ReadEasy_1_KSF(const char *fileName)
+void Song::ReadEasy_2(const char *fileName)
 {
-	ReadKSF(fileName, &mStep[0]);
-
-	HaveEasy=true;
-
-	sprintf(SongTitle,"%s",mStep[0].name);
-
-	GetFullPathName("Title.bmp",TitleImgPath,PATH_LEN);
-	GetFullPathName("Back.bmp",BgImgPath,PATH_LEN);
-	GetFullPathName("Song.wav",PlayWavPath,PATH_LEN);
-	GetFullPathName("Song.mp3",PlayMp3Path,PATH_LEN);
-	GetFullPathName("Song.mpg",PlayMpgPath,PATH_LEN);
-	GetFullPathName("Intro.wav",IntroWavPath,PATH_LEN);
-	GetFullPathName("Intro.mp3",IntroMp3Path,PATH_LEN);
-    LoadDiskImage();
-}
-
-void SONG::ReadEasy_2_STF(const char *fileName)
-{
-	ReadSTF(fileName, &mStep[1]);
-
 	HaveCouple=true;
-
-	sprintf(SongTitle,"%s",mStep[1].name);
-
-	GetFullPathName("Title.bmp",TitleImgPath,PATH_LEN);
-	GetFullPathName("Back.bmp",BgImgPath,PATH_LEN);
-	GetFullPathName("Song.wav",PlayWavPath,PATH_LEN);
-	GetFullPathName("Song.mp3",PlayMp3Path,PATH_LEN);
-	GetFullPathName("Song.mpg",PlayMpgPath,PATH_LEN);
-	GetFullPathName("Intro.wav",IntroWavPath,PATH_LEN);
-	GetFullPathName("Intro.mp3",IntroMp3Path,PATH_LEN);
-    LoadDiskImage();
-}
-
-void SONG::ReadEasy_2_KSF(const char *fileName)
-{
-	ReadKSF(fileName, &mStep[1]);
-
-	HaveCouple=true;
-
-	sprintf(SongTitle,"%s",mStep[1].name);
-	
-	GetFullPathName("Title.bmp",TitleImgPath,PATH_LEN);
-	GetFullPathName("Back.bmp",BgImgPath,PATH_LEN);
-	GetFullPathName("Song.wav",PlayWavPath,PATH_LEN);
-	GetFullPathName("Song.mp3",PlayMp3Path,PATH_LEN);
-	GetFullPathName("Song.mpg",PlayMpgPath,PATH_LEN);
-	GetFullPathName("Intro.wav",IntroWavPath,PATH_LEN);
-	GetFullPathName("Intro.mp3",IntroMp3Path,PATH_LEN);
-    LoadDiskImage();
+	_readStep(fileName, &mStep[1]);
 }
 
 
-void SONG::ReadDouble_STF(const char *fileName)
+void Song::ReadDouble(const char *fileName)
 {
-	ReadSTF(fileName, &mStep[0]);
-
 	HaveDouble=true;
-
-	sprintf(SongTitle,"%s",mStep[0].name);
-
-	GetFullPathName("Title.bmp",TitleImgPath,PATH_LEN);
-	GetFullPathName("Back.bmp",BgImgPath,PATH_LEN);
-	GetFullPathName("Song.wav",PlayWavPath,PATH_LEN);
-	GetFullPathName("Song.mp3",PlayMp3Path,PATH_LEN);
-	GetFullPathName("Song.mpg",PlayMpgPath,PATH_LEN);
-	GetFullPathName("Intro.wav",IntroWavPath,PATH_LEN);
-	GetFullPathName("Intro.mp3",IntroMp3Path,PATH_LEN);
-    LoadDiskImage();
+	_readStep(fileName, &mStep[0]);
 }
 
-void SONG::ReadDouble_KSF(const char *fileName)
-{
-	ReadKSF(fileName, &mStep[0]);
-
-	HaveDouble=true;
-
-	sprintf(SongTitle,"%s",mStep[0].name);
-	
-	GetFullPathName("Title.bmp",TitleImgPath,PATH_LEN);
-	GetFullPathName("Back.bmp",BgImgPath,PATH_LEN);
-	GetFullPathName("Song.wav",PlayWavPath,PATH_LEN);
-	GetFullPathName("Song.mp3",PlayMp3Path,PATH_LEN);
-	GetFullPathName("Song.mpg",PlayMpgPath,PATH_LEN);
-	GetFullPathName("Intro.wav",IntroWavPath,PATH_LEN);
-	GetFullPathName("Intro.mp3",IntroMp3Path,PATH_LEN);
-    
-    LoadDiskImage();
-}
-
-
-void SONG::LoadDiskImage()
+void Song::_loadDiskImage()
 {
     if( mThisSongDiskImage.LoadBmp( "Disc.bmp" ) ) {
         mThisSongDiskImage.SetColorKey();
@@ -490,4 +275,29 @@ void SONG::LoadDiskImage()
     else {
         mpDiskImage = & gNoDISC;
     }
+}
+
+void Song::_readStep(const char *fileName, KIUStep * pStep)
+{
+	// 확장자 얻기
+	char extName[8] = {0, };
+	const char * extPtr = fileName + strlen(fileName) - 3;
+	strncpy(extName, extPtr, 3);
+
+	// 확장자 구분.	".stf", ".ksf"
+	if(stricmp(extName, "ksf") == 0) {
+		_readKSF(fileName, pStep);
+	} else {
+		_readSTF(fileName, pStep);
+	}
+
+	strncpy(SongTitle, pStep->name, sizeof(SongTitle));
+	_getFullPathName("Title.bmp", TitleImgPath, PATH_LEN);
+	_getFullPathName("Back.bmp", BgImgPath, PATH_LEN);
+	_getFullPathName("Song.wav", PlayWavPath, PATH_LEN);
+	_getFullPathName("Song.mp3", PlayMp3Path, PATH_LEN);
+	_getFullPathName("Song.mpg", PlayMpgPath, PATH_LEN);
+	_getFullPathName("Intro.wav", IntroWavPath, PATH_LEN);
+	_getFullPathName("Intro.mp3", IntroMp3Path, PATH_LEN);
+    _loadDiskImage();
 }
