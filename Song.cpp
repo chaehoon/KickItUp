@@ -20,7 +20,12 @@ using namespace std;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-Song::Song()
+Song::Song() : 	Next(0), Prev(0),
+	HaveCrazy(false),
+	HaveHard(false),
+	HaveEasy(false),
+	HaveCouple(false),
+	HaveDouble(false)
 {
     mpDiskImage = & mThisSongDiskImage;
 }
@@ -29,6 +34,16 @@ Song::~Song()
 {
 }
 
+/**
+ * context에 있는 내용에서 key값에 해당되는 값을 반환한다.
+ *
+ * 예) _getValue("#TITLE:Hello world;", "#TITLE:", val) --> "Hello world"
+ *
+ * @param	context	키값과 값을 가지고 있는 몸체
+ * @param	key		찿을 키값
+ * @param	value	반환 값
+ * @return	찾았는지 여부
+ */
 bool _getValue( const string & context, const string & key, string * value )
 {
     string::size_type startIdx;
@@ -49,6 +64,17 @@ bool _getValue( const string & context, const string & key, string * value )
     return ret;
 }
 
+/**
+ * context에 있는 내용에서 key값에 해당되는 값을 반환한다.
+ *
+ * 예) _getValue("#TITLE:Hello world;", "#TITLE:", val) --> "Hello world"
+ *
+ * @param	context	키값과 값을 가지고 있는 몸체
+ * @param	key		찿을 키값
+ * @param	value	반환 string
+ * @param	size	value size
+ * @return	찾았는지 여부
+ */
 bool _getValue( const string & context, const string & key, char * value, const int size )
 {
 	bool ret = false;
@@ -61,6 +87,16 @@ bool _getValue( const string & context, const string & key, char * value, const 
 
 }
 
+/**
+ * context에 있는 내용에서 key값에 해당되는 값을 반환한다.
+ *
+ * 예) _getValue("#TITLE:Hello world;", "#TITLE:", val) --> "Hello world"
+ *
+ * @param	context	키값과 값을 가지고 있는 몸체
+ * @param	key		찿을 키값
+ * @param	value	반환 값
+ * @return	찾았는지 여부
+ */
 bool _getValue( const string & context, const string & key, int * value )
 {
 	bool ret = false;
@@ -72,6 +108,16 @@ bool _getValue( const string & context, const string & key, int * value )
 	return ret;
 }
 
+/**
+ * context에 있는 내용에서 key값에 해당되는 값을 반환한다.
+ *
+ * 예) _getValue("#TITLE:Hello world;", "#TITLE:", val) --> "Hello world"
+ *
+ * @param	context	키값과 값을 가지고 있는 몸체
+ * @param	key		찿을 키값
+ * @param	value	반환 값
+ * @return	찾았는지 여부
+ */
 bool _getValue( const string & context, const string & key, float * value )
 {
 	bool ret = false;
@@ -83,6 +129,12 @@ bool _getValue( const string & context, const string & key, float * value )
 	return ret;
 }
 
+/**
+ * 파일에서 KickItUp Step(stf Step) Data를 읽어 들인다.
+ *
+ * @param	fileName
+ * @param	pStep		반환 할 Step정보
+ */
 bool _readSTF(const char *fileName, KIUStep * pStep)
 {
 	char tmpStep[MAX_DATA][14];
@@ -124,6 +176,12 @@ bool _readSTF(const char *fileName, KIUStep * pStep)
 	return true;
 }
 
+/**
+ * 파일에서 KickItUp Step(ksf Step) Data를 읽어 들인다.
+ *
+ * @param	fileName
+ * @param	pStep		반환 할 Step정보
+ */
 bool _readKSF(const char *fileName, KIUStep * pStep)
 {
 	KIUStep & step = *pStep;
@@ -212,6 +270,13 @@ bool _readKSF(const char *fileName, KIUStep * pStep)
 	return true;
 }
 
+/**
+ * 파일이름에 전체 경로를 알아낸다.
+ *
+ * @param	fileName
+ * @param	outputDir	반환 할 파일전체 경로
+ * @param	size		outputDir size
+ */
 bool _getFullPathName( const char * fileName, char * outputDir, const size_t size )
 {
     char    buff[PATH_LEN+1] = { 0, };
@@ -223,49 +288,73 @@ bool _getFullPathName( const char * fileName, char * outputDir, const size_t siz
 
 }
 
+
+/**
+ * 파일에서 KickItUp Crazy Mode Step Data를 읽어 들인다.
+ */
 void Song::ReadCrazy_1(const char *fileName)
 {
 	HaveCrazy=true;
 	_readStep(fileName, &mStep[0]);
 }
 
+/**
+ * 파일에서 KickItUp Crazy Mode Step Data를 읽어 들인다.
+ */
 void Song::ReadCrazy_2(const char *fileName)
 {
 	HaveCouple=true;
 	_readStep(fileName, &mStep[1]);
 }
 
+/**
+ * 파일에서 KickItUp Hard Mode Step Data를 읽어 들인다.
+ */
 void Song::ReadHard_1(const char *fileName)
 {
 	HaveHard=true;
 	_readStep(fileName, &mStep[0]);
 }
 
+/**
+ * 파일에서 KickItUp Hard Mode Step Data를 읽어 들인다.
+ */
 void Song::ReadHard_2(const char *fileName)
 {
 	HaveCouple=true;
 	_readStep(fileName, &mStep[1]);
 }
 
+/**
+ * 파일에서 KickItUp Easy Mode Step Data를 읽어 들인다.
+ */
 void Song::ReadEasy_1(const char *fileName)
 {
 	HaveEasy=true;
 	_readStep(fileName, &mStep[0]);
 }
 
+/**
+ * 파일에서 KickItUp Easy Mode Step Data를 읽어 들인다.
+ */
 void Song::ReadEasy_2(const char *fileName)
 {
 	HaveCouple=true;
 	_readStep(fileName, &mStep[1]);
 }
 
-
+/**
+ * 파일에서 KickItUp Double Mode Step Data를 읽어 들인다.
+ */
 void Song::ReadDouble(const char *fileName)
 {
 	HaveDouble=true;
 	_readStep(fileName, &mStep[0]);
 }
 
+/**
+ * 화면에 보여줄 노래의 disk image data를 읽어들인다.
+ */
 void Song::_loadDiskImage()
 {
     if( mThisSongDiskImage.LoadBmp( "Disc.bmp" ) ) {
@@ -280,12 +369,10 @@ void Song::_loadDiskImage()
 void Song::_readStep(const char *fileName, KIUStep * pStep)
 {
 	// 확장자 얻기
-	char extName[8] = {0, };
 	const char * extPtr = fileName + strlen(fileName) - 3;
-	strncpy(extName, extPtr, 3);
 
 	// 확장자 구분.	".stf", ".ksf"
-	if(stricmp(extName, "ksf") == 0) {
+	if(stricmp(extPtr, "ksf") == 0) {
 		_readKSF(fileName, pStep);
 	} else {
 		_readSTF(fileName, pStep);

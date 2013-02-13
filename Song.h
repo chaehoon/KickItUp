@@ -13,7 +13,7 @@
 
 extern Surface  gNoDISC;
 
-/** Step Info
+/** KickItUp Step Info
  */
 struct KIUStep
 {
@@ -32,31 +32,69 @@ struct KIUStep
 	int bunki2;			///< bunki2 ?
 
 	char step[MAX_DATA][14];	///< Step Data
+
+	KIUStep() : bpm1(0.f), bpm2(0.f), bpm3(0.f), madi(0), tick(0), diffculty(0), track(0),
+			start1(0), start2(0), start3(0),bunki1(0), bunki2(0){
+	}
 };
 
+/**
+ * 노래와 Step정보를 저장 관리하는 클래스
+ * TODO: 리펙토링이 필요하다.
+ */
 class Song  
 {
 private:
 	KIUStep	mStep[2];	// crazy1, crazy2, heard1, heard2, ....
 
 public:
+	/**
+	 * 현재 한곡당 2개의 스탭까지 제공할수 있는데 정확한 정보는 잘 모르겠다.
+	 */
 	const KIUStep & getStep1() {
 		return mStep[0];
 	}
 
+	/**
+	 * 현재 한곡당 2개의 스탭까지 제공할수 있는데 정확한 정보는 잘 모르겠다.
+	 */
 	const KIUStep & getStep2() {
 		return mStep[1];
 	}
 
+	/**
+	 *  Creazy1 스텝을 mStep[0]에 저장한다.
+	 */
 	void ReadCrazy_1(const char *fileName);
+
+	/**
+	 *  Creazy2 스텝을 mStep[1]에 저장한다.
+	 */
 	void ReadCrazy_2(const char *fileName);
 
+	/**
+	 *  Hard1 스텝을 mStep[0]에 저장한다.
+	 */
 	void ReadHard_1(const char *fileName);
+
+	/**
+	 *  Hard2 스텝을 mStep[1]에 저장한다.
+	 */
 	void ReadHard_2(const char *fileName);
-	
+
+	/**
+	 *  Easy1 스텝을 mStep[0]에 저장한다.
+	 */
 	void ReadEasy_1(const char *fileName);
+
+	/**
+	 *  Easy2 스텝을 mStep[1]에 저장한다.
+	 */
 	void ReadEasy_2(const char *fileName);
 	
+	/**
+	 *  Double 스텝을 mStep[0]에 저장한다.
+	 */
 	void ReadDouble(const char *fileName);
 
     Surface *   mpDiskImage;
