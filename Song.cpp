@@ -11,8 +11,11 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "Song.h"
-#include <stdio.h>
-// #include <direct.h>
+#include <cstdio>
+#include <iostream>
+#include <string>
+#include <cstdlib>
+using namespace std;
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
@@ -26,16 +29,70 @@ SONG::~SONG()
 {
 }
 
-bool	ReadSTF(const char *fileName, STEP * pStep)
+bool _getValue( const string & context, const string & key, string * value )
+{
+    string::size_type startIdx;
+    string::size_type endIdx;
+
+    bool    ret = false;
+
+    // value 얻기.
+    startIdx = context.find( key );
+    if( startIdx != string::npos ) {
+        startIdx += key.length();
+        endIdx = context.find_last_of( ";" );
+        if( startIdx < endIdx && endIdx != string::npos ) {
+            value->assign( context.begin()+startIdx, context.begin() + endIdx );
+            ret = true;
+        }
+    }
+    return ret;
+}
+
+bool _getValue( const string & context, const string & key, char * value, const int size )
+{
+	bool ret = false;
+	string	strVal;
+	if(_getValue(context, key, &strVal)) {
+		strncpy(value, strVal.c_str(), size);
+		ret = true;
+	}
+	return ret;
+
+}
+
+bool _getValue( const string & context, const string & key, int * value )
+{
+	bool ret = false;
+	string	strVal;
+	if(_getValue(context, key, &strVal)) {
+		*value = atoi(strVal.c_str());
+		ret = true;
+	}
+	return ret;
+}
+
+bool _getValue( const string & context, const string & key, float * value )
+{
+	bool ret = false;
+	string	strVal;
+	if(_getValue(context, key, &strVal)) {
+		*value = atof(strVal.c_str());
+		ret = true;
+	}
+	return ret;
+}
+
+bool	ReadSTF(const char *fileName, KIUStep * pStep)
 {
 	char tmpStep[MAX_DATA][14];
 
 	FILE *F = fopen(fileName,"rb");
 	fread(pStep, sizeof(*pStep), 1, F);
 
-	double bpmcount = 60 / pStep->BPM * 100;
+	double bpmcount = 60 / pStep->bpm1 * 100;
 
-	double tmpStart = pStep->start;
+	double tmpStart = pStep->start1;
 
 	unsigned int i = 0;
 	if(pStep->tick==2) {
@@ -61,33 +118,31 @@ bool	ReadSTF(const char *fileName, STEP * pStep)
 		strcpy(tmpStep[i+j], pStep->step[j]);
 	}
 
-	pStep->start = (int)tmpStart;
+	pStep->start1 = (int)tmpStart;
 	memcpy(&pStep->step, &tmpStep, sizeof(pStep->step));
 	
 	return true;
 }
 
-bool	ReadKSF(const char *fileName, STEP_NEW * pStep)
+bool	ReadKSF(const char *fileName, KIUStep * pStep)
 {
-	STEP_NEW & step = *pStep;
-	char TEMP[50];
+	KIUStep & step = *pStep;
 
 	char TempStep[MAX_DATA][14];
 	
-	unsigned int i,j;
-	double bpmcount,TempStart;
+	double bpmcount,tempStart;
 
-	step.start2=0;
-	step.start3=0;
-	step.BPM=0;
-	step.BPM2=0;
-	step.BPM3=0;
-	step.bunki=0;
-	step.bunki2=0;
+	step.start2 = 0;
+	step.start3 = 0;
+	step.bpm1 = 0;
+	step.bpm2 = 0;
+	step.bpm3 = 0;
+	step.bunki1 = 0;
+	step.bunki2 = 0;
 
-	for(i=0;i<2048;i++)
+	for(int i = 0 ; i < MAX_DATA ; ++i) {
 		strcpy(step.step[i],"0000000000000");
-
+	}
 	
 	FILE * f = fopen(fileName,"rt");
 	if(f == NULL)	{
@@ -95,162 +150,63 @@ bool	ReadKSF(const char *fileName, STEP_NEW * pStep)
 		return false;
 	}
 
-	char	szStr[256];
+	char	line[1024];
 	while(!feof(f)) {
-		if(fgetc(f)=='#'){
-			for(i=0;;i++) {
-				szStr[i]=fgetc(f);
-				if(szStr[i]==':') {
-					szStr[i]='\0';
-					break;
-				}
-			}
+		fgets(line, sizeof(line), f);
+		if(_getValue(line, "#TITLE:", step.name, sizeof(step.name)) ||
+				_getValue(line, "#TICKCOUNT:", &step.tick) ||
+				_getValue(line, "#BUNKI:", &step.bunki1) ||
+				_getValue(line, "#BUNKI2:", &step.bunki2) ||
+				_getValue(line, "#BPM:", &step.bpm1) ||
+				_getValue(line, "#BPM2:", &step.bpm2) ||
+				_getValue(line, "#BPM3:", &step.bpm3) ||
+				_getValue(line, "#DIFFCULTY:", &step.diffculty) ||
+				_getValue(line, "#MADI:", &step.madi) ||
+				_getValue(line, "#STARTTIME:", &step.start1) ||
+				_getValue(line, "#STARTTIME2:", &step.start2) ||
+				_getValue(line, "#STARTTIME3:", &step.start3) ) {
+			continue;
+		}
 
-			// #TITLE:Title Name;
-			if(strcmp(szStr,"TITLE")==0) {
-				for(i=0;;i++) {
-					step.name[i]=fgetc(f);
-					if(step.name[i]==';') {
-						step.name[i]='\0';
-						break;
-					}
-				}
-			} else if(strcmp(szStr,"TICKCOUNT")==0) {	// #TICKCOUNT:100;
-				for(i=0;;i++) {
-					TEMP[i]=fgetc(f);
-					if(TEMP[i]==';') {
-						TEMP[i]='\0';
-						break;
-					}
-				}
-				step.tick=atoi(TEMP);
-			} else if(strcmp(szStr,"BUNKI")==0) {	// #BUNKI:100;
-				for(i=0;;i++) {
-					TEMP[i]=fgetc(f);
-					if(TEMP[i]==';') {
-						TEMP[i]='\0';
-						break;
-					}
-				}
-				step.bunki=atoi(TEMP);
-			} else if(strcmp(szStr,"BUNKI2")==0) {	// #BUNKI2:100;
-				for(i=0;;i++) {
-					TEMP[i]=fgetc(f);
-					if(TEMP[i]==';') {
-						TEMP[i]='\0';
-						break;
-					}
-				}
-				step.bunki2=atoi(TEMP);
-			} else if(strcmp(szStr,"BPM")==0) {		// #BPM:100;
-				for(i=0;;i++) {
-					TEMP[i]=fgetc(f);
-					if(TEMP[i]==';') {
-						TEMP[i]='\0';
-						break;
-					}
-				}
-				step.BPM=(float)atof(TEMP);
-			} else if(strcmp(szStr,"BPM2")==0) {	// #BPM2:100;
-				for(i=0;;i++) {
-					TEMP[i]=fgetc(f);
-					if(TEMP[i]==';') {
-						TEMP[i]='\0';
-						break;
-					}
-				}
-				step.BPM2=(float)atof(TEMP);
-			} else if(strcmp(szStr,"BPM3")==0) {
-				for(i=0;;i++) {
-					TEMP[i]=fgetc(f);
-					if(TEMP[i]==';') {
-						TEMP[i]='\0';
-						break;
-					}
-				}
-				step.BPM3=(float)atof(TEMP);
-			} else if(strcmp(szStr,"DIFFCULTY")==0) {
-				for(i=0;;i++) {
-					TEMP[i]=fgetc(f);
-					if(TEMP[i]==';') {
-						TEMP[i]='\0';
-						break;
-					}
-				}
-				step._dummy=atoi(TEMP);
-			} else if(strcmp(szStr,"MADI")==0) {
-				for(i=0;;i++) {
-					TEMP[i]=fgetc(f);
-					if(TEMP[i]==';') {
-						TEMP[i]='\0';
-						break;
-					}
-				}
-				step.madi=atoi(TEMP);
-			} else if(strcmp(szStr,"STARTTIME")==0) {
-				for(i=0;;i++) {
-					TEMP[i]=fgetc(f);
-					if(TEMP[i]==';') {
-						TEMP[i]='\0';
-						break;
-					}
-				}
-				step.start=atoi(TEMP);
-			} else if(strcmp(szStr,"STARTTIME2")==0) {
-				for(i=0;;i++) {
-					TEMP[i]=fgetc(f);
-					if(TEMP[i]==';') {
-						TEMP[i]='\0';
-						break;
-					}
-				}
-				step.start2=atoi(TEMP);
-			} else if(strcmp(szStr,"STARTTIME3")==0) {
-				for(i=0;;i++) {
-					TEMP[i]=fgetc(f);
-					if(TEMP[i]==';') {
-						TEMP[i]='\0';
-						break;
-					}
-				}
-				step.start3=atoi(TEMP);
-			} else if(strcmp(szStr,"STEP")==0) {
-				for(i=0;i<2048;i++) {
-					fscanf(f,"%s\n",step.step[i]);
-					if(strcmp(step.step[i],"2222222222222")==0)break;
-				}
+		// STEP 얻기
+		if(strncmp(line,"#STEP:", 6) == 0) {
+			for(int i=0 ; i < MAX_DATA ; ++i) {
+				fscanf(f,"%s\n",step.step[i]);
+				if(strcmp(step.step[i],"2222222222222")==0)
+					break;
 			}
 		}
 	}
 	
-	bpmcount=60/step.BPM;
-	bpmcount*=100;
+	bpmcount = 60/step.bpm1;
+	bpmcount *= 100;
 
-	TempStart=step.start;
+	tempStart=step.start1;
 
+	int startStepIndex = 0;
 	if(step.tick==2) {
-		for(i=0;;i+=2) {
-			if(TempStart<bpmcount)break;
-			TempStart-=bpmcount;
-			strcpy(TempStep[i],"0000000000000");
-			strcpy(TempStep[i+1],"0000000000000");
+		for(startStepIndex = 0;; startStepIndex += 2) {
+			if(tempStart<bpmcount)break;
+			tempStart-=bpmcount;
+			strcpy(TempStep[startStepIndex],"0000000000000");
+			strcpy(TempStep[startStepIndex+1],"0000000000000");
 		}
 	} else if(step.tick==4) {
-		for(i=0;;i+=4) {
-			if(TempStart<bpmcount)break;
-			TempStart-=bpmcount;
-			strcpy(TempStep[i],"0000000000000");
-			strcpy(TempStep[i+1],"0000000000000");
-			strcpy(TempStep[i+2],"0000000000000");
-			strcpy(TempStep[i+3],"0000000000000");
+		for(startStepIndex = 0 ;; startStepIndex += 4) {
+			if(tempStart<bpmcount)break;
+			tempStart -= bpmcount;
+			strcpy(TempStep[startStepIndex],"0000000000000");
+			strcpy(TempStep[startStepIndex+1],"0000000000000");
+			strcpy(TempStep[startStepIndex+2],"0000000000000");
+			strcpy(TempStep[startStepIndex+3],"0000000000000");
 		}
 	}
 	
-	for(j=0;j<MAX_DATA-i;j++) {
-		strcpy(TempStep[i+j],step.step[j]);
+	for(int j = 0 ; j < MAX_DATA - startStepIndex ; ++j) {
+		strcpy(TempStep[startStepIndex+j],step.step[j]);
 	}
 
-	step.start=(int)TempStart;
+	step.start1=(int)tempStart;
 	memcpy(&step.step,&TempStep,sizeof(step.step));
 	
 	return true;
@@ -269,21 +225,14 @@ bool GetFullPathName( const char * fileName, char * outputDir, const size_t size
 
 void SONG::ReadCrazy_1_STF(const char *fileName)
 {
-	STEP step;
+	ReadSTF(fileName, &mStep[0]);
 
-	ReadSTF(fileName, &step);
+	HaveCrazy = true;
 
-	HaveCrazy=true;
-	bpm=step.BPM;
+	sprintf(SongTitle,"%s", mStep[0].name);
 
-	Crazy_Start=step.start;
-	Crazy_Tick=step.tick;
-
-	sprintf(SongTitle,"%s", step.name);
-	memcpy(&Data_Crazy, &step.step, sizeof(step.step));
-
-    char    buff[PATH_LEN-1] = { 0, };
-    getcwd( buff, sizeof( buff ) );
+	char    buff[PATH_LEN-1] = { 0, };
+	getcwd( buff, sizeof( buff ) );
 
 	GetFullPathName("Title.bmp",TitleImgPath,PATH_LEN);
 	GetFullPathName("Back.bmp",BgImgPath,PATH_LEN);
@@ -297,26 +246,11 @@ void SONG::ReadCrazy_1_STF(const char *fileName)
 
 void SONG::ReadCrazy_1_KSF(const char *fileName)
 {
-	STEP_NEW step;
-
-	ReadKSF(fileName, &step);
+	ReadKSF(fileName, &mStep[0]);
 
 	HaveCrazy=true;
-	bpm=step.BPM;
-	bpm2=step.BPM2;
-	bpm3=step.BPM3;
 
-	Crazy_Diff=step._dummy;
-	Crazy_Start=step.start;
-	Crazy_Start2=step.start2;
-	Crazy_Start3=step.start3;
-	Crazy_Tick=step.tick;
-
-	Bunki=step.bunki;
-	Bunki2=step.bunki2;
-
-	sprintf(SongTitle,"%s",step.name);
-	memcpy(&Data_Crazy,&step.step,sizeof(step.step));
+	sprintf(SongTitle,"%s",mStep[0].name);
 
 	GetFullPathName("Title.bmp",TitleImgPath,PATH_LEN);
 	GetFullPathName("Back.bmp",BgImgPath,PATH_LEN);
@@ -330,18 +264,11 @@ void SONG::ReadCrazy_1_KSF(const char *fileName)
 
 void SONG::ReadCrazy_2_STF(const char *fileName)
 {
-	STEP step;
-
-	ReadSTF(fileName, &step);
+	ReadSTF(fileName, &mStep[1]);
 
 	HaveCouple=true;
-	bpm=step.BPM;
 
-	Crazy_Start=step.start;
-	Crazy_Tick=step.tick;
-
-	sprintf(SongTitle,"%s",step.name);
-	memcpy(&Data_Crazy1,&step.step,sizeof(step.step));
+	sprintf(SongTitle,"%s",mStep[1].name);
 
 	GetFullPathName("Title.bmp",TitleImgPath,PATH_LEN);
 	GetFullPathName("Back.bmp",BgImgPath,PATH_LEN);
@@ -355,25 +282,11 @@ void SONG::ReadCrazy_2_STF(const char *fileName)
 
 void SONG::ReadCrazy_2_KSF(const char *fileName)
 {
-	STEP_NEW step;
-	ReadKSF(fileName, &step);
+	ReadKSF(fileName, &mStep[1]);
 
 	HaveCouple=true;
-	bpm=step.BPM;
-	bpm2=step.BPM2;
-	bpm3=step.BPM3;
 
-	Crazy_Start=step.start;
-	Crazy_Start2=step.start2;
-	Crazy_Start3=step.start3;
-	Crazy_Diff=step._dummy;
-	Crazy_Tick=step.tick;
-
-	Bunki=step.bunki;
-	Bunki2=step.bunki2;
-
-	sprintf(SongTitle,"%s",step.name);
-	memcpy(&Data_Crazy1,&step.step,sizeof(step.step));
+	sprintf(SongTitle,"%s",mStep[1].name);
 
 	GetFullPathName("Title.bmp",TitleImgPath,PATH_LEN);
 	GetFullPathName("Back.bmp",BgImgPath,PATH_LEN);
@@ -387,18 +300,11 @@ void SONG::ReadCrazy_2_KSF(const char *fileName)
 
 void SONG::ReadHard_1_STF(const char *fileName)
 {
-	STEP step;
-	
-	ReadSTF(fileName, &step);
+	ReadKSF(fileName, &mStep[0]);
 
 	HaveHard=true;
-	bpm=step.BPM;
 
-	Hard_Start=step.start;
-	Hard_Tick=step.tick;
-
-	sprintf(SongTitle,"%s",step.name);
-	memcpy(&Data_Hard,&step.step,sizeof(step.step));
+	sprintf(SongTitle,"%s", mStep[0].name);
 
 	GetFullPathName("Title.bmp",TitleImgPath,PATH_LEN);
 	GetFullPathName("Back.bmp",BgImgPath,PATH_LEN);
@@ -412,26 +318,11 @@ void SONG::ReadHard_1_STF(const char *fileName)
 
 void SONG::ReadHard_1_KSF(const char *fileName)
 {
-	STEP_NEW step;
-	
-	ReadKSF(fileName, &step);
+	ReadKSF(fileName, &mStep[0]);
 
 	HaveHard=true;
-	bpm=step.BPM;
-	bpm2=step.BPM2;
-	bpm3=step.BPM3;
 
-	Hard_Diff=step._dummy;
-	Hard_Start=step.start;
-	Hard_Start2=step.start2;
-	Hard_Start3=step.start3;
-	Hard_Tick=step.tick;
-
-	Bunki=step.bunki;
-	Bunki2=step.bunki2;
-
-	sprintf(SongTitle,"%s",step.name);
-	memcpy(&Data_Hard,&step.step,sizeof(step.step));
+	sprintf(SongTitle,"%s",mStep[0].name);
 
 	GetFullPathName("Title.bmp",TitleImgPath,PATH_LEN);
 	GetFullPathName("Back.bmp",BgImgPath,PATH_LEN);
@@ -445,18 +336,11 @@ void SONG::ReadHard_1_KSF(const char *fileName)
 
 void SONG::ReadHard_2_STF(const char *fileName)
 {
-	STEP step;
-	
-	ReadSTF(fileName, &step);
+	ReadSTF(fileName, &mStep[1]);
 
 	HaveCouple=true;
-	bpm=step.BPM;
 
-	Hard_Start=step.start;
-	Hard_Tick=step.tick;
-
-	sprintf(SongTitle,"%s",step.name);
-	memcpy(&Data_Hard1,&step.step,sizeof(step.step));
+	sprintf(SongTitle,"%s",mStep[1].name);
 
 	GetFullPathName("Title.bmp",TitleImgPath,PATH_LEN);
 	GetFullPathName("Back.bmp",BgImgPath,PATH_LEN);
@@ -470,26 +354,11 @@ void SONG::ReadHard_2_STF(const char *fileName)
 
 void SONG::ReadHard_2_KSF(const char *fileName)
 {
-	STEP_NEW step;
-	
-	ReadKSF(fileName, &step);
+	ReadKSF(fileName, &mStep[1]);
 
 	HaveCouple=true;
-	bpm=step.BPM;
-	bpm2=step.BPM2;
-	bpm3=step.BPM3;
 
-	Hard_Diff=step._dummy;
-	Hard_Start=step.start;
-	Hard_Start2=step.start2;
-	Hard_Start3=step.start3;
-	Hard_Tick=step.tick;
-
-	Bunki=step.bunki;
-	Bunki2=step.bunki2;
-
-	sprintf(SongTitle,"%s",step.name);
-	memcpy(&Data_Hard1,&step.step,sizeof(step.step));
+	sprintf(SongTitle,"%s",mStep[1].name);
 
 	GetFullPathName("Title.bmp",TitleImgPath,PATH_LEN);
 	GetFullPathName("Back.bmp",BgImgPath,PATH_LEN);
@@ -503,18 +372,11 @@ void SONG::ReadHard_2_KSF(const char *fileName)
 
 void SONG::ReadEasy_1_STF(const char *fileName)
 {
-	STEP step;
-	
-	ReadSTF(fileName, &step);
+	ReadSTF(fileName, &mStep[0]);
 
 	HaveEasy=true;
-	bpm=step.BPM;
 
-	Easy_Start=step.start;
-	Easy_Tick=step.tick;
-
-	sprintf(SongTitle,"%s",step.name);
-	memcpy(&Data_Easy,&step.step,sizeof(step.step));
+	sprintf(SongTitle,"%s",mStep[0].name);
 
 	GetFullPathName("Title.bmp",TitleImgPath,PATH_LEN);
 	GetFullPathName("Back.bmp",BgImgPath,PATH_LEN);
@@ -528,26 +390,11 @@ void SONG::ReadEasy_1_STF(const char *fileName)
 
 void SONG::ReadEasy_1_KSF(const char *fileName)
 {
-	STEP_NEW step;
-	
-	ReadKSF(fileName, &step);
+	ReadKSF(fileName, &mStep[0]);
 
 	HaveEasy=true;
-	bpm=step.BPM;
-	bpm2=step.BPM2;
-	bpm3=step.BPM3;
 
-	Easy_Diff=step._dummy;
-	Easy_Start=step.start;
-	Easy_Start2=step.start2;
-	Easy_Start3=step.start3;
-	Easy_Tick=step.tick;
-
-	Bunki=step.bunki;
-	Bunki2=step.bunki2;
-
-	sprintf(SongTitle,"%s",step.name);
-	memcpy(&Data_Easy,&step.step,sizeof(step.step));
+	sprintf(SongTitle,"%s",mStep[0].name);
 
 	GetFullPathName("Title.bmp",TitleImgPath,PATH_LEN);
 	GetFullPathName("Back.bmp",BgImgPath,PATH_LEN);
@@ -561,18 +408,11 @@ void SONG::ReadEasy_1_KSF(const char *fileName)
 
 void SONG::ReadEasy_2_STF(const char *fileName)
 {
-	STEP step;
-	
-	ReadSTF(fileName, &step);
+	ReadSTF(fileName, &mStep[1]);
 
 	HaveCouple=true;
-	bpm=step.BPM;
 
-	Easy_Start=step.start;
-	Easy_Tick=step.tick;
-
-	sprintf(SongTitle,"%s",step.name);
-	memcpy(&Data_Easy1,&step.step,sizeof(step.step));
+	sprintf(SongTitle,"%s",mStep[1].name);
 
 	GetFullPathName("Title.bmp",TitleImgPath,PATH_LEN);
 	GetFullPathName("Back.bmp",BgImgPath,PATH_LEN);
@@ -586,26 +426,11 @@ void SONG::ReadEasy_2_STF(const char *fileName)
 
 void SONG::ReadEasy_2_KSF(const char *fileName)
 {
-	STEP_NEW step;
-	
-	ReadKSF(fileName, &step);
+	ReadKSF(fileName, &mStep[1]);
 
 	HaveCouple=true;
-	bpm=step.BPM;
-	bpm2=step.BPM2;
-	bpm3=step.BPM3;
 
-	Easy_Diff=step._dummy;
-	Easy_Start=step.start;
-	Easy_Start2=step.start2;
-	Easy_Start3=step.start3;
-	Easy_Tick=step.tick;
-
-	Bunki=step.bunki;
-	Bunki2=step.bunki2;
-
-	sprintf(SongTitle,"%s",step.name);
-	memcpy(&Data_Easy1,&step.step,sizeof(step.step));
+	sprintf(SongTitle,"%s",mStep[1].name);
 	
 	GetFullPathName("Title.bmp",TitleImgPath,PATH_LEN);
 	GetFullPathName("Back.bmp",BgImgPath,PATH_LEN);
@@ -620,18 +445,11 @@ void SONG::ReadEasy_2_KSF(const char *fileName)
 
 void SONG::ReadDouble_STF(const char *fileName)
 {
-	STEP step;
-	
-	ReadSTF(fileName, &step);
+	ReadSTF(fileName, &mStep[0]);
 
 	HaveDouble=true;
-	bpm=step.BPM;
 
-	Double_Start=step.start;
-	Double_Tick=step.tick;
-
-	sprintf(SongTitle,"%s",step.name);
-	memcpy(&Data_Double,&step.step,sizeof(step.step));
+	sprintf(SongTitle,"%s",mStep[0].name);
 
 	GetFullPathName("Title.bmp",TitleImgPath,PATH_LEN);
 	GetFullPathName("Back.bmp",BgImgPath,PATH_LEN);
@@ -645,26 +463,11 @@ void SONG::ReadDouble_STF(const char *fileName)
 
 void SONG::ReadDouble_KSF(const char *fileName)
 {
-	STEP_NEW step;
-	
-	ReadKSF(fileName, &step);
+	ReadKSF(fileName, &mStep[0]);
 
 	HaveDouble=true;
-	bpm=step.BPM;
-	bpm2=step.BPM2;
-	bpm3=step.BPM3;
 
-	Double_Diff=step._dummy;
-	Double_Start=step.start;
-	Double_Start2=step.start2;
-	Double_Start3=step.start3;
-	Double_Tick=step.tick;
-
-	Bunki=step.bunki;
-	Bunki2=step.bunki2;
-
-	sprintf(SongTitle,"%s",step.name);
-	memcpy(&Data_Double,&step.step,sizeof(step.step));
+	sprintf(SongTitle,"%s",mStep[0].name);
 	
 	GetFullPathName("Title.bmp",TitleImgPath,PATH_LEN);
 	GetFullPathName("Back.bmp",BgImgPath,PATH_LEN);

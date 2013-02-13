@@ -38,8 +38,8 @@
 									<listOptionValue builtIn="false" value="SDL"/>
 									<listOptionValue builtIn="false" value="fmodex"/>
 								</option>
-								<option id="gnu.cpp.link.option.userobjs.1840744661" name="Other objects" superClass="gnu.cpp.link.option.userobjs" valueType="userObjs"/>
-								<option id="gnu.cpp.link.option.paths.1926768175" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths"/>
+								<option id="gnu.cpp.link.option.userobjs.1840744661" name="Other objects" superClass="gnu.cpp.link.option.userobjs"/>
+								<option id="gnu.cpp.link.option.paths.1926768175" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths"/>
 								<option id="gnu.cpp.link.option.flags.2135156800" name="Linker flags" superClass="gnu.cpp.link.option.flags" value="" valueType="string"/>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.834621129" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
@@ -74,7 +74,7 @@
 							<tool id="cdt.managedbuild.tool.gnu.archiver.mingw.base.1526525471" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.mingw.base"/>
 							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.mingw.base.214389969" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.mingw.base">
 								<option id="gnu.cpp.compiler.option.include.paths.1737069291" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths"/>
-								<option id="gnu.cpp.compiler.option.optimization.level.1499862923" superClass="gnu.cpp.compiler.option.optimization.level" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
+								<option id="gnu.cpp.compiler.option.optimization.level.1499862923" name="Optimization Level" superClass="gnu.cpp.compiler.option.optimization.level" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1531703978" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.compiler.mingw.base.1718402907" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.mingw.base">
@@ -88,8 +88,8 @@
 									<listOptionValue builtIn="false" value="SDL"/>
 									<listOptionValue builtIn="false" value="fmodex"/>
 								</option>
-								<option id="gnu.cpp.link.option.userobjs.2137036988" name="Other objects" superClass="gnu.cpp.link.option.userobjs" valueType="userObjs"/>
-								<option id="gnu.cpp.link.option.paths.260870392" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths"/>
+								<option id="gnu.cpp.link.option.userobjs.2137036988" name="Other objects" superClass="gnu.cpp.link.option.userobjs"/>
+								<option id="gnu.cpp.link.option.paths.260870392" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths"/>
 								<option id="gnu.cpp.link.option.flags.454651247" name="Linker flags" superClass="gnu.cpp.link.option.flags" value="" valueType="string"/>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.1266539013" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
@@ -109,14 +109,20 @@
 	<storageModule moduleId="refreshScope" versionNumber="1">
 		<resource resourceType="PROJECT" workspacePath="/KickItUp"/>
 	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 	<storageModule moduleId="scannerConfiguration">
 		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		<scannerConfigBuildInfo instanceId="cdt.managedbuild.toolchain.gnu.mingw.base.2124692413;cdt.managedbuild.toolchain.gnu.mingw.base.2124692413.2140389488;cdt.managedbuild.tool.gnu.c.compiler.mingw.base.1360105543;cdt.managedbuild.tool.gnu.c.compiler.input.402008572">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileC"/>
 		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.toolchain.gnu.mingw.base.2124692413.295017910;cdt.managedbuild.toolchain.gnu.mingw.base.2124692413.295017910.;cdt.managedbuild.tool.gnu.c.compiler.mingw.base.1718402907;cdt.managedbuild.tool.gnu.c.compiler.input.325855877">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileC"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.toolchain.gnu.mingw.base.2124692413.295017910;cdt.managedbuild.toolchain.gnu.mingw.base.2124692413.295017910.;cdt.managedbuild.tool.gnu.cpp.compiler.mingw.base.214389969;cdt.managedbuild.tool.gnu.cpp.compiler.input.1531703978">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileCPP"/>
+		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="cdt.managedbuild.toolchain.gnu.mingw.base.2124692413;cdt.managedbuild.toolchain.gnu.mingw.base.2124692413.2140389488;cdt.managedbuild.tool.gnu.cpp.compiler.mingw.base.1249362839;cdt.managedbuild.tool.gnu.cpp.compiler.input.201266599">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileCPP"/>
 		</scannerConfigBuildInfo>
 	</storageModule>
-	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 </cproject>
