@@ -13,71 +13,40 @@
 
 extern Surface  gNoDISC;
 
-struct  STEP
+/** Step Info
+ */
+struct KIUStep
 {
-	unsigned char name[256];
-	float BPM;
-	int madi;
-	int tick;
-	int _dummy;
-	int track;
-	int start;
-	char step[2048][14];
-};
+	char name[256];		///< Step Title
+	float bpm1;			///< Step BPM1
+	float bpm2;			///< Step BPM2
+	float bpm3;			///< Step BPM3
+	int madi;			///< Step MADI ?
+	int tick;			///< Tick count
+	int diffculty;		///< DIFFCULTY - Not Use
+	int track;			///< track
+	int start1;			///< start time1
+	int start2;			///< start time2
+	int start3;			///< start time3
+	int bunki1;			///< bunki1 ?
+	int bunki2;			///< bunki2 ?
 
-struct STEP_NEW
-{
-	unsigned char name[256];
-	float BPM;
-	float BPM2;
-	float BPM3;
-	int madi;
-	int tick;
-	int _dummy;
-	int track;
-	int start;
-	int start2;
-	int start3;
-	int bunki;
-	int bunki2;
-
-	char step[2048][14];
+	char step[MAX_DATA][14];	///< Step Data
 };
 
 class SONG  
 {
+private:
+	KIUStep	mStep[2];	// crazy1, crazy2, heard1, heard2, ....
+
 public:
-	double	bpm;
-	double	bpm2;
-	double	bpm3;
+	const KIUStep & getStep1() {
+		return mStep[0];
+	}
 
-	int Crazy_Start;
-	int Hard_Start;
-	int Easy_Start;
-	int Double_Start;
-
-	int Crazy_Start2;
-	int Hard_Start2;
-	int Easy_Start2;
-	int Double_Start2;
-
-	int Crazy_Start3;
-	int Hard_Start3;
-	int Easy_Start3;
-	int Double_Start3;
-
-	Uint32 Bunki;
-	Uint32 Bunki2;
-
-	int Crazy_Tick;
-	int Hard_Tick;
-	int Easy_Tick;
-	int Double_Tick;
-
-	int Crazy_Diff;
-	int Hard_Diff;
-	int Easy_Diff;
-	int Double_Diff;
+	const KIUStep & getStep2() {
+		return mStep[1];
+	}
 
 	void ReadCrazy_1_STF(const char *fileName);
 	void ReadCrazy_1_KSF(const char *fileName);
@@ -97,42 +66,30 @@ public:
 	void ReadDouble_STF(const char *fileName);
 	void ReadDouble_KSF(const char *fileName);
 
+    Surface *   mpDiskImage;
+    Surface     mThisSongDiskImage;
+
+	Uint32	Next;
+	Uint32	Prev;
+
 	bool HaveCrazy;
 	bool HaveHard;
 	bool HaveEasy;
 	bool HaveCouple;
 	bool HaveDouble;
 
-
 	char TitleImgPath[PATH_LEN+1];
 	char IntroWavPath[PATH_LEN+1];	// intro wav file.
 	char IntroMp3Path[PATH_LEN+1];	// intro mp3 file.
-	
-	char Data_Hard[MAX_DATA][14];
-	char Data_Hard1[MAX_DATA][14];
-
-	char Data_Easy[MAX_DATA][14];
-	char Data_Easy1[MAX_DATA][14];
-
-	char Data_Crazy[MAX_DATA][14];
-	char Data_Crazy1[MAX_DATA][14];
-
-	char Data_Double[MAX_DATA][14];
 	
 	char DiscImagePath[PATH_LEN+1];
 	char BgImgPath[PATH_LEN+1];
 	char MSDPath[PATH_LEN+1];
 	
-    Surface *   mpDiskImage;
-    Surface     mThisSongDiskImage;
-
 	char SongTitle[PATH_LEN+1];
 	char PlayWavPath[PATH_LEN+1];
 	char PlayMp3Path[PATH_LEN+1];
 	char PlayMpgPath[PATH_LEN+1];
-
-	Uint32	Next;
-	Uint32	Prev;
 
 	SONG();
 	virtual ~SONG();

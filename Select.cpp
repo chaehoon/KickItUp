@@ -175,26 +175,40 @@ void Read()
 				{
 					SetCurrentDirectory ( lpData.cFileName );
 
-					if ( access ( "Crazy_2.stf",04 ) ==0 ) CSONG[Count].ReadCrazy_2_STF ( "Crazy_2.stf" );
-					else if ( access ( "Crazy_2.ksf",04 ) ==0 ) CSONG[Count].ReadCrazy_2_KSF ( "Crazy_2.ksf" );
+					if ( access ( "Crazy_2.stf",04 ) == 0 )
+						CSONG[Count].ReadCrazy_2_STF ( "Crazy_2.stf" );
+					else if ( access ( "Crazy_2.ksf",04 ) ==0 )
+						CSONG[Count].ReadCrazy_2_KSF ( "Crazy_2.ksf" );
 
-					if ( access ( "Crazy_1.stf",04 ) ==0 ) CSONG[Count].ReadCrazy_1_STF ( "Crazy_1.stf" ),Count++;
-					else if ( access ( "Crazy_1.ksf",04 ) ==0 ) CSONG[Count].ReadCrazy_1_KSF ( "Crazy_1.ksf" ),Count++;
+					if ( access ( "Crazy_1.stf",04 ) ==0 )
+						CSONG[Count].ReadCrazy_1_STF ( "Crazy_1.stf" ),Count++;
+					else if ( access ( "Crazy_1.ksf",04 ) ==0 )
+						CSONG[Count].ReadCrazy_1_KSF ( "Crazy_1.ksf" ),Count++;
 
-					if ( access ( "Hard_2.stf",04 ) ==0 ) CSONG[Count].ReadHard_2_STF ( "Hard_2.stf" );
-					else if ( access ( "Hard_2.ksf",04 ) ==0 ) CSONG[Count].ReadHard_2_KSF ( "Hard_2.ksf" );
+					if ( access ( "Hard_2.stf",04 ) ==0 )
+						CSONG[Count].ReadHard_2_STF ( "Hard_2.stf" );
+					else if ( access ( "Hard_2.ksf",04 ) ==0 )
+						CSONG[Count].ReadHard_2_KSF ( "Hard_2.ksf" );
 
-					if ( access ( "Hard_1.stf",04 ) ==0 ) CSONG[Count].ReadHard_1_STF ( "Hard_1.stf" ),Count++;
-					else if ( access ( "Hard_1.ksf",04 ) ==0 ) CSONG[Count].ReadHard_1_KSF ( "Hard_1.ksf" ),Count++;
+					if ( access ( "Hard_1.stf",04 ) ==0 )
+						CSONG[Count].ReadHard_1_STF ( "Hard_1.stf" ),Count++;
+					else if ( access ( "Hard_1.ksf",04 ) ==0 )
+						CSONG[Count].ReadHard_1_KSF ( "Hard_1.ksf" ),Count++;
 
-					if ( access ( "Easy_2.stf",04 ) ==0 ) CSONG[Count].ReadEasy_2_STF ( "Easy_2.stf" );
-					else if ( access ( "Easy_2.ksf",04 ) ==0 ) CSONG[Count].ReadEasy_2_KSF ( "Easy_2.ksf" );
+					if ( access ( "Easy_2.stf",04 ) ==0 )
+						CSONG[Count].ReadEasy_2_STF ( "Easy_2.stf" );
+					else if ( access ( "Easy_2.ksf",04 ) ==0 )
+						CSONG[Count].ReadEasy_2_KSF ( "Easy_2.ksf" );
 
-					if ( access ( "Easy_1.stf",04 ) ==0 ) CSONG[Count].ReadEasy_1_STF ( "Easy_1.stf" ),Count++;
-					else if ( access ( "Easy_1.ksf",04 ) ==0 ) CSONG[Count].ReadEasy_1_KSF ( "Easy_1.ksf" ),Count++;
+					if ( access ( "Easy_1.stf",04 ) ==0 )
+						CSONG[Count].ReadEasy_1_STF ( "Easy_1.stf" ),Count++;
+					else if ( access ( "Easy_1.ksf",04 ) ==0 )
+						CSONG[Count].ReadEasy_1_KSF ( "Easy_1.ksf" ),Count++;
 
-					if ( access ( "Double.stf",04 ) ==0 ) CSONG[Count].ReadDouble_STF ( "Double.stf" ),Count++;
-					else if ( access ( "Double.ksf",04 ) ==0 ) CSONG[Count].ReadDouble_KSF ( "Double.ksf" ),Count++;
+					if ( access ( "Double.stf",04 ) ==0 )
+						CSONG[Count].ReadDouble_STF ( "Double.stf" ),Count++;
+					else if ( access ( "Double.ksf",04 ) ==0 )
+						CSONG[Count].ReadDouble_KSF ( "Double.ksf" ),Count++;
 
 					//if(CSONG[Count].bpm!=0)Count++;
 					SetCurrentDirectory ( "..\\" );
@@ -205,7 +219,7 @@ void Read()
 	}
 	FindClose ( hFind );
 
-	if ( CSONG[0].bpm==0 )
+	if ( CSONG[0].getStep1().bpm1==0 && CSONG[0].getStep2().bpm1==0 )
 		MsgBox ( "Song directory not found or No song data.","KICKITUP ERROR",MB_OK );
 }
 
@@ -387,7 +401,6 @@ void Read()
 
 void SelectSong ( void )
 {
-	Uint32 count,i;
 	static Uint32 current;
 	static Uint32 SelectCurrent;
 	static int Selected, zoom,toggle,speed;
@@ -460,15 +473,13 @@ void SelectSong ( void )
 	DiscSize.w = 300;
 	DiscSize.h = 200;
 
-	for ( count=0;;count++ )
-	{
+	for(int count=0;;count++ ) {
 		if ( count!=0 )
 			CSONG[count].Prev=count-1;
 
 		CSONG[count].Next=count+1;
 
-		if ( CSONG[count].bpm==0 )
-		{
+		if ( CSONG[count].getStep1().bpm1 == 0 && CSONG[count].getStep2().bpm1 == 0 ) {
 			CSONG[count].Prev=0;
 			count--;
 			CSONG[count].Next=0;
@@ -477,7 +488,7 @@ void SelectSong ( void )
 		}
 	}
 
-	if ( speed==1 ) //?�단?� 변?��? ?�용?�니?? �??�?�머 ?�식?�로 바꾸?�록 ?�시??
+	if ( speed==1 )
 	{
 		speed=0;
 		if ( toggle==0 )
@@ -830,17 +841,18 @@ void SelectSong ( void )
 		PressedKey1p[0]=0;
 
 		// Game Mode setting.
-		if ( CSONG[SelectCurrent].HaveCrazy==true ) GameMode=MODE_CRAZY,Double=false;
-		else if ( CSONG[SelectCurrent].HaveDouble==true ) GameMode=MODE_DOUBLE,Double=true;
-		else if ( CSONG[SelectCurrent].HaveEasy==true ) GameMode=MODE_EASY,Double=false;
-		else if ( CSONG[SelectCurrent].HaveHard==true ) GameMode=MODE_HARD,Double=false;
+		SONG &	selectedSong = CSONG[SelectCurrent];
+		if ( selectedSong.HaveCrazy==true ) GameMode=MODE_CRAZY,Double=false;
+		else if ( selectedSong.HaveDouble==true ) GameMode=MODE_DOUBLE,Double=true;
+		else if ( selectedSong.HaveEasy==true ) GameMode=MODE_EASY,Double=false;
+		else if ( selectedSong.HaveHard==true ) GameMode=MODE_HARD,Double=false;
 		else return;
 
 		// Couple mode setting.
 		if ( Start1p && Start2p )
 		{
 			Couple=true;
-			if ( CSONG[SelectCurrent].HaveCouple==false )
+			if ( selectedSong.HaveCouple==false )
 				bModeSynchro=true;
 		}
 		else
@@ -850,16 +862,16 @@ void SelectSong ( void )
 		gCancel.Play();
 
 		// selected song background setting.
-		gSongBack.LoadBmp ( CSONG[SelectCurrent].BgImgPath );
+		gSongBack.LoadBmp ( selectedSong.BgImgPath );
 
 		// selected song title setting.
-		gSongTitle.LoadBmp ( CSONG[SelectCurrent].TitleImgPath );
+		gSongTitle.LoadBmp ( selectedSong.TitleImgPath );
 
 		// if background is not set then background set title image.
 		if ( !gSongBack.IsLoaded() )
 		{
 			if ( gSongTitle.IsLoaded() )
-				gSongBack.LoadBmp ( CSONG[SelectCurrent].TitleImgPath );
+				gSongBack.LoadBmp ( selectedSong.TitleImgPath );
 			else
 				gSongBack.LoadBmp ( "Images/Back.bmp" );
 		}
@@ -872,17 +884,17 @@ void SelectSong ( void )
 
 		// double mode
 		if ( GameMode == MODE_DOUBLE ) {
-			memcpy ( &Data_Double, &CSONG[SelectCurrent].Data_Double, sizeof ( CSONG[SelectCurrent].Data_Double ) );
+			memcpy ( &Data_Double, &selectedSong.getStep1().step, sizeof ( selectedSong.getStep1().step ) );
 		}
 		// couple mode
 		else if ( Couple==true ) {
 			switch ( GameMode )		{
 				case MODE_CRAZY:
 					if ( bModeSynchro )	{
-						memcpy ( &Data,  &CSONG[SelectCurrent].Data_Crazy, sizeof ( CSONG[SelectCurrent].Data_Crazy ) );
-						memcpy ( &Data1, &CSONG[SelectCurrent].Data_Crazy, sizeof ( CSONG[SelectCurrent].Data_Crazy ) );
+						memcpy ( &Data,  &selectedSong.getStep1().step, sizeof ( selectedSong.getStep1().step ) );
+						memcpy ( &Data1, &selectedSong.getStep1().step, sizeof ( selectedSong.getStep1().step ) );
 
-						for ( i=0;i<MAX_DATA;i++ )	{
+						for( int i=0;i<MAX_DATA;i++ )	{
 							Data1[i][5] = Data1[i][0];
 							Data1[i][6] = Data1[i][1];
 							Data1[i][7] = Data1[i][2];
@@ -891,17 +903,17 @@ void SelectSong ( void )
 						}
 					}
 					else	{
-						memcpy ( &Data, &CSONG[SelectCurrent].Data_Crazy1, sizeof ( CSONG[SelectCurrent].Data_Crazy1 ) );
-						memcpy ( &Data1,&CSONG[SelectCurrent].Data_Crazy1, sizeof ( CSONG[SelectCurrent].Data_Crazy1 ) );
+						memcpy ( &Data, &selectedSong.getStep2().step, sizeof ( selectedSong.getStep2().step ) );
+						memcpy ( &Data1,&selectedSong.getStep2().step, sizeof ( selectedSong.getStep2().step ) );
 					}
 					break;
 
 				case MODE_EASY:
 					if ( bModeSynchro )	{
-						memcpy ( &Data, &CSONG[SelectCurrent].Data_Easy, sizeof ( CSONG[SelectCurrent].Data_Easy ) );
-						memcpy ( &Data1,&CSONG[SelectCurrent].Data_Easy, sizeof ( CSONG[SelectCurrent].Data_Easy ) );
+						memcpy ( &Data, &selectedSong.getStep1().step, sizeof ( selectedSong.getStep1().step ) );
+						memcpy ( &Data1,&selectedSong.getStep1().step, sizeof ( selectedSong.getStep1().step ) );
 
-						for ( i=0;i<MAX_DATA;i++ )
+						for ( int i=0;i<MAX_DATA;i++ )
 						{
 							Data1[i][5] = Data1[i][0];
 							Data1[i][6] = Data1[i][1];
@@ -911,17 +923,17 @@ void SelectSong ( void )
 						}
 					}
 					else	{
-						memcpy ( &Data, &CSONG[SelectCurrent].Data_Easy1, sizeof ( CSONG[SelectCurrent].Data_Easy1 ) );
-						memcpy ( &Data1,&CSONG[SelectCurrent].Data_Easy1, sizeof ( CSONG[SelectCurrent].Data_Easy1 ) );
+						memcpy ( &Data, &selectedSong.getStep2().step, sizeof ( selectedSong.getStep2().step ) );
+						memcpy ( &Data1,&selectedSong.getStep2().step, sizeof ( selectedSong.getStep2().step ) );
 					}
 					break;
 
 				case MODE_HARD:
 					if ( bModeSynchro )	{
-						memcpy ( &Data, &CSONG[SelectCurrent].Data_Hard, sizeof ( CSONG[SelectCurrent].Data_Hard ) );
-						memcpy ( &Data1,&CSONG[SelectCurrent].Data_Hard, sizeof ( CSONG[SelectCurrent].Data_Hard ) );
+						memcpy ( &Data, &selectedSong.getStep1().step, sizeof ( selectedSong.getStep1().step ) );
+						memcpy ( &Data1,&selectedSong.getStep1().step, sizeof ( selectedSong.getStep1().step ) );
 
-						for ( i=0;i<MAX_DATA;i++ )	{
+						for ( int i=0;i<MAX_DATA;i++ )	{
 							Data1[i][5]=Data1[i][0];
 							Data1[i][6]=Data1[i][1];
 							Data1[i][7]=Data1[i][2];
@@ -930,8 +942,8 @@ void SelectSong ( void )
 						}
 					}
 					else	{
-						memcpy ( &Data,&CSONG[SelectCurrent].Data_Hard1,sizeof ( CSONG[SelectCurrent].Data_Hard1 ) );
-						memcpy ( &Data1,&CSONG[SelectCurrent].Data_Hard1,sizeof ( CSONG[SelectCurrent].Data_Hard1 ) );
+						memcpy ( &Data,&selectedSong.getStep2().step,sizeof ( selectedSong.getStep2().step ) );
+						memcpy ( &Data1,&selectedSong.getStep2().step,sizeof ( selectedSong.getStep2().step ) );
 					}
 					break;
 			}
@@ -941,11 +953,11 @@ void SelectSong ( void )
 			switch ( GameMode )	{
 				case MODE_CRAZY:
 					if ( Start1p )
-						memcpy ( &Data, CSONG[SelectCurrent].Data_Crazy, sizeof ( Data ) );
+						memcpy ( &Data, selectedSong.getStep1().step, sizeof ( Data ) );
 					else	{// 2p play
-						memcpy ( &Data, CSONG[SelectCurrent].Data_Crazy, sizeof ( Data ) );
-						memcpy ( &Data1,CSONG[SelectCurrent].Data_Crazy, sizeof ( Data ) );
-						for ( i=0;i<MAX_DATA;i++ )	{
+						memcpy ( &Data, selectedSong.getStep1().step, sizeof ( Data ) );
+						memcpy ( &Data1,selectedSong.getStep1().step, sizeof ( Data ) );
+						for ( int i=0;i<MAX_DATA;i++ )	{
 							Data1[i][5] = Data[i][0];
 							Data1[i][6] = Data[i][1];
 							Data1[i][7] = Data[i][2];
@@ -957,11 +969,11 @@ void SelectSong ( void )
 
 				case MODE_EASY:
 					if ( Start1p )
-						memcpy ( &Data,CSONG[SelectCurrent].Data_Easy,sizeof ( Data ) );
+						memcpy ( &Data,selectedSong.getStep1().step,sizeof ( Data ) );
 					else	{
-						memcpy ( &Data,  CSONG[SelectCurrent].Data_Easy, sizeof ( Data ) );
-						memcpy ( &Data1, CSONG[SelectCurrent].Data_Easy, sizeof ( Data ) );
-						for ( i=0;i<MAX_DATA;i++ )	{
+						memcpy ( &Data,  selectedSong.getStep1().step, sizeof ( Data ) );
+						memcpy ( &Data1, selectedSong.getStep1().step, sizeof ( Data ) );
+						for ( int i=0;i<MAX_DATA;i++ )	{
 							Data1[i][5] = Data[i][0];
 							Data1[i][6] = Data[i][1];
 							Data1[i][7] = Data[i][2];
@@ -973,11 +985,11 @@ void SelectSong ( void )
 
 				case MODE_HARD:
 					if ( Start1p )
-						memcpy ( &Data,CSONG[SelectCurrent].Data_Hard,sizeof ( Data ) );
+						memcpy ( &Data,selectedSong.getStep1().step,sizeof ( Data ) );
 					else	{// 2p play
-						memcpy ( &Data,  CSONG[SelectCurrent].Data_Hard, sizeof ( Data ) );
-						memcpy ( &Data1, CSONG[SelectCurrent].Data_Hard, sizeof ( Data ) );
-						for ( i=0;i<MAX_DATA;i++ )	{
+						memcpy ( &Data,  selectedSong.getStep1().step, sizeof ( Data ) );
+						memcpy ( &Data1, selectedSong.getStep1().step, sizeof ( Data ) );
+						for ( int i=0;i<MAX_DATA;i++ )	{
 							Data1[i][5] = Data[i][0];
 							Data1[i][6] = Data[i][1];
 							Data1[i][7] = Data[i][2];
@@ -989,46 +1001,21 @@ void SelectSong ( void )
 			}
 		}
 
-		bpm=CSONG[SelectCurrent].bpm;
-		bpm2=CSONG[SelectCurrent].bpm2;
-		bpm3=CSONG[SelectCurrent].bpm3;
-		bunki=CSONG[SelectCurrent].Bunki;
-		bunki2=CSONG[SelectCurrent].Bunki2;
+		bpm=selectedSong.getStep1().bpm1;
+		bpm2=selectedSong.getStep1().bpm2;
+		bpm3=selectedSong.getStep1().bpm3;
+		bunki=selectedSong.getStep1().bunki1;
+		bunki2=selectedSong.getStep1().bunki2;
 
 		switch ( GameMode )	{
-				/*	idia
-				Song a;
-				a.setMode( GameMode );
-				start = a.GetStart();
-				start2 = a.GetStart2();
-				..
-				*/
 			case MODE_CRAZY:
-				start = CSONG[SelectCurrent].Crazy_Start;
-				start2= CSONG[SelectCurrent].Crazy_Start2;
-				start3= CSONG[SelectCurrent].Crazy_Start3;
-				tick  = CSONG[SelectCurrent].Crazy_Tick;
-				break;
-
 			case MODE_HARD:
-				start = CSONG[SelectCurrent].Hard_Start;
-				start2= CSONG[SelectCurrent].Hard_Start2;
-				start3= CSONG[SelectCurrent].Hard_Start3;
-				tick  = CSONG[SelectCurrent].Hard_Tick;
-				break;
-
 			case MODE_EASY:
-				start = CSONG[SelectCurrent].Easy_Start;
-				start2= CSONG[SelectCurrent].Easy_Start2;
-				start3= CSONG[SelectCurrent].Easy_Start3;
-				tick  = CSONG[SelectCurrent].Easy_Tick;
-				break;
-
 			case MODE_DOUBLE:
-				start  = CSONG[SelectCurrent].Double_Start;
-				start2 = CSONG[SelectCurrent].Double_Start2;
-				start3 = CSONG[SelectCurrent].Double_Start3;
-				tick   = CSONG[SelectCurrent].Double_Tick;
+				start = selectedSong.getStep1().start1;
+				start2= selectedSong.getStep1().start2;
+				start3= selectedSong.getStep1().start3;
+				tick  = selectedSong.getStep1().tick;
 				break;
 
 			default:
@@ -1040,10 +1027,10 @@ void SelectSong ( void )
 			break;
 		}
 
-		strcpy ( SongName,  CSONG[SelectCurrent].PlayWavPath );
-		strcpy ( SongName2, CSONG[SelectCurrent].PlayMp3Path );
-		strcpy ( SongName3, CSONG[SelectCurrent].PlayMpgPath );
-		strcpy ( Title,     CSONG[SelectCurrent].SongTitle );
+		strcpy ( SongName,  selectedSong.PlayWavPath );
+		strcpy ( SongName2, selectedSong.PlayMp3Path );
+		strcpy ( SongName3, selectedSong.PlayMpgPath );
+		strcpy ( Title,     selectedSong.SongTitle );
 
 		Judgement1p=NONE;
 		Judgement2p=NONE;
