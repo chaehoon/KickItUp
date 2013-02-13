@@ -20,15 +20,30 @@ using namespace std;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-SONG::SONG()
+Song::Song() : 	Next(0), Prev(0),
+	HaveCrazy(false),
+	HaveHard(false),
+	HaveEasy(false),
+	HaveCouple(false),
+	HaveDouble(false)
 {
     mpDiskImage = & mThisSongDiskImage;
 }
 
-SONG::~SONG()
+Song::~Song()
 {
 }
 
+/**
+ * context에 있는 내용에서 key값에 해당되는 값을 반환한다.
+ *
+ * 예) _getValue("#TITLE:Hello world;", "#TITLE:", val) --> "Hello world"
+ *
+ * @param	context	키값과 값을 가지고 있는 몸체
+ * @param	key		찿을 키값
+ * @param	value	반환 값
+ * @return	찾았는지 여부
+ */
 bool _getValue( const string & context, const string & key, string * value )
 {
     string::size_type startIdx;
@@ -49,6 +64,17 @@ bool _getValue( const string & context, const string & key, string * value )
     return ret;
 }
 
+/**
+ * context에 있는 내용에서 key값에 해당되는 값을 반환한다.
+ *
+ * 예) _getValue("#TITLE:Hello world;", "#TITLE:", val) --> "Hello world"
+ *
+ * @param	context	키값과 값을 가지고 있는 몸체
+ * @param	key		찿을 키값
+ * @param	value	반환 string
+ * @param	size	value size
+ * @return	찾았는지 여부
+ */
 bool _getValue( const string & context, const string & key, char * value, const int size )
 {
 	bool ret = false;
@@ -61,6 +87,16 @@ bool _getValue( const string & context, const string & key, char * value, const 
 
 }
 
+/**
+ * context에 있는 내용에서 key값에 해당되는 값을 반환한다.
+ *
+ * 예) _getValue("#TITLE:Hello world;", "#TITLE:", val) --> "Hello world"
+ *
+ * @param	context	키값과 값을 가지고 있는 몸체
+ * @param	key		찿을 키값
+ * @param	value	반환 값
+ * @return	찾았는지 여부
+ */
 bool _getValue( const string & context, const string & key, int * value )
 {
 	bool ret = false;
@@ -72,6 +108,16 @@ bool _getValue( const string & context, const string & key, int * value )
 	return ret;
 }
 
+/**
+ * context에 있는 내용에서 key값에 해당되는 값을 반환한다.
+ *
+ * 예) _getValue("#TITLE:Hello world;", "#TITLE:", val) --> "Hello world"
+ *
+ * @param	context	키값과 값을 가지고 있는 몸체
+ * @param	key		찿을 키값
+ * @param	value	반환 값
+ * @return	찾았는지 여부
+ */
 bool _getValue( const string & context, const string & key, float * value )
 {
 	bool ret = false;
@@ -83,7 +129,13 @@ bool _getValue( const string & context, const string & key, float * value )
 	return ret;
 }
 
-bool	ReadSTF(const char *fileName, KIUStep * pStep)
+/**
+ * 파일에서 KickItUp Step(stf Step) Data를 읽어 들인다.
+ *
+ * @param	fileName
+ * @param	pStep		반환 할 Step정보
+ */
+bool _readSTF(const char *fileName, KIUStep * pStep)
 {
 	char tmpStep[MAX_DATA][14];
 
@@ -124,7 +176,13 @@ bool	ReadSTF(const char *fileName, KIUStep * pStep)
 	return true;
 }
 
-bool	ReadKSF(const char *fileName, KIUStep * pStep)
+/**
+ * 파일에서 KickItUp Step(ksf Step) Data를 읽어 들인다.
+ *
+ * @param	fileName
+ * @param	pStep		반환 할 Step정보
+ */
+bool _readKSF(const char *fileName, KIUStep * pStep)
 {
 	KIUStep & step = *pStep;
 
@@ -212,7 +270,14 @@ bool	ReadKSF(const char *fileName, KIUStep * pStep)
 	return true;
 }
 
-bool GetFullPathName( const char * fileName, char * outputDir, const size_t size )
+/**
+ * 파일이름에 전체 경로를 알아낸다.
+ *
+ * @param	fileName
+ * @param	outputDir	반환 할 파일전체 경로
+ * @param	size		outputDir size
+ */
+bool _getFullPathName( const char * fileName, char * outputDir, const size_t size )
 {
     char    buff[PATH_LEN+1] = { 0, };
     if( getcwd( buff, sizeof( buff ) ) == NULL )
@@ -223,265 +288,74 @@ bool GetFullPathName( const char * fileName, char * outputDir, const size_t size
 
 }
 
-void SONG::ReadCrazy_1_STF(const char *fileName)
+
+/**
+ * 파일에서 KickItUp Crazy Mode Step Data를 읽어 들인다.
+ */
+void Song::ReadCrazy_1(const char *fileName)
 {
-	ReadSTF(fileName, &mStep[0]);
-
-	HaveCrazy = true;
-
-	sprintf(SongTitle,"%s", mStep[0].name);
-
-	char    buff[PATH_LEN-1] = { 0, };
-	getcwd( buff, sizeof( buff ) );
-
-	GetFullPathName("Title.bmp",TitleImgPath,PATH_LEN);
-	GetFullPathName("Back.bmp",BgImgPath,PATH_LEN);
-	GetFullPathName("Song.wav",PlayWavPath,PATH_LEN);
-	GetFullPathName("Song.mp3",PlayMp3Path,PATH_LEN);
-	GetFullPathName("Song.mpg",PlayMpgPath,PATH_LEN);
-	GetFullPathName("Intro.wav",IntroWavPath,PATH_LEN);
-	GetFullPathName("Intro.mp3",IntroMp3Path,PATH_LEN);
-    LoadDiskImage();
-}
-
-void SONG::ReadCrazy_1_KSF(const char *fileName)
-{
-	ReadKSF(fileName, &mStep[0]);
-
 	HaveCrazy=true;
-
-	sprintf(SongTitle,"%s",mStep[0].name);
-
-	GetFullPathName("Title.bmp",TitleImgPath,PATH_LEN);
-	GetFullPathName("Back.bmp",BgImgPath,PATH_LEN);
-	GetFullPathName("Song.wav",PlayWavPath,PATH_LEN);
-	GetFullPathName("Song.mp3",PlayMp3Path,PATH_LEN);
-	GetFullPathName("Song.mpg",PlayMpgPath,PATH_LEN);
-	GetFullPathName("Intro.wav",IntroWavPath,PATH_LEN);
-	GetFullPathName("Intro.mp3",IntroMp3Path,PATH_LEN);
-    LoadDiskImage();
+	_readStep(fileName, &mStep[0]);
 }
 
-void SONG::ReadCrazy_2_STF(const char *fileName)
+/**
+ * 파일에서 KickItUp Crazy Mode Step Data를 읽어 들인다.
+ */
+void Song::ReadCrazy_2(const char *fileName)
 {
-	ReadSTF(fileName, &mStep[1]);
-
 	HaveCouple=true;
-
-	sprintf(SongTitle,"%s",mStep[1].name);
-
-	GetFullPathName("Title.bmp",TitleImgPath,PATH_LEN);
-	GetFullPathName("Back.bmp",BgImgPath,PATH_LEN);
-	GetFullPathName("Song.wav",PlayWavPath,PATH_LEN);
-	GetFullPathName("Song.mp3",PlayMp3Path,PATH_LEN);
-	GetFullPathName("Song.mpg",PlayMpgPath,PATH_LEN);
-	GetFullPathName("Intro.wav",IntroWavPath,PATH_LEN);
-	GetFullPathName("Intro.mp3",IntroMp3Path,PATH_LEN);
-    LoadDiskImage();
+	_readStep(fileName, &mStep[1]);
 }
 
-void SONG::ReadCrazy_2_KSF(const char *fileName)
+/**
+ * 파일에서 KickItUp Hard Mode Step Data를 읽어 들인다.
+ */
+void Song::ReadHard_1(const char *fileName)
 {
-	ReadKSF(fileName, &mStep[1]);
-
-	HaveCouple=true;
-
-	sprintf(SongTitle,"%s",mStep[1].name);
-
-	GetFullPathName("Title.bmp",TitleImgPath,PATH_LEN);
-	GetFullPathName("Back.bmp",BgImgPath,PATH_LEN);
-	GetFullPathName("Song.wav",PlayWavPath,PATH_LEN);
-	GetFullPathName("Song.mp3",PlayMp3Path,PATH_LEN);
-	GetFullPathName("Song.mpg",PlayMpgPath,PATH_LEN);
-	GetFullPathName("Intro.wav",IntroWavPath,PATH_LEN);
-	GetFullPathName("Intro.mp3",IntroMp3Path,PATH_LEN);
-    LoadDiskImage();
-}
-
-void SONG::ReadHard_1_STF(const char *fileName)
-{
-	ReadKSF(fileName, &mStep[0]);
-
 	HaveHard=true;
-
-	sprintf(SongTitle,"%s", mStep[0].name);
-
-	GetFullPathName("Title.bmp",TitleImgPath,PATH_LEN);
-	GetFullPathName("Back.bmp",BgImgPath,PATH_LEN);
-	GetFullPathName("Song.wav",PlayWavPath,PATH_LEN);
-	GetFullPathName("Song.mp3",PlayMp3Path,PATH_LEN);
-	GetFullPathName("Song.mpg",PlayMpgPath,PATH_LEN);
-	GetFullPathName("Intro.wav",IntroWavPath,PATH_LEN);
-	GetFullPathName("Intro.mp3",IntroMp3Path,PATH_LEN);
-    LoadDiskImage();
+	_readStep(fileName, &mStep[0]);
 }
 
-void SONG::ReadHard_1_KSF(const char *fileName)
+/**
+ * 파일에서 KickItUp Hard Mode Step Data를 읽어 들인다.
+ */
+void Song::ReadHard_2(const char *fileName)
 {
-	ReadKSF(fileName, &mStep[0]);
-
-	HaveHard=true;
-
-	sprintf(SongTitle,"%s",mStep[0].name);
-
-	GetFullPathName("Title.bmp",TitleImgPath,PATH_LEN);
-	GetFullPathName("Back.bmp",BgImgPath,PATH_LEN);
-	GetFullPathName("Song.wav",PlayWavPath,PATH_LEN);
-	GetFullPathName("Song.mp3",PlayMp3Path,PATH_LEN);
-	GetFullPathName("Song.mpg",PlayMpgPath,PATH_LEN);
-	GetFullPathName("Intro.wav",IntroWavPath,PATH_LEN);
-	GetFullPathName("Intro.mp3",IntroMp3Path,PATH_LEN);
-    LoadDiskImage();
-}
-
-void SONG::ReadHard_2_STF(const char *fileName)
-{
-	ReadSTF(fileName, &mStep[1]);
-
 	HaveCouple=true;
-
-	sprintf(SongTitle,"%s",mStep[1].name);
-
-	GetFullPathName("Title.bmp",TitleImgPath,PATH_LEN);
-	GetFullPathName("Back.bmp",BgImgPath,PATH_LEN);
-	GetFullPathName("Song.wav",PlayWavPath,PATH_LEN);
-	GetFullPathName("Song.mp3",PlayMp3Path,PATH_LEN);
-	GetFullPathName("Song.mpg",PlayMpgPath,PATH_LEN);
-	GetFullPathName("Intro.wav",IntroWavPath,PATH_LEN);
-	GetFullPathName("Intro.mp3",IntroMp3Path,PATH_LEN);
-    LoadDiskImage();
+	_readStep(fileName, &mStep[1]);
 }
 
-void SONG::ReadHard_2_KSF(const char *fileName)
+/**
+ * 파일에서 KickItUp Easy Mode Step Data를 읽어 들인다.
+ */
+void Song::ReadEasy_1(const char *fileName)
 {
-	ReadKSF(fileName, &mStep[1]);
-
-	HaveCouple=true;
-
-	sprintf(SongTitle,"%s",mStep[1].name);
-
-	GetFullPathName("Title.bmp",TitleImgPath,PATH_LEN);
-	GetFullPathName("Back.bmp",BgImgPath,PATH_LEN);
-	GetFullPathName("Song.wav",PlayWavPath,PATH_LEN);
-	GetFullPathName("Song.mp3",PlayMp3Path,PATH_LEN);
-	GetFullPathName("Song.mpg",PlayMpgPath,PATH_LEN);
-	GetFullPathName("Intro.wav",IntroWavPath,PATH_LEN);
-	GetFullPathName("Intro.mp3",IntroMp3Path,PATH_LEN);
-    LoadDiskImage();
-}
-
-void SONG::ReadEasy_1_STF(const char *fileName)
-{
-	ReadSTF(fileName, &mStep[0]);
-
 	HaveEasy=true;
-
-	sprintf(SongTitle,"%s",mStep[0].name);
-
-	GetFullPathName("Title.bmp",TitleImgPath,PATH_LEN);
-	GetFullPathName("Back.bmp",BgImgPath,PATH_LEN);
-	GetFullPathName("Song.wav",PlayWavPath,PATH_LEN);
-	GetFullPathName("Song.mp3",PlayMp3Path,PATH_LEN);
-	GetFullPathName("Song.mpg",PlayMpgPath,PATH_LEN);
-	GetFullPathName("Intro.wav",IntroWavPath,PATH_LEN);
-	GetFullPathName("Intro.mp3",IntroMp3Path,PATH_LEN);
-    LoadDiskImage();
+	_readStep(fileName, &mStep[0]);
 }
 
-void SONG::ReadEasy_1_KSF(const char *fileName)
+/**
+ * 파일에서 KickItUp Easy Mode Step Data를 읽어 들인다.
+ */
+void Song::ReadEasy_2(const char *fileName)
 {
-	ReadKSF(fileName, &mStep[0]);
-
-	HaveEasy=true;
-
-	sprintf(SongTitle,"%s",mStep[0].name);
-
-	GetFullPathName("Title.bmp",TitleImgPath,PATH_LEN);
-	GetFullPathName("Back.bmp",BgImgPath,PATH_LEN);
-	GetFullPathName("Song.wav",PlayWavPath,PATH_LEN);
-	GetFullPathName("Song.mp3",PlayMp3Path,PATH_LEN);
-	GetFullPathName("Song.mpg",PlayMpgPath,PATH_LEN);
-	GetFullPathName("Intro.wav",IntroWavPath,PATH_LEN);
-	GetFullPathName("Intro.mp3",IntroMp3Path,PATH_LEN);
-    LoadDiskImage();
-}
-
-void SONG::ReadEasy_2_STF(const char *fileName)
-{
-	ReadSTF(fileName, &mStep[1]);
-
 	HaveCouple=true;
-
-	sprintf(SongTitle,"%s",mStep[1].name);
-
-	GetFullPathName("Title.bmp",TitleImgPath,PATH_LEN);
-	GetFullPathName("Back.bmp",BgImgPath,PATH_LEN);
-	GetFullPathName("Song.wav",PlayWavPath,PATH_LEN);
-	GetFullPathName("Song.mp3",PlayMp3Path,PATH_LEN);
-	GetFullPathName("Song.mpg",PlayMpgPath,PATH_LEN);
-	GetFullPathName("Intro.wav",IntroWavPath,PATH_LEN);
-	GetFullPathName("Intro.mp3",IntroMp3Path,PATH_LEN);
-    LoadDiskImage();
+	_readStep(fileName, &mStep[1]);
 }
 
-void SONG::ReadEasy_2_KSF(const char *fileName)
+/**
+ * 파일에서 KickItUp Double Mode Step Data를 읽어 들인다.
+ */
+void Song::ReadDouble(const char *fileName)
 {
-	ReadKSF(fileName, &mStep[1]);
-
-	HaveCouple=true;
-
-	sprintf(SongTitle,"%s",mStep[1].name);
-	
-	GetFullPathName("Title.bmp",TitleImgPath,PATH_LEN);
-	GetFullPathName("Back.bmp",BgImgPath,PATH_LEN);
-	GetFullPathName("Song.wav",PlayWavPath,PATH_LEN);
-	GetFullPathName("Song.mp3",PlayMp3Path,PATH_LEN);
-	GetFullPathName("Song.mpg",PlayMpgPath,PATH_LEN);
-	GetFullPathName("Intro.wav",IntroWavPath,PATH_LEN);
-	GetFullPathName("Intro.mp3",IntroMp3Path,PATH_LEN);
-    LoadDiskImage();
-}
-
-
-void SONG::ReadDouble_STF(const char *fileName)
-{
-	ReadSTF(fileName, &mStep[0]);
-
 	HaveDouble=true;
-
-	sprintf(SongTitle,"%s",mStep[0].name);
-
-	GetFullPathName("Title.bmp",TitleImgPath,PATH_LEN);
-	GetFullPathName("Back.bmp",BgImgPath,PATH_LEN);
-	GetFullPathName("Song.wav",PlayWavPath,PATH_LEN);
-	GetFullPathName("Song.mp3",PlayMp3Path,PATH_LEN);
-	GetFullPathName("Song.mpg",PlayMpgPath,PATH_LEN);
-	GetFullPathName("Intro.wav",IntroWavPath,PATH_LEN);
-	GetFullPathName("Intro.mp3",IntroMp3Path,PATH_LEN);
-    LoadDiskImage();
+	_readStep(fileName, &mStep[0]);
 }
 
-void SONG::ReadDouble_KSF(const char *fileName)
-{
-	ReadKSF(fileName, &mStep[0]);
-
-	HaveDouble=true;
-
-	sprintf(SongTitle,"%s",mStep[0].name);
-	
-	GetFullPathName("Title.bmp",TitleImgPath,PATH_LEN);
-	GetFullPathName("Back.bmp",BgImgPath,PATH_LEN);
-	GetFullPathName("Song.wav",PlayWavPath,PATH_LEN);
-	GetFullPathName("Song.mp3",PlayMp3Path,PATH_LEN);
-	GetFullPathName("Song.mpg",PlayMpgPath,PATH_LEN);
-	GetFullPathName("Intro.wav",IntroWavPath,PATH_LEN);
-	GetFullPathName("Intro.mp3",IntroMp3Path,PATH_LEN);
-    
-    LoadDiskImage();
-}
-
-
-void SONG::LoadDiskImage()
+/**
+ * 화면에 보여줄 노래의 disk image data를 읽어들인다.
+ */
+void Song::_loadDiskImage()
 {
     if( mThisSongDiskImage.LoadBmp( "Disc.bmp" ) ) {
         mThisSongDiskImage.SetColorKey();
@@ -490,4 +364,27 @@ void SONG::LoadDiskImage()
     else {
         mpDiskImage = & gNoDISC;
     }
+}
+
+void Song::_readStep(const char *fileName, KIUStep * pStep)
+{
+	// 확장자 얻기
+	const char * extPtr = fileName + strlen(fileName) - 3;
+
+	// 확장자 구분.	".stf", ".ksf"
+	if(stricmp(extPtr, "ksf") == 0) {
+		_readKSF(fileName, pStep);
+	} else {
+		_readSTF(fileName, pStep);
+	}
+
+	strncpy(SongTitle, pStep->name, sizeof(SongTitle));
+	_getFullPathName("Title.bmp", TitleImgPath, PATH_LEN);
+	_getFullPathName("Back.bmp", BgImgPath, PATH_LEN);
+	_getFullPathName("Song.wav", PlayWavPath, PATH_LEN);
+	_getFullPathName("Song.mp3", PlayMp3Path, PATH_LEN);
+	_getFullPathName("Song.mpg", PlayMpgPath, PATH_LEN);
+	_getFullPathName("Intro.wav", IntroWavPath, PATH_LEN);
+	_getFullPathName("Intro.mp3", IntroMp3Path, PATH_LEN);
+    _loadDiskImage();
 }

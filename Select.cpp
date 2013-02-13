@@ -28,7 +28,7 @@
 
 #define	STILL_DRAWING	100
 
-extern SONG					CSONG[512];
+extern Song					CSONG[512];
 
 extern Surface gSongBack;
 extern Surface gSongTitle;
@@ -141,26 +141,40 @@ void Read()
 		{
 			SetCurrentDirectory ( lpData.cFileName );
 
-			if ( access ( "Crazy_2.stf",04 ) ==0 ) CSONG[Count].ReadCrazy_2_STF ( "Crazy_2.stf" );
-			else if ( access ( "Crazy_2.ksf",04 ) ==0 ) CSONG[Count].ReadCrazy_2_KSF ( "Crazy_2.ksf" );
+			if ( access ( "Crazy_2.stf",04 ) ==0 )
+				CSONG[Count].ReadCrazy_2( "Crazy_2.stf" );
+			else if ( access ( "Crazy_2.ksf",04 ) ==0 )
+				CSONG[Count].ReadCrazy_2 ( "Crazy_2.ksf" );
 
-			if ( access ( "Crazy_1.stf",04 ) ==0 ) CSONG[Count].ReadCrazy_1_STF ( "Crazy_1.stf" ),Count++;
-			else if ( access ( "Crazy_1.ksf",04 ) ==0 ) CSONG[Count].ReadCrazy_1_KSF ( "Crazy_1.ksf" ),Count++;
+			if ( access ( "Crazy_1.stf",04 ) ==0 )
+				CSONG[Count].ReadCrazy_1( "Crazy_1.stf" ),Count++;
+			else if ( access ( "Crazy_1.ksf",04 ) ==0 )
+				CSONG[Count].ReadCrazy_1 ( "Crazy_1.ksf" ),Count++;
 
-			if ( access ( "Hard_2.stf",04 ) ==0 ) CSONG[Count].ReadHard_2_STF ( "Hard_2.stf" );
-			else if ( access ( "Hard_2.ksf",04 ) ==0 ) CSONG[Count].ReadHard_2_KSF ( "Hard_2.ksf" );
+			if ( access ( "Hard_2.stf",04 ) ==0 )
+				CSONG[Count].ReadHard_2( "Hard_2.stf" );
+			else if ( access ( "Hard_2.ksf",04 ) ==0 )
+				CSONG[Count].ReadHard_2 ( "Hard_2.ksf" );
 
-			if ( access ( "Hard_1.stf",04 ) ==0 ) CSONG[Count].ReadHard_1_STF ( "Hard_1.stf" ),Count++;
-			else if ( access ( "Hard_1.ksf",04 ) ==0 ) CSONG[Count].ReadHard_1_KSF ( "Hard_1.ksf" ),Count++;
+			if ( access ( "Hard_1.stf",04 ) ==0 )
+				CSONG[Count].ReadHard_1( "Hard_1.stf" ),Count++;
+			else if ( access ( "Hard_1.ksf",04 ) ==0 )
+				CSONG[Count].ReadHard_1( "Hard_1.ksf" ),Count++;
 
-			if ( access ( "Easy_2.stf",04 ) ==0 ) CSONG[Count].ReadEasy_2_STF ( "Easy_2.stf" );
-			else if ( access ( "Easy_2.ksf",04 ) ==0 ) CSONG[Count].ReadEasy_2_KSF ( "Easy_2.ksf" );
+			if ( access ( "Easy_2.stf",04 ) ==0 )
+				CSONG[Count].ReadEasy_2( "Easy_2.stf" );
+			else if ( access ( "Easy_2.ksf",04 ) ==0 )
+				CSONG[Count].ReadEasy_2( "Easy_2.ksf" );
 
-			if ( access ( "Easy_1.stf",04 ) ==0 ) CSONG[Count].ReadEasy_1_STF ( "Easy_1.stf" ),Count++;
-			else if ( access ( "Easy_1.ksf",04 ) ==0 ) CSONG[Count].ReadEasy_1_KSF ( "Easy_1.ksf" ),Count++;
+			if ( access ( "Easy_1.stf",04 ) ==0 )
+				CSONG[Count].ReadEasy_1( "Easy_1.stf" ),Count++;
+			else if ( access ( "Easy_1.ksf",04 ) ==0 )
+				CSONG[Count].ReadEasy_1( "Easy_1.ksf" ),Count++;
 
-			if ( access ( "Double.stf",04 ) ==0 ) CSONG[Count].ReadDouble_STF ( "Double.stf" ),Count++;
-			else if ( access ( "Double.ksf",04 ) ==0 ) CSONG[Count].ReadDouble_KSF ( "Double.ksf" );
+			if ( access ( "Double.stf",04 ) ==0 )
+				CSONG[Count].ReadDouble( "Double.stf" ),Count++;
+			else if ( access ( "Double.ksf",04 ) ==0 )
+				CSONG[Count].ReadDouble( "Double.ksf" );
 
 			//if(CSONG[Count].bpm!=0)Count++;
 			SetCurrentDirectory ( "..\\" );
@@ -176,39 +190,39 @@ void Read()
 					SetCurrentDirectory ( lpData.cFileName );
 
 					if ( access ( "Crazy_2.stf",04 ) == 0 )
-						CSONG[Count].ReadCrazy_2_STF ( "Crazy_2.stf" );
+						CSONG[Count].ReadCrazy_2 ( "Crazy_2.stf" );
 					else if ( access ( "Crazy_2.ksf",04 ) ==0 )
-						CSONG[Count].ReadCrazy_2_KSF ( "Crazy_2.ksf" );
+						CSONG[Count].ReadCrazy_2 ( "Crazy_2.ksf" );
 
 					if ( access ( "Crazy_1.stf",04 ) ==0 )
-						CSONG[Count].ReadCrazy_1_STF ( "Crazy_1.stf" ),Count++;
+						CSONG[Count].ReadCrazy_1( "Crazy_1.stf" ),Count++;
 					else if ( access ( "Crazy_1.ksf",04 ) ==0 )
-						CSONG[Count].ReadCrazy_1_KSF ( "Crazy_1.ksf" ),Count++;
+						CSONG[Count].ReadCrazy_1( "Crazy_1.ksf" ),Count++;
 
 					if ( access ( "Hard_2.stf",04 ) ==0 )
-						CSONG[Count].ReadHard_2_STF ( "Hard_2.stf" );
+						CSONG[Count].ReadHard_2( "Hard_2.stf" );
 					else if ( access ( "Hard_2.ksf",04 ) ==0 )
-						CSONG[Count].ReadHard_2_KSF ( "Hard_2.ksf" );
+						CSONG[Count].ReadHard_2( "Hard_2.ksf" );
 
 					if ( access ( "Hard_1.stf",04 ) ==0 )
-						CSONG[Count].ReadHard_1_STF ( "Hard_1.stf" ),Count++;
+						CSONG[Count].ReadHard_1( "Hard_1.stf" ),Count++;
 					else if ( access ( "Hard_1.ksf",04 ) ==0 )
-						CSONG[Count].ReadHard_1_KSF ( "Hard_1.ksf" ),Count++;
+						CSONG[Count].ReadHard_1( "Hard_1.ksf" ),Count++;
 
 					if ( access ( "Easy_2.stf",04 ) ==0 )
-						CSONG[Count].ReadEasy_2_STF ( "Easy_2.stf" );
+						CSONG[Count].ReadEasy_2( "Easy_2.stf" );
 					else if ( access ( "Easy_2.ksf",04 ) ==0 )
-						CSONG[Count].ReadEasy_2_KSF ( "Easy_2.ksf" );
+						CSONG[Count].ReadEasy_2( "Easy_2.ksf" );
 
 					if ( access ( "Easy_1.stf",04 ) ==0 )
-						CSONG[Count].ReadEasy_1_STF ( "Easy_1.stf" ),Count++;
+						CSONG[Count].ReadEasy_1( "Easy_1.stf" ),Count++;
 					else if ( access ( "Easy_1.ksf",04 ) ==0 )
-						CSONG[Count].ReadEasy_1_KSF ( "Easy_1.ksf" ),Count++;
+						CSONG[Count].ReadEasy_1( "Easy_1.ksf" ),Count++;
 
 					if ( access ( "Double.stf",04 ) ==0 )
-						CSONG[Count].ReadDouble_STF ( "Double.stf" ),Count++;
+						CSONG[Count].ReadDouble( "Double.stf" ),Count++;
 					else if ( access ( "Double.ksf",04 ) ==0 )
-						CSONG[Count].ReadDouble_KSF ( "Double.ksf" ),Count++;
+						CSONG[Count].ReadDouble( "Double.ksf" ),Count++;
 
 					//if(CSONG[Count].bpm!=0)Count++;
 					SetCurrentDirectory ( "..\\" );
@@ -343,53 +357,53 @@ void Read()
 		chdir ( dirName.c_str() );
 
 		if ( FindFile ( "crazy_2.stf", cPathStr, sizeof ( cPathStr ) ) )
-			CSONG[Count].ReadCrazy_2_STF ( cPathStr );
+			CSONG[Count].ReadCrazy_2( cPathStr );
 		else if ( FindFile ( "crazy_2.ksf", cPathStr, sizeof ( cPathStr ) ) )
-			CSONG[Count].ReadCrazy_2_KSF ( cPathStr );
+			CSONG[Count].ReadCrazy_2( cPathStr );
 
 		if ( FindFile ( "crazy_1.stf", cPathStr, sizeof ( cPathStr ) ) ) {
-			CSONG[Count].ReadCrazy_1_STF ( cPathStr );
+			CSONG[Count].ReadCrazy_1( cPathStr );
 			++Count;
 		}
 		else if ( FindFile ( "crazy_1.ksf", cPathStr, sizeof ( cPathStr ) ) ) {
-			CSONG[Count].ReadCrazy_1_KSF ( cPathStr );
+			CSONG[Count].ReadCrazy_1( cPathStr );
 			++Count;
 		}
 
 		if ( FindFile ( "hard_2.stf", cPathStr, sizeof ( cPathStr ) ) )
-			CSONG[Count].ReadHard_2_STF ( cPathStr );
+			CSONG[Count].ReadHard_2( cPathStr );
 		else if ( FindFile ( "hard_2.ksf", cPathStr, sizeof ( cPathStr ) ) )
-			CSONG[Count].ReadHard_2_KSF ( cPathStr );
+			CSONG[Count].ReadHard_2( cPathStr );
 
 		if ( FindFile ( "hard_1.stf", cPathStr, sizeof ( cPathStr ) ) ) {
-			CSONG[Count].ReadHard_1_STF ( cPathStr );
+			CSONG[Count].ReadHard_1( cPathStr );
 			++Count;
 		}
 		else if ( FindFile ( "hard_1.ksf", cPathStr, sizeof ( cPathStr ) ) ) {
-			CSONG[Count].ReadHard_1_KSF ( cPathStr );
+			CSONG[Count].ReadHard_1( cPathStr );
 			++Count;
 		}
 
 		if ( FindFile ( "easy_2.stf", cPathStr, sizeof ( cPathStr ) ) )
-			CSONG[Count].ReadEasy_2_STF ( cPathStr );
+			CSONG[Count].ReadEasy_2( cPathStr );
 		else if ( FindFile ( "easy_2.ksf", cPathStr, sizeof ( cPathStr ) ) )
-			CSONG[Count].ReadEasy_2_KSF ( cPathStr );
+			CSONG[Count].ReadEasy_2( cPathStr );
 
 		if ( FindFile ( "easy_1.stf", cPathStr, sizeof ( cPathStr ) ) ) {
-			CSONG[Count].ReadEasy_1_STF ( cPathStr );
+			CSONG[Count].ReadEasy_1( cPathStr );
 			++Count;
 		}
 		else if ( FindFile ( "easy_1.ksf", cPathStr, sizeof ( cPathStr ) ) ) {
-			CSONG[Count].ReadEasy_1_KSF ( cPathStr );
+			CSONG[Count].ReadEasy_1( cPathStr );
 			++Count;
 		}
 
 		if ( FindFile ( "double.stf", cPathStr, sizeof ( cPathStr ) ) ) {
-			CSONG[Count].ReadDouble_STF ( cPathStr );
+			CSONG[Count].ReadDouble( cPathStr );
 			++Count;
 		}
 		else if ( FindFile ( "double.ksf", cPathStr, sizeof ( cPathStr ) ) ) {
-			CSONG[Count].ReadDouble_KSF ( cPathStr );
+			CSONG[Count].ReadDouble( cPathStr );
 			++Count;
 		}
 
@@ -841,7 +855,7 @@ void SelectSong ( void )
 		PressedKey1p[0]=0;
 
 		// Game Mode setting.
-		SONG &	selectedSong = CSONG[SelectCurrent];
+		Song &	selectedSong = CSONG[SelectCurrent];
 		if ( selectedSong.HaveCrazy==true ) GameMode=MODE_CRAZY,Double=false;
 		else if ( selectedSong.HaveDouble==true ) GameMode=MODE_DOUBLE,Double=true;
 		else if ( selectedSong.HaveEasy==true ) GameMode=MODE_EASY,Double=false;
