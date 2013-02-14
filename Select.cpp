@@ -82,14 +82,13 @@ bool	ClpBlt3 ( int x ,int y ,Surface & surface, const SDL_Rect & srect )
 	if ( 640 < x || 480 < y )
 		return true;
 
-	if ( sRect.h < -y || sRect.w < -x )     // ?��?지 ?�기보다 ?�로 ?�라가�??�냄.
+	if ( sRect.h < -y || sRect.w < -x )
 		return true;
 
 	if ( 480 < ( y + sRect.h ) )
 		sRect.h = 480 - y;
 
-	if ( y < 0 )
-	{
+	if ( y < 0 )	{
 		sRect.y -= y;
 		sRect.h += y;
 		y = 0;
@@ -98,8 +97,7 @@ bool	ClpBlt3 ( int x ,int y ,Surface & surface, const SDL_Rect & srect )
 	if ( 640 < x + sRect.w )
 		sRect.w = 640 - x;
 
-	if ( x < 0 )
-	{
+	if ( x < 0 )	{
 		sRect.x -= x;
 		sRect.w += x;
 		x = 0;
@@ -364,11 +362,53 @@ void Read()
 }
 #endif // _WIN32
 
+/**
+ * 음악을 정렬시킨다.
+ * 링크를 연결한다.
+ */
+void SortSong()
+{
+	for(int count=0;;count++ ) {
+		if ( count!=0 )
+			CSONG[count].Prev=count-1;
+
+		CSONG[count].Next=count+1;
+
+		if ( CSONG[count].getStep1().bpm1 == 0 && CSONG[count].getStep2().bpm1 == 0 ) {
+			CSONG[count].Prev=0;
+			count--;
+			CSONG[count].Next=0;
+			CSONG[0].Prev=count;
+			break;
+		}
+	}
+}
+
+/**
+ *  줌인 줌아웃 시킨다.
+ *
+ *  @param	curZoom	현재 확대 배율(0 ~ 10배)
+ *  @return	다음 확대 배율
+ */
+int ZoomInOut(const int curZoom)
+{
+	static int	toogleFlag = 1;
+
+	if(curZoom <= 0) {
+		toogleFlag = 1;
+	} else if(10 <= curZoom) {
+		toogleFlag = -1;
+	}
+
+	return curZoom + toogleFlag;
+
+}
+
 void SelectSong ( void )
 {
 	static Uint32 current;
 	static Uint32 SelectCurrent;
-	static int Selected, zoom,toggle,speed;
+	static int Selected, zoom;
 
 	int ModeTemp1p, ModeTemp2p;
 
@@ -383,11 +423,9 @@ void SelectSong ( void )
 
 	char s[50];
 
-	if ( First==0 )
-	{
+	if ( First==0 )	{
 		startTimer=SDL_GetTicks();
-		if ( Start1p==false )
-		{
+		if ( Start1p==false ) {
 			HighSpeed1p=1;
 			bModeMirror1p=false;
 			bModeNonstep1p=false;
@@ -405,8 +443,8 @@ void SelectSong ( void )
 			bModeRandomS1p=false;
 
 		}
-		if ( Start2p==false )
-		{
+
+		if ( Start2p==false )	{
 			HighSpeed2p=1;
 			bModeMirror2p=false;
 			bModeNonstep2p=false;
@@ -438,61 +476,21 @@ void SelectSong ( void )
 	DiscSize.w = 300;
 	DiscSize.h = 200;
 
-	for(int count=0;;count++ ) {
-		if ( count!=0 )
-			CSONG[count].Prev=count-1;
-
-		CSONG[count].Next=count+1;
-
-		if ( CSONG[count].getStep1().bpm1 == 0 && CSONG[count].getStep2().bpm1 == 0 ) {
-			CSONG[count].Prev=0;
-			count--;
-			CSONG[count].Next=0;
-			CSONG[0].Prev=count;
-			break;
-		}
-	}
-
-	if ( speed==1 )
-	{
-		speed=0;
-		if ( toggle==0 )
-		{
-			if ( zoom==10 )
-				toggle=1;
-			else
-				zoom++;
-		}
-		else if ( toggle==1 )
-		{
-			if ( zoom==0 )
-				toggle=0;
-			else
-				zoom--;
-		}
-	}
-	else
-		speed++;
+	// 선택화면에서 보이는 좌우 음악을 연결 시킨다.
+	SortSong();
 
 	ReadGameInput();
 
-	if ( PressedKey1p[5]==true )
-	{
-		if ( Start1p==false )
-		{
-			Start1p=true;
-		}
+	if ( PressedKey1p[5]==true ) {
+		Start1p=true;
 	}
-	if ( PressedKey2p[5]==true )
-	{
-		if ( Start2p==false )
-		{
-			Start2p=true;
-		}
+
+	if ( PressedKey2p[5]==true ) {
+		Start2p=true;
 	}
 
 	// Get 1Player hidden mode.
-	ModeTemp1p=ScanHiddenMode1p();
+	ModeTemp1p = ScanHiddenMode1p();
 
 	if ( ModeTemp1p )
 	{
@@ -1084,6 +1082,9 @@ void SelectSong ( void )
 	}
 
 	DisplayNumber ( 560,8,s );
+
+	// 선택된 타이틀을 줌인 줌아웃 시킨다.
+	zoom = ZoomInOut(zoom);
 
 	// selected left song.
 	if ( Selected == 7 )	{
