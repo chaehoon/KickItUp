@@ -15,6 +15,7 @@
 #include <iostream>
 #include <string>
 #include <cstdlib>
+#include <strings.h>
 using namespace std;
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -372,7 +373,7 @@ void Song::_readStep(const char *fileName, KIUStep * pStep)
 	const char * extPtr = fileName + strlen(fileName) - 3;
 
 	// 확장자 구분.	".stf", ".ksf"
-	if(stricmp(extPtr, "ksf") == 0) {
+	if(strcasecmp(extPtr, "ksf") == 0) {
 		_readKSF(fileName, pStep);
 	} else {
 		_readSTF(fileName, pStep);

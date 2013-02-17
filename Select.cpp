@@ -1347,13 +1347,12 @@ void SelectSong ( void )
 	}
 }
 
-int	ScanHiddenMode1p ( void )
+int ScanHiddenMode(const int * pressedKey, int * keyHistory)
 {
 	static char IntKey1p[10];
-	int i;
 
 	if ( PressedKey1p[1] || PressedKey1p[3] || PressedKey1p[5] || PressedKey1p[7] || PressedKey1p[9] )
-		for ( i=0;i<7;i++ ) IntKey1p[i]=IntKey1p[i+1];
+		for ( int i=0;i<7;i++ ) IntKey1p[i]=IntKey1p[i+1];
 
 	if ( PressedKey1p[1] ) IntKey1p[7]='1';
 	if ( PressedKey1p[3] ) IntKey1p[7]='3';
@@ -1454,17 +1453,125 @@ int	ScanHiddenMode1p ( void )
 		IntKey1p[7]='0';
 		return HMODE_RANDOMS;
 	}
-	else
-		return HMODE_NONE;
+
+	return HMODE_NONE;
+}
+
+int	ScanHiddenMode1p ( void )
+{
+	static char IntKey1p[10];
+
+	if ( PressedKey1p[1] || PressedKey1p[3] || PressedKey1p[5] || PressedKey1p[7] || PressedKey1p[9] )
+		for ( int i=0;i<7;i++ ) IntKey1p[i]=IntKey1p[i+1];
+
+	if ( PressedKey1p[1] ) IntKey1p[7]='1';
+	if ( PressedKey1p[3] ) IntKey1p[7]='3';
+	if ( PressedKey1p[5] ) IntKey1p[7]='5';
+	if ( PressedKey1p[7] ) IntKey1p[7]='7';
+	if ( PressedKey1p[9] ) IntKey1p[7]='9';
+
+	// 2배속 ?�니??
+	if ( strcmp ( IntKey1p,"55755595" ) ==0 )
+	{
+		IntKey1p[7]='0';
+		return HMODE_2X;
+	}
+	// 4배속 ?�니??
+	else if ( strcmp ( IntKey1p,"55355755" ) ==0 )
+	{
+		IntKey1p[7]='0';
+		return HMODE_4X;
+	}
+	// 8배속 ?�니??
+	else if ( strcmp ( IntKey1p,"55153555" ) ==0 )
+	{
+		IntKey1p[7]='0';
+		return HMODE_8X;
+	}
+	// 배니???�니??
+	else if ( strcmp ( IntKey1p,"55975315" ) ==0 )
+	{
+		IntKey1p[7]='0';
+		return HMODE_VANISH;
+	}
+	// 미러모드 ?�니??
+	else if ( strcmp ( IntKey1p,"55159357" ) ==0 )
+	{
+		IntKey1p[7]='0';
+		return HMODE_MIRROR;
+	}
+	// ?�덤모드 ?�니??
+	else if ( strcmp ( IntKey1p,"51535957" ) ==0 )
+	{
+		IntKey1p[7]='0';
+		return HMODE_RANDOM;
+	}
+	/*	// 커플모드 ?�니??
+		else if(strcmp(IntKey1p,"55979755")==0)
+		{
+			IntKey1p[7]='0';
+			return HMODE_COUPLE;
+		}
+	*/	// ?�크�?모드?�니??
+	else if ( strcmp ( IntKey1p,"55797955" ) ==0 )
+	{
+		IntKey1p[7]='0';
+		return HMODE_SYNCHRO;
+	}
+	// ?�스?�모???�니??
+	else if ( strcmp ( IntKey1p,"79579579" ) ==0 )
+	{
+		IntKey1p[7]='0';
+		return HMODE_NONSTEP;
+	}
+	/*	// ?�스?�더�??�니??
+		else if(strcmp(IntKey1p,"17159395")==0)
+		{
+			IntKey1p[7]='0';
+			return HMODE_NONSTOPDOUBLE;
+		}*/
+	// ?�니?�모???�니??
+	else if ( strcmp ( IntKey1p,"13573159" ) ==0 )
+	{
+		IntKey1p[7]='0';
+		return HMODE_UNION;
+	}
+	/*	// ?�?�트???�니??
+		else if(strcmp(IntKey1p,"95197537")==0)
+		{
+			IntKey1p[7]='0';
+			return HMODE_SELECTALL;
+		}*/
+	// 캔슬 ?�니??
+	else if ( strcmp ( IntKey1p,"55555555" ) ==0 )
+	{
+		IntKey1p[7]='0';
+		return HMODE_CANCEL;
+	}
+	else if ( strcmp ( IntKey1p,"55955575" ) ==0 )
+	{
+		IntKey1p[7]='0';
+		return HMODE_4DMIX;
+	}
+	else if ( strcmp ( IntKey1p,"79513579" ) ==0 )
+	{
+		IntKey1p[7]='0';
+		return HMODE_SUDDENR;
+	}
+	else if ( strcmp ( IntKey1p,"17931793" ) ==0 )
+	{
+		IntKey1p[7]='0';
+		return HMODE_RANDOMS;
+	}
+
+	return HMODE_NONE;
 }
 
 int	ScanHiddenMode2p ( void )
 {
 	static char IntKey2p[10];
-	int i;
-
 	if ( PressedKey2p[1] || PressedKey2p[3] || PressedKey2p[5] || PressedKey2p[7] || PressedKey2p[9] )
-		for ( i=0;i<7;i++ ) IntKey2p[i]=IntKey2p[i+1];
+		for ( int i=0;i<7;i++ ) IntKey2p[i]=IntKey2p[i+1];
 
 	if ( PressedKey2p[1] ) IntKey2p[7]='1';
 	if ( PressedKey2p[3] ) IntKey2p[7]='3';
@@ -1554,7 +1661,8 @@ int	ScanHiddenMode2p ( void )
 		IntKey2p[7]='0';
 		return HMODE_RANDOMS;
 	}
-	else return HMODE_NONE;
+	
+	return HMODE_NONE;
 }
 
 void DrawMode ( int x, int y, int Mode )
