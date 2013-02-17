@@ -17,4 +17,6 @@
 #	include <unistd.h>
 #endif // _WIN32
 
+bool GetRealFileName(const char * filename, char * buff, unsigned int size);
+
 #endif // _COMMON_H

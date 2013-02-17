@@ -284,11 +284,13 @@ bool _getFullPathName( const char * fileName, char * outputDir, const size_t siz
     if( getcwd( buff, sizeof( buff ) ) == NULL )
         return false;
 
-    snprintf( outputDir, size, "%s/%s", buff, fileName );
+    char realFileName[64] = {0, };
+
+    GetRealFileName(fileName, realFileName, sizeof(realFileName));
+    snprintf(outputDir, size, "%s/%s", buff, realFileName);
     return true;
 
 }
-
 
 /**
  * 파일에서 KickItUp Crazy Mode Step Data를 읽어 들인다.
