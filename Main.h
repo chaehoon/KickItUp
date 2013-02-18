@@ -63,6 +63,14 @@ extern Music    gSong;
 #define	JUDGE_SIZE_X	250
 #define	JUDGE_SIZE_Y	50
 
+struct st_HighSpeed {
+	int		step;
+	int		step1;
+	int		step5;
+	int		step7;
+	int		step9;
+};
+
 extern Surface gSelectBack;
 extern Surface gScreen;
 
@@ -75,7 +83,6 @@ extern	bool	bModeUnion1p;
 extern	bool	bModeRandom1p;
 extern	bool	b4dMix1p;
 extern	bool	bModeVanish1p;
-extern	bool	bModeCrazy1p;
 extern	bool	bModeSuddenR1p;
 extern	bool	bModeRandomS1p;
 
@@ -85,24 +92,10 @@ extern	bool	bModeUnion2p;
 extern	bool	bModeRandom2p;
 extern	bool	b4dMix2p;
 extern	bool	bModeVanish2p;
-extern	bool	bModeCrazy2p;
 extern	bool	bModeSuddenR2p;
 extern	bool	bModeRandomS2p;
 
-extern	int		HighSpeed1p;
-extern	int		HighSpeed2p;
-
-extern	int		HighSpeed1p_1;
-extern	int		HighSpeed1p_3;
-extern	int		HighSpeed1p_5;
-extern	int		HighSpeed1p_7;
-extern	int		HighSpeed1p_9;
-
-extern	int		HighSpeed2p_1;
-extern	int		HighSpeed2p_3;
-extern	int		HighSpeed2p_5;
-extern	int		HighSpeed2p_7;
-extern	int		HighSpeed2p_9;
+extern st_HighSpeed	gSpeed[2];
 
 extern	int		MaxSpeed;
 extern	int		MinSpeed;

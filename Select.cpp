@@ -369,17 +369,17 @@ void Read()
  */
 void SortSong()
 {
-	for(int count=0;;count++ ) {
-		if ( count!=0 )
-			CSONG[count].Prev=count-1;
+	for(int i=0;;i++ ) {
+		if ( i!=0 )
+			CSONG[i].Prev=i-1;
 
-		CSONG[count].Next=count+1;
+		CSONG[i].Next=i+1;
 
-		if ( CSONG[count].getStep1().bpm1 == 0 && CSONG[count].getStep2().bpm1 == 0 ) {
-			CSONG[count].Prev=0;
-			count--;
-			CSONG[count].Next=0;
-			CSONG[0].Prev=count;
+		if ( CSONG[i].getStep1().bpm1 == 0 && CSONG[i].getStep2().bpm1 == 0 ) {
+			CSONG[i].Prev=0;
+			i--;
+			CSONG[i].Next=0;
+			CSONG[0].Prev=i;
 			break;
 		}
 	}
@@ -391,8 +391,9 @@ void SortSong()
  *  @param	curZoom	현재 확대 배율(0 ~ 10배)
  *  @return	다음 확대 배율
  */
-int ZoomInOut(const int curZoom)
+int ZoomInOut()
 {
+	static int	curZoom = 0;
 	static int	toogleFlag = 1;
 
 	if(curZoom <= 0) {
@@ -401,7 +402,8 @@ int ZoomInOut(const int curZoom)
 		toogleFlag = -1;
 	}
 
-	return curZoom + toogleFlag;
+	curZoom += toogleFlag;
+	return curZoom;
 
 }
 
@@ -409,57 +411,49 @@ void SelectSong ( void )
 {
 	static Uint32 current;
 	static Uint32 SelectCurrent;
-	static int Selected, zoom;
-
-	int ModeTemp1p, ModeTemp2p;
-
-	static	time_t t;
-
+	static int Selected;
 	static	int a,b;
-
 	static	int iMove;
-
-	SDL_Rect Screen;
-	SDL_Rect DiscSize;
 
 	char s[50];
 
 	if ( First==0 )	{
 		startTimer=SDL_GetTicks();
 		if ( Start1p==false ) {
-			HighSpeed1p=1;
 			bModeMirror1p=false;
 			bModeNonstep1p=false;
 			bModeSynchro=false;
 			bModeUnion1p=false;
 			bModeRandom1p=false;
 			b4dMix1p=false;
-			HighSpeed1p_1=1;
-			HighSpeed1p_3=1;
-			HighSpeed1p_5=1;
-			HighSpeed1p_7=1;
-			HighSpeed1p_9=1;
 			bModeVanish1p=false;
 			bModeSuddenR1p=false;
 			bModeRandomS1p=false;
 
+			gSpeed[0].step = 1;
+			gSpeed[0].step1 = 1;
+			gSpeed[0].step3 = 1;
+			gSpeed[0].step5 = 1;
+			gSpeed[0].step7 = 1;
+			gSpeed[0].step9 = 1;
 		}
 
 		if ( Start2p==false )	{
-			HighSpeed2p=1;
 			bModeMirror2p=false;
 			bModeNonstep2p=false;
 			bModeUnion2p=false;
 			bModeRandom2p=false;
 			b4dMix2p=false;
-			HighSpeed2p_1=1;
-			HighSpeed2p_3=1;
-			HighSpeed2p_5=1;
-			HighSpeed2p_7=1;
-			HighSpeed2p_9=1;
 			bModeVanish2p=false;
 			bModeSuddenR1p=false;
 			bModeRandomS1p=false;
+
+			gSpeed[1].step = 1;
+			gSpeed[1].step1 = 1;
+			gSpeed[1].step3 = 1;
+			gSpeed[1].step5 = 1;
+			gSpeed[1].step7 = 1;
+			gSpeed[1].step9 = 1;
 		}
 		// paint the background black.
 		gScreen.FillRect ( 0, 0 );
@@ -471,11 +465,6 @@ void SelectSong ( void )
 		First++;
 		gSelectSong.Play ( true );
 	}
-
-	DiscSize.y = 0;
-	DiscSize.x = 0;
-	DiscSize.w = 300;
-	DiscSize.h = 200;
 
 	// 선택화면에서 보이는 좌우 음악을 연결 시킨다.
 	SortSong();
@@ -491,7 +480,7 @@ void SelectSong ( void )
 	}
 
 	// Get 1Player hidden mode.
-	ModeTemp1p = ScanHiddenMode1p();
+	int ModeTemp1p = ScanHiddenMode1p();
 
 	if ( ModeTemp1p )
 	{
@@ -547,7 +536,7 @@ void SelectSong ( void )
 			gMode.Play();
 			break;
 		case HMODE_4DMIX:
-			srand ( ( unsigned ) time ( &t ) );
+			srand ( ( unsigned ) time ( NULL ) );
 
 			HighSpeed1p_1=1+rand() %8;
 			HighSpeed1p_3=1+rand() %8;
@@ -592,7 +581,7 @@ void SelectSong ( void )
 	}
 
 	// Get 2Player hidden mode.
-	ModeTemp2p=ScanHiddenMode2p();
+	int ModeTemp2p=ScanHiddenMode2p();
 	if ( ModeTemp2p )
 		if ( IntroFlag )
 		{
@@ -648,7 +637,7 @@ void SelectSong ( void )
 			break;
 		case HMODE_4DMIX:
 
-			srand ( ( unsigned ) time ( &t ) );
+			srand ( ( unsigned ) time ( NULL ) );
 
 			HighSpeed2p_1 = 1+rand() %8;
 			HighSpeed2p_3 = 1+rand() %8;
@@ -1085,7 +1074,9 @@ void SelectSong ( void )
 	DisplayNumber ( 560,8,s );
 
 	// 선택된 타이틀을 줌인 줌아웃 시킨다.
-	zoom = ZoomInOut(zoom);
+	int zoom = ZoomInOut();
+
+	SDL_Rect Screen;
 
 	// selected left song.
 	if ( Selected == 7 )	{
@@ -1103,6 +1094,12 @@ void SelectSong ( void )
 	}
 
 	// change right screen.
+	SDL_Rect DiscSize;	// TODO: 정리 대상
+	DiscSize.y = 0;
+	DiscSize.x = 0;
+	DiscSize.w = 300;
+	DiscSize.h = 200;
+
 	if ( iMove<0 )	{
 		if ( iMove<=-640 )
 			iMove=0;
@@ -1124,8 +1121,9 @@ void SelectSong ( void )
 			ClpBlt3 ( 10+iMove,50, *CSONG[CSONG[CSONG[current].Next].Next].mpDiskImage, DiscSize );
 		}
 	}
-	else if ( iMove==0 )
+	else if ( iMove==0 ) {
 		CSONG[current].mpDiskImage->BltFast ( Screen.x, Screen.y, gScreen, &DiscSize );
+	}
 
 	// selected right song.
 	if ( Selected == 9 )	{
@@ -1165,8 +1163,9 @@ void SelectSong ( void )
 			ClpBlt3 ( 330+iMove,50, *CSONG[CSONG[CSONG[CSONG[current].Next].Next].Next].mpDiskImage, DiscSize );
 		}
 	}
-	else if ( iMove==0 )
+	else if ( iMove==0 ) {
 		CSONG[CSONG[current].Next].mpDiskImage->BltFast ( Screen.x, Screen.y, gScreen, &DiscSize );
+	}
 
 	// draw shiftleft image.
 	gShiftLeft.BltFast ( 0, 250, gScreen );
@@ -1246,8 +1245,10 @@ void SelectSong ( void )
 		if ( a==0 )
 		{
 			a++;
-			if ( Start1p && Start2p ) Couple=true;
-			else Couple=false;
+			if ( Start1p && Start2p )
+				Couple=true;
+			else
+				Couple=false;
 		}
 	}
 	if ( Start2p )

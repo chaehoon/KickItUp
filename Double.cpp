@@ -1856,6 +1856,7 @@ void KIU_STAGE_DOUBLE(void)
 	{
 		if(Start1p)
 		{
+
 			HighSpeed=HighSpeed1p;
 			HighSpeed_1=HighSpeed1p_1;
 			HighSpeed_3=HighSpeed1p_3;

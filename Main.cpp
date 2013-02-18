@@ -96,6 +96,9 @@ Chunk	gSelectSong;
 Music   gIntro;
 Music   gSong;
 
+
+st_HighSpeed	gSpeed[2];
+
 char				Data[MAX_DATA+1][14];
 char				Data_Judge[MAX_DATA+1][14];
 double				Data_y[MAX_DATA+1];
@@ -169,21 +172,6 @@ Song				CSONG[512];
 bool	SongFlag;
 bool	IntroFlag;
 
-int		HighSpeed1p=1;
-int		HighSpeed2p=1;
-
-int		HighSpeed1p_1;
-int		HighSpeed1p_3;
-int		HighSpeed1p_5;
-int		HighSpeed1p_7;
-int		HighSpeed1p_9;
-
-int		HighSpeed2p_1;
-int		HighSpeed2p_3;
-int		HighSpeed2p_5;
-int		HighSpeed2p_7;
-int		HighSpeed2p_9;
-
 int		MaxSpeed;
 int		MinSpeed;
 
@@ -196,7 +184,6 @@ bool	bModeUnion1p;
 bool	bModeRandom1p;
 bool	b4dMix1p;			// 1p 4DMIX mode.
 bool	bModeVanish1p;
-bool	bModeCrazy1p;
 bool	bModeSuddenR1p;
 bool	bModeRandomS1p;
 
@@ -206,7 +193,6 @@ bool	bModeUnion2p;
 bool	bModeRandom2p;
 bool	b4dMix2p;
 bool	bModeVanish2p;
-bool	bModeCrazy2p;
 bool	bModeSuddenR2p;
 bool	bModeRandomS2p;
 
@@ -281,37 +267,42 @@ void	DisplayStageCount(const int count)
 
 void ClearMode(void)
 {
-	HighSpeed1p=1;
 	bModeMirror1p=false;
 	bModeNonstep1p=false;
 	bModeSynchro=false;
 	bModeUnion1p=false;
 	bModeRandom1p=false;
 	b4dMix1p=false;
-	HighSpeed1p_1=1;
-	HighSpeed1p_3=1;
-	HighSpeed1p_5=1;
-	HighSpeed1p_7=1;
-	HighSpeed1p_9=1;
 	bModeVanish1p=false;
 	bModeRandomS1p=false;
 	bModeSuddenR1p=false;
 
-	HighSpeed2p=1;
 	bModeMirror2p=false;
 	bModeNonstep2p=false;
 	bModeUnion2p=false;
 	bModeRandom2p=false;
 	b4dMix2p=false;
+
+	bModeVanish2p=false;
+	Double=false;
+	bModeRandomS2p=false;
+	bModeSuddenR2p=false;
+
+	// TODO:
+	HighSpeed1p=1;
+	HighSpeed1p_1=1;
+	HighSpeed1p_3=1;
+	HighSpeed1p_5=1;
+	HighSpeed1p_7=1;
+	HighSpeed1p_9=1;
+
+	HighSpeed2p=1;
 	HighSpeed2p_1=1;
 	HighSpeed2p_3=1;
 	HighSpeed2p_5=1;
 	HighSpeed2p_7=1;
 	HighSpeed2p_9=1;
-	bModeVanish2p=false;
-	Double=false;
-	bModeRandomS2p=false;
-	bModeSuddenR2p=false;
+
 }
 
 void	GameOver1(void)
