@@ -430,12 +430,7 @@ void SelectSong ( void )
 			bModeSuddenR1p=false;
 			bModeRandomS1p=false;
 
-			gSpeed[0].step = 1;
-			gSpeed[0].step1 = 1;
-			gSpeed[0].step3 = 1;
-			gSpeed[0].step5 = 1;
-			gSpeed[0].step7 = 1;
-			gSpeed[0].step9 = 1;
+			gSpeed[0].reset();
 		}
 
 		if ( Start2p==false )	{
@@ -448,12 +443,7 @@ void SelectSong ( void )
 			bModeSuddenR1p=false;
 			bModeRandomS1p=false;
 
-			gSpeed[1].step = 1;
-			gSpeed[1].step1 = 1;
-			gSpeed[1].step3 = 1;
-			gSpeed[1].step5 = 1;
-			gSpeed[1].step7 = 1;
-			gSpeed[1].step9 = 1;
+			gSpeed[1].reset();
 		}
 		// paint the background black.
 		gScreen.FillRect ( 0, 0 );
@@ -536,13 +526,7 @@ void SelectSong ( void )
 			gMode.Play();
 			break;
 		case HMODE_4DMIX:
-			srand ( ( unsigned ) time ( NULL ) );
-
-			gSpeed[0].step1=1+rand() %8;
-			gSpeed[0].step3=1+rand() %8;
-			gSpeed[0].step5=1+rand() %8;
-			gSpeed[0].step7=1+rand() %8;
-			gSpeed[0].step9=1+rand() %8;
+			gSpeed[0].setRandom();
 
 			b4dMix1p=true;
 			gMode.Play();
@@ -559,18 +543,15 @@ void SelectSong ( void )
 						break;*/
 		case HMODE_CANCEL:
 			gCancel.Play();
-			gSpeed[0].step=1;
+			gSpeed[0].reset();
+
 			bModeMirror1p=false;
 			bModeNonstep1p=false;
 			bModeSynchro=false;
 			bModeUnion1p=false;
 			bModeRandom1p=false;
 			b4dMix1p=false;
-			gSpeed[0].step1=1;
-			gSpeed[0].step3=1;
-			gSpeed[0].step5=1;
-			gSpeed[0].step7=1;
-			gSpeed[0].step9=1;
+
 			bModeVanish1p=false;
 			bModeSuddenR1p=false;
 			bModeRandomS1p=false;
@@ -636,14 +617,7 @@ void SelectSong ( void )
 			gMode.Play();
 			break;
 		case HMODE_4DMIX:
-
-			srand ( ( unsigned ) time ( NULL ) );
-
-			gSpeed[1].step1 = 1+rand() %8;
-			gSpeed[1].step3 = 1+rand() %8;
-			gSpeed[1].step5 = 1+rand() %8;
-			gSpeed[1].step7 = 1+rand() %8;
-			gSpeed[1].step9 = 1+rand() %8;
+			gSpeed[1].setRandom();
 
 			b4dMix2p=true;
 			gMode.Play();

@@ -27,12 +27,8 @@
 #include <stdio.h>
 #include <time.h>
 #include <sstream>
-#include <algorithm>
 #include <iostream>
 #include <fmodex/fmod_errors.h>
-
-using std::max;
-using std::min;
 
 #define VER_NUM	"0.4a"
 char	TITLE[PATH_LEN];
@@ -288,20 +284,8 @@ void ClearMode(void)
 	bModeRandomS2p=false;
 	bModeSuddenR2p=false;
 
-	// TODO:
-	gSpeed[0].step = 1;
-	gSpeed[0].step1=1;
-	gSpeed[0].step3=1;
-	gSpeed[0].step5=1;
-	gSpeed[0].step7=1;
-	gSpeed[0].step9=1;
-
-	gSpeed[1].step=1;
-	gSpeed[1].step1=1;
-	gSpeed[1].step3=1;
-	gSpeed[1].step5=1;
-	gSpeed[1].step7=1;
-	gSpeed[1].step9=1;
+	gSpeed[0].reset();
+	gSpeed[1].reset();
 
 }
 
@@ -502,46 +486,21 @@ void KIU_STAGE(void)
 	sprintf(s, "bunki2:%uld", bunki2);
 	DisplayMessage(0,112,s);
 
-	if(start1==0)
-	{
-		if(b4dMix1p==true)
-		{
-			MaxSpeed = MinSpeed = gSpeed[0].step1;
-
-			MaxSpeed = max( MaxSpeed, gSpeed[0].step3);
-			MaxSpeed = max( MaxSpeed, gSpeed[0].step5);
-			MaxSpeed = max( MaxSpeed, gSpeed[0].step7);
-			MaxSpeed = max( MaxSpeed, gSpeed[0].step9);
-			
-			MinSpeed = min( MinSpeed, gSpeed[0].step3);
-			MinSpeed = min( MinSpeed, gSpeed[0].step5);
-			MinSpeed = min( MinSpeed, gSpeed[0].step7);
-			MinSpeed = min( MinSpeed, gSpeed[0].step9);
-		}
-		else 
-		{
+	if(start1==0) {
+		if(b4dMix1p==true) {
+			MaxSpeed = gSpeed[0].getMax();
+			MinSpeed = gSpeed[0].getMin();
+		} else {
 			MaxSpeed = MinSpeed = gSpeed[0].step;
-			gSpeed[0].step1 = gSpeed[0].step3 = gSpeed[0].step5 = gSpeed[0].step7 = gSpeed[0].step9 = gSpeed[0].step;
+			gSpeed[0].reset(gSpeed[0].step);
 		}
 
-		if(b4dMix2p)
-		{
-			MaxSpeed=MinSpeed=gSpeed[1].step1;
-
-			MaxSpeed = max( MaxSpeed, gSpeed[1].step3);
-			MaxSpeed = max( MaxSpeed, gSpeed[1].step5);
-			MaxSpeed = max( MaxSpeed, gSpeed[1].step7);
-			MaxSpeed = max( MaxSpeed, gSpeed[1].step9);
-			
-			MinSpeed = min( MinSpeed, gSpeed[1].step3);
-			MinSpeed = min( MinSpeed, gSpeed[1].step5);
-			MinSpeed = min( MinSpeed, gSpeed[1].step7);
-			MinSpeed = min( MinSpeed, gSpeed[1].step9);
-		}
-		else 
-		{
+		if(b4dMix2p) {
+			MaxSpeed = gSpeed[1].getMax();
+			MinSpeed = gSpeed[1].getMin();
+		} else {
 			MaxSpeed = MinSpeed = gSpeed[1].step;
-			gSpeed[1].step1 = gSpeed[1].step3 = gSpeed[1].step5 = gSpeed[1].step7 = gSpeed[1].step9 = gSpeed[1].step;
+			gSpeed[1].reset(gSpeed[1].step);
 		}
 
 		for(sta=0;sta<6;sta++) {
@@ -577,8 +536,6 @@ void KIU_STAGE(void)
 
 		if(bModeRandom1p)
 		{
-			srand((unsigned) time(&t));
-			
 			for(i=0;i<MAX_DATA;i++)
 			{
 				Data[MAX_DATA][0]=Data[i][0];
@@ -3665,6 +3622,9 @@ void ERRCHECK(FMOD_RESULT result)
 
 bool init()
 {
+	// random function init
+	srand((unsigned)time(NULL));
+
     // Start SDL
     if( SDL_Init( SDL_INIT_VIDEO | SDL_INIT_AUDIO ) < 0 || !SDL_GetVideoInfo() )
         return false;

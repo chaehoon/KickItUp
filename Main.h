@@ -4,6 +4,10 @@
 #include "Surface.h"
 #include "Music.h"
 #include <stdio.h>
+#include <algorithm>
+
+using std::max;
+using std::min;
 
 extern Music    gIntro;
 extern Music    gSong;
@@ -70,6 +74,42 @@ struct st_HighSpeed {
 	int		step5;
 	int		step7;
 	int		step9;
+
+public:
+	void reset(const int speed = 1) {
+		step = speed;
+		step1 = speed;
+		step3 = speed;
+		step5 = speed;
+		step7 = speed;
+		step9 = speed;
+	}
+
+	int getMax() const {
+		int ret = step;
+		ret = max(ret, step3);
+		ret = max(ret, step5);
+		ret = max(ret, step7);
+		ret = max(ret, step9);
+		return ret;
+	}
+
+	int getMin() const {
+		int ret = step;
+		ret = min(ret, step3);
+		ret = min(ret, step5);
+		ret = min(ret, step7);
+		ret = min(ret, step9);
+		return ret;
+	}
+
+	void setRandom()  {
+		step1 = 1+rand() % 8;
+		step3 = 1+rand() % 8;
+		step5 = 1+rand() % 8;
+		step7 = 1+rand() % 8;
+		step9 = 1+rand() % 8;
+	}
 };
 
 extern Surface gSelectBack;
