@@ -289,19 +289,19 @@ void ClearMode(void)
 	bModeSuddenR2p=false;
 
 	// TODO:
-	HighSpeed1p=1;
-	HighSpeed1p_1=1;
-	HighSpeed1p_3=1;
-	HighSpeed1p_5=1;
-	HighSpeed1p_7=1;
-	HighSpeed1p_9=1;
+	gSpeed[0].step = 1;
+	gSpeed[0].step1=1;
+	gSpeed[0].step3=1;
+	gSpeed[0].step5=1;
+	gSpeed[0].step7=1;
+	gSpeed[0].step9=1;
 
-	HighSpeed2p=1;
-	HighSpeed2p_1=1;
-	HighSpeed2p_3=1;
-	HighSpeed2p_5=1;
-	HighSpeed2p_7=1;
-	HighSpeed2p_9=1;
+	gSpeed[1].step=1;
+	gSpeed[1].step1=1;
+	gSpeed[1].step3=1;
+	gSpeed[1].step5=1;
+	gSpeed[1].step7=1;
+	gSpeed[1].step9=1;
 
 }
 
@@ -506,42 +506,42 @@ void KIU_STAGE(void)
 	{
 		if(b4dMix1p==true)
 		{
-			MaxSpeed = MinSpeed = HighSpeed1p_1;
+			MaxSpeed = MinSpeed = gSpeed[0].step1;
 
-			MaxSpeed = max( MaxSpeed, HighSpeed1p_3);
-			MaxSpeed = max( MaxSpeed, HighSpeed1p_5);
-			MaxSpeed = max( MaxSpeed, HighSpeed1p_7);
-			MaxSpeed = max( MaxSpeed, HighSpeed1p_9);
+			MaxSpeed = max( MaxSpeed, gSpeed[0].step3);
+			MaxSpeed = max( MaxSpeed, gSpeed[0].step5);
+			MaxSpeed = max( MaxSpeed, gSpeed[0].step7);
+			MaxSpeed = max( MaxSpeed, gSpeed[0].step9);
 			
-			MinSpeed = min( MinSpeed, HighSpeed1p_3);
-			MinSpeed = min( MinSpeed, HighSpeed1p_5);
-			MinSpeed = min( MinSpeed, HighSpeed1p_7);
-			MinSpeed = min( MinSpeed, HighSpeed1p_9);
+			MinSpeed = min( MinSpeed, gSpeed[0].step3);
+			MinSpeed = min( MinSpeed, gSpeed[0].step5);
+			MinSpeed = min( MinSpeed, gSpeed[0].step7);
+			MinSpeed = min( MinSpeed, gSpeed[0].step9);
 		}
 		else 
 		{
-			MaxSpeed = MinSpeed = HighSpeed1p;
-			HighSpeed1p_1 = HighSpeed1p_3 = HighSpeed1p_5 = HighSpeed1p_7 = HighSpeed1p_9 = HighSpeed1p;
+			MaxSpeed = MinSpeed = gSpeed[0].step;
+			gSpeed[0].step1 = gSpeed[0].step3 = gSpeed[0].step5 = gSpeed[0].step7 = gSpeed[0].step9 = gSpeed[0].step;
 		}
 
 		if(b4dMix2p)
 		{
-			MaxSpeed=MinSpeed=HighSpeed2p_1;
+			MaxSpeed=MinSpeed=gSpeed[1].step1;
 
-			MaxSpeed = max( MaxSpeed, HighSpeed2p_3);
-			MaxSpeed = max( MaxSpeed, HighSpeed2p_5);
-			MaxSpeed = max( MaxSpeed, HighSpeed2p_7);
-			MaxSpeed = max( MaxSpeed, HighSpeed2p_9);
+			MaxSpeed = max( MaxSpeed, gSpeed[1].step3);
+			MaxSpeed = max( MaxSpeed, gSpeed[1].step5);
+			MaxSpeed = max( MaxSpeed, gSpeed[1].step7);
+			MaxSpeed = max( MaxSpeed, gSpeed[1].step9);
 			
-			MinSpeed = min( MinSpeed, HighSpeed2p_3);
-			MinSpeed = min( MinSpeed, HighSpeed2p_5);
-			MinSpeed = min( MinSpeed, HighSpeed2p_7);
-			MinSpeed = min( MinSpeed, HighSpeed2p_9);
+			MinSpeed = min( MinSpeed, gSpeed[1].step3);
+			MinSpeed = min( MinSpeed, gSpeed[1].step5);
+			MinSpeed = min( MinSpeed, gSpeed[1].step7);
+			MinSpeed = min( MinSpeed, gSpeed[1].step9);
 		}
 		else 
 		{
-			MaxSpeed = MinSpeed = HighSpeed2p;
-			HighSpeed2p_1 = HighSpeed2p_3 = HighSpeed2p_5 = HighSpeed2p_7 = HighSpeed2p_9 = HighSpeed2p;
+			MaxSpeed = MinSpeed = gSpeed[1].step;
+			gSpeed[1].step1 = gSpeed[1].step3 = gSpeed[1].step5 = gSpeed[1].step7 = gSpeed[1].step9 = gSpeed[1].step;
 		}
 
 		for(sta=0;sta<6;sta++) {
@@ -829,28 +829,28 @@ void KIU_STAGE(void)
 		if(tick==2)
 		{
 			if(Data[i+k][0]=='1')
-				ClpBlt(LP1_X,(temp+PUMP_SPRITE_Y*k/2)*HighSpeed1p_1-(PUMP_SPRITE_Y)*(HighSpeed1p_1-1),gWArrow, rect1[sta] );
+				ClpBlt(LP1_X,(temp+PUMP_SPRITE_Y*k/2)*gSpeed[0].step1-(PUMP_SPRITE_Y)*(gSpeed[0].step1-1),gWArrow, rect1[sta] );
 			if(Data[i+k][1]=='1')
-				ClpBlt(LP7_X,(temp+PUMP_SPRITE_Y*k/2)*HighSpeed1p_7-(PUMP_SPRITE_Y)*(HighSpeed1p_7-1),gWArrow, rect7[sta] );
+				ClpBlt(LP7_X,(temp+PUMP_SPRITE_Y*k/2)*gSpeed[0].step7-(PUMP_SPRITE_Y)*(gSpeed[0].step7-1),gWArrow, rect7[sta] );
 			if(Data[i+k][2]=='1')
-				ClpBlt(LP5_X,(temp+PUMP_SPRITE_Y*k/2)*HighSpeed1p_5-(PUMP_SPRITE_Y)*(HighSpeed1p_5-1),gWArrow, rect5[sta] );
+				ClpBlt(LP5_X,(temp+PUMP_SPRITE_Y*k/2)*gSpeed[0].step5-(PUMP_SPRITE_Y)*(gSpeed[0].step5-1),gWArrow, rect5[sta] );
 			if(Data[i+k][3]=='1')
-				ClpBlt(LP9_X,(temp+PUMP_SPRITE_Y*k/2)*HighSpeed1p_9-(PUMP_SPRITE_Y)*(HighSpeed1p_9-1),gWArrow, rect9[sta] );
+				ClpBlt(LP9_X,(temp+PUMP_SPRITE_Y*k/2)*gSpeed[0].step9-(PUMP_SPRITE_Y)*(gSpeed[0].step9-1),gWArrow, rect9[sta] );
 			if(Data[i+k][4]=='1')
-				ClpBlt(LP3_X,(temp+PUMP_SPRITE_Y*k/2)*HighSpeed1p_3-(PUMP_SPRITE_Y)*(HighSpeed1p_3-1),gWArrow, rect3[sta] );
+				ClpBlt(LP3_X,(temp+PUMP_SPRITE_Y*k/2)*gSpeed[0].step3-(PUMP_SPRITE_Y)*(gSpeed[0].step3-1),gWArrow, rect3[sta] );
 			
 			Data_y[i+k]=(temp+PUMP_SPRITE_Y*k/2)*MinSpeed-(PUMP_SPRITE_Y)*(MinSpeed-1);
 			
 			if(Data[i+k+1][0]=='1')
-				ClpBlt(LP1_X,(25+temp+PUMP_SPRITE_Y*k/2)*HighSpeed1p_1-(PUMP_SPRITE_Y)*(HighSpeed1p_1-1),gWArrow, rect1[sta] );
+				ClpBlt(LP1_X,(25+temp+PUMP_SPRITE_Y*k/2)*gSpeed[0].step1-(PUMP_SPRITE_Y)*(gSpeed[0].step1-1),gWArrow, rect1[sta] );
  			if(Data[i+k+1][1]=='1')
-				ClpBlt(LP7_X,(25+temp+PUMP_SPRITE_Y*k/2)*HighSpeed1p_7-(PUMP_SPRITE_Y)*(HighSpeed1p_7-1),gWArrow, rect7[sta] );
+				ClpBlt(LP7_X,(25+temp+PUMP_SPRITE_Y*k/2)*gSpeed[0].step7-(PUMP_SPRITE_Y)*(gSpeed[0].step7-1),gWArrow, rect7[sta] );
 			if(Data[i+k+1][2]=='1')
-				ClpBlt(LP5_X,(25+temp+PUMP_SPRITE_Y*k/2)*HighSpeed1p_5-(PUMP_SPRITE_Y)*(HighSpeed1p_5-1),gWArrow, rect5[sta] );
+				ClpBlt(LP5_X,(25+temp+PUMP_SPRITE_Y*k/2)*gSpeed[0].step5-(PUMP_SPRITE_Y)*(gSpeed[0].step5-1),gWArrow, rect5[sta] );
 			if(Data[i+k+1][3]=='1')
-				ClpBlt(LP9_X,(25+temp+PUMP_SPRITE_Y*k/2)*HighSpeed1p_9-(PUMP_SPRITE_Y)*(HighSpeed1p_9-1),gWArrow, rect9[sta] );
+				ClpBlt(LP9_X,(25+temp+PUMP_SPRITE_Y*k/2)*gSpeed[0].step9-(PUMP_SPRITE_Y)*(gSpeed[0].step9-1),gWArrow, rect9[sta] );
 			if(Data[i+k+1][4]=='1')
-				ClpBlt(LP3_X,(25+temp+PUMP_SPRITE_Y*k/2)*HighSpeed1p_3-(PUMP_SPRITE_Y)*(HighSpeed1p_3-1),gWArrow, rect3[sta] );
+				ClpBlt(LP3_X,(25+temp+PUMP_SPRITE_Y*k/2)*gSpeed[0].step3-(PUMP_SPRITE_Y)*(gSpeed[0].step3-1),gWArrow, rect3[sta] );
 
 			Data_y[i+k+1]=(25+temp+PUMP_SPRITE_Y*k/2)*MinSpeed-(PUMP_SPRITE_Y)*(MinSpeed-1);
 
@@ -912,54 +912,54 @@ void KIU_STAGE(void)
 		else if(tick==4)
 		{
 			if(Data[i+k][0]=='1')
-				ClpBlt(LP1_X,(temp+PUMP_SPRITE_Y*k/4)*HighSpeed1p_1-(PUMP_SPRITE_Y)*(HighSpeed1p_1-1),gWArrow,rect1[sta] );
+				ClpBlt(LP1_X,(temp+PUMP_SPRITE_Y*k/4)*gSpeed[0].step1-(PUMP_SPRITE_Y)*(gSpeed[0].step1-1),gWArrow,rect1[sta] );
 			if(Data[i+k][1]=='1')
-				ClpBlt(LP7_X,(temp+PUMP_SPRITE_Y*k/4)*HighSpeed1p_7-(PUMP_SPRITE_Y)*(HighSpeed1p_7-1),gWArrow,rect7[sta] );
+				ClpBlt(LP7_X,(temp+PUMP_SPRITE_Y*k/4)*gSpeed[0].step7-(PUMP_SPRITE_Y)*(gSpeed[0].step7-1),gWArrow,rect7[sta] );
 			if(Data[i+k][2]=='1')
-				ClpBlt(LP5_X,(temp+PUMP_SPRITE_Y*k/4)*HighSpeed1p_5-(PUMP_SPRITE_Y)*(HighSpeed1p_5-1),gWArrow,rect5[sta] );
+				ClpBlt(LP5_X,(temp+PUMP_SPRITE_Y*k/4)*gSpeed[0].step5-(PUMP_SPRITE_Y)*(gSpeed[0].step5-1),gWArrow,rect5[sta] );
 			if(Data[i+k][3]=='1')
-				ClpBlt(LP9_X,(temp+PUMP_SPRITE_Y*k/4)*HighSpeed1p_9-(PUMP_SPRITE_Y)*(HighSpeed1p_9-1),gWArrow,rect9[sta] );
+				ClpBlt(LP9_X,(temp+PUMP_SPRITE_Y*k/4)*gSpeed[0].step9-(PUMP_SPRITE_Y)*(gSpeed[0].step9-1),gWArrow,rect9[sta] );
 			if(Data[i+k][4]=='1')
-				ClpBlt(LP3_X,(temp+PUMP_SPRITE_Y*k/4)*HighSpeed1p_3-(PUMP_SPRITE_Y)*(HighSpeed1p_3-1),gWArrow,rect3[sta] );
+				ClpBlt(LP3_X,(temp+PUMP_SPRITE_Y*k/4)*gSpeed[0].step3-(PUMP_SPRITE_Y)*(gSpeed[0].step3-1),gWArrow,rect3[sta] );
 
 			Data_y[i+k]=(temp+PUMP_SPRITE_Y*k/4)*MinSpeed-(PUMP_SPRITE_Y)*(MinSpeed-1);
 
 			if(Data[i+k+1][0]=='1')
-				ClpBlt(LP1_X,(12+temp+PUMP_SPRITE_Y*k/4)*HighSpeed1p_1-(PUMP_SPRITE_Y)*(HighSpeed1p_1-1),gWArrow,rect1[sta] );
+				ClpBlt(LP1_X,(12+temp+PUMP_SPRITE_Y*k/4)*gSpeed[0].step1-(PUMP_SPRITE_Y)*(gSpeed[0].step1-1),gWArrow,rect1[sta] );
 			if(Data[i+k+1][1]=='1')
-				ClpBlt(LP7_X,(12+temp+PUMP_SPRITE_Y*k/4)*HighSpeed1p_7-(PUMP_SPRITE_Y)*(HighSpeed1p_7-1),gWArrow,rect7[sta] );
+				ClpBlt(LP7_X,(12+temp+PUMP_SPRITE_Y*k/4)*gSpeed[0].step7-(PUMP_SPRITE_Y)*(gSpeed[0].step7-1),gWArrow,rect7[sta] );
 			if(Data[i+k+1][2]=='1')
-				ClpBlt(LP5_X,(12+temp+PUMP_SPRITE_Y*k/4)*HighSpeed1p_5-(PUMP_SPRITE_Y)*(HighSpeed1p_5-1),gWArrow,rect5[sta] );
+				ClpBlt(LP5_X,(12+temp+PUMP_SPRITE_Y*k/4)*gSpeed[0].step5-(PUMP_SPRITE_Y)*(gSpeed[0].step5-1),gWArrow,rect5[sta] );
 			if(Data[i+k+1][3]=='1')
-				ClpBlt(LP9_X,(12+temp+PUMP_SPRITE_Y*k/4)*HighSpeed1p_9-(PUMP_SPRITE_Y)*(HighSpeed1p_9-1),gWArrow,rect9[sta] );
+				ClpBlt(LP9_X,(12+temp+PUMP_SPRITE_Y*k/4)*gSpeed[0].step9-(PUMP_SPRITE_Y)*(gSpeed[0].step9-1),gWArrow,rect9[sta] );
 			if(Data[i+k+1][4]=='1')
-				ClpBlt(LP3_X,(12+temp+PUMP_SPRITE_Y*k/4)*HighSpeed1p_3-(PUMP_SPRITE_Y)*(HighSpeed1p_3-1),gWArrow,rect3[sta] );
+				ClpBlt(LP3_X,(12+temp+PUMP_SPRITE_Y*k/4)*gSpeed[0].step3-(PUMP_SPRITE_Y)*(gSpeed[0].step3-1),gWArrow,rect3[sta] );
 
 			Data_y[i+k+1]=(12+temp+PUMP_SPRITE_Y*k/4)*MinSpeed-(PUMP_SPRITE_Y)*(MinSpeed-1);
 
 			if(Data[i+k+2][0]=='1')
-				ClpBlt(LP1_X,(25+temp+PUMP_SPRITE_Y*k/4)*HighSpeed1p_1-(PUMP_SPRITE_Y)*(HighSpeed1p_1-1),gWArrow,rect1[sta] );
+				ClpBlt(LP1_X,(25+temp+PUMP_SPRITE_Y*k/4)*gSpeed[0].step1-(PUMP_SPRITE_Y)*(gSpeed[0].step1-1),gWArrow,rect1[sta] );
 			if(Data[i+k+2][1]=='1')
-				ClpBlt(LP7_X,(25+temp+PUMP_SPRITE_Y*k/4)*HighSpeed1p_7-(PUMP_SPRITE_Y)*(HighSpeed1p_7-1),gWArrow,rect7[sta] );
+				ClpBlt(LP7_X,(25+temp+PUMP_SPRITE_Y*k/4)*gSpeed[0].step7-(PUMP_SPRITE_Y)*(gSpeed[0].step7-1),gWArrow,rect7[sta] );
 			if(Data[i+k+2][2]=='1')
-				ClpBlt(LP5_X,(25+temp+PUMP_SPRITE_Y*k/4)*HighSpeed1p_5-(PUMP_SPRITE_Y)*(HighSpeed1p_5-1),gWArrow,rect5[sta] );
+				ClpBlt(LP5_X,(25+temp+PUMP_SPRITE_Y*k/4)*gSpeed[0].step5-(PUMP_SPRITE_Y)*(gSpeed[0].step5-1),gWArrow,rect5[sta] );
 			if(Data[i+k+2][3]=='1')
-				ClpBlt(LP9_X,(25+temp+PUMP_SPRITE_Y*k/4)*HighSpeed1p_9-(PUMP_SPRITE_Y)*(HighSpeed1p_9-1),gWArrow,rect9[sta] );
+				ClpBlt(LP9_X,(25+temp+PUMP_SPRITE_Y*k/4)*gSpeed[0].step9-(PUMP_SPRITE_Y)*(gSpeed[0].step9-1),gWArrow,rect9[sta] );
 			if(Data[i+k+2][4]=='1')
-				ClpBlt(LP3_X,(25+temp+PUMP_SPRITE_Y*k/4)*HighSpeed1p_3-(PUMP_SPRITE_Y)*(HighSpeed1p_3-1),gWArrow,rect3[sta] );
+				ClpBlt(LP3_X,(25+temp+PUMP_SPRITE_Y*k/4)*gSpeed[0].step3-(PUMP_SPRITE_Y)*(gSpeed[0].step3-1),gWArrow,rect3[sta] );
 
 			Data_y[i+k+2]=(25+temp+PUMP_SPRITE_Y*k/4)*MinSpeed-(PUMP_SPRITE_Y)*(MinSpeed-1);
 		
 			if(Data[i+k+3][0]=='1')
-				ClpBlt(LP1_X,(38+temp+PUMP_SPRITE_Y*k/4)*HighSpeed1p_1-(PUMP_SPRITE_Y)*(HighSpeed1p_1-1),gWArrow,rect1[sta] );
+				ClpBlt(LP1_X,(38+temp+PUMP_SPRITE_Y*k/4)*gSpeed[0].step1-(PUMP_SPRITE_Y)*(gSpeed[0].step1-1),gWArrow,rect1[sta] );
 			if(Data[i+k+3][1]=='1')
-				ClpBlt(LP7_X,(38+temp+PUMP_SPRITE_Y*k/4)*HighSpeed1p_7-(PUMP_SPRITE_Y)*(HighSpeed1p_7-1),gWArrow,rect7[sta] );
+				ClpBlt(LP7_X,(38+temp+PUMP_SPRITE_Y*k/4)*gSpeed[0].step7-(PUMP_SPRITE_Y)*(gSpeed[0].step7-1),gWArrow,rect7[sta] );
 			if(Data[i+k+3][2]=='1')
-				ClpBlt(LP5_X,(38+temp+PUMP_SPRITE_Y*k/4)*HighSpeed1p_5-(PUMP_SPRITE_Y)*(HighSpeed1p_5-1),gWArrow,rect5[sta] );
+				ClpBlt(LP5_X,(38+temp+PUMP_SPRITE_Y*k/4)*gSpeed[0].step5-(PUMP_SPRITE_Y)*(gSpeed[0].step5-1),gWArrow,rect5[sta] );
 			if(Data[i+k+3][3]=='1')
-				ClpBlt(LP9_X,(38+temp+PUMP_SPRITE_Y*k/4)*HighSpeed1p_9-(PUMP_SPRITE_Y)*(HighSpeed1p_9-1),gWArrow,rect9[sta] );
+				ClpBlt(LP9_X,(38+temp+PUMP_SPRITE_Y*k/4)*gSpeed[0].step9-(PUMP_SPRITE_Y)*(gSpeed[0].step9-1),gWArrow,rect9[sta] );
 			if(Data[i+k+3][4]=='1')
-				ClpBlt(LP3_X,(38+temp+PUMP_SPRITE_Y*k/4)*HighSpeed1p_3-(PUMP_SPRITE_Y)*(HighSpeed1p_3-1),gWArrow,rect3[sta] );
+				ClpBlt(LP3_X,(38+temp+PUMP_SPRITE_Y*k/4)*gSpeed[0].step3-(PUMP_SPRITE_Y)*(gSpeed[0].step3-1),gWArrow,rect3[sta] );
 
 			Data_y[i+k+3]=(38+temp+PUMP_SPRITE_Y*k/4)*MinSpeed-(PUMP_SPRITE_Y)*(MinSpeed-1);
 
@@ -1088,28 +1088,28 @@ void KIU_STAGE(void)
 		if(tick==2)
 		{
 			if(Data1[i+k][5]=='1')
-				ClpBlt(LP1_X1,(temp+PUMP_SPRITE_Y*k/2)*HighSpeed2p_1-(PUMP_SPRITE_Y)*(HighSpeed2p_1-1),gWArrow,rect1[sta] );
+				ClpBlt(LP1_X1,(temp+PUMP_SPRITE_Y*k/2)*gSpeed[1].step1-(PUMP_SPRITE_Y)*(gSpeed[1].step1-1),gWArrow,rect1[sta] );
 			if(Data1[i+k][6]=='1')
-				ClpBlt(LP7_X1,(temp+PUMP_SPRITE_Y*k/2)*HighSpeed2p_7-(PUMP_SPRITE_Y)*(HighSpeed2p_7-1),gWArrow,rect7[sta] );
+				ClpBlt(LP7_X1,(temp+PUMP_SPRITE_Y*k/2)*gSpeed[1].step7-(PUMP_SPRITE_Y)*(gSpeed[1].step7-1),gWArrow,rect7[sta] );
 			if(Data1[i+k][7]=='1')
-				ClpBlt(LP5_X1,(temp+PUMP_SPRITE_Y*k/2)*HighSpeed2p_5-(PUMP_SPRITE_Y)*(HighSpeed2p_5-1),gWArrow,rect5[sta] );
+				ClpBlt(LP5_X1,(temp+PUMP_SPRITE_Y*k/2)*gSpeed[1].step5-(PUMP_SPRITE_Y)*(gSpeed[1].step5-1),gWArrow,rect5[sta] );
 			if(Data1[i+k][8]=='1')
-				ClpBlt(LP9_X1,(temp+PUMP_SPRITE_Y*k/2)*HighSpeed2p_9-(PUMP_SPRITE_Y)*(HighSpeed2p_9-1),gWArrow,rect9[sta] );
+				ClpBlt(LP9_X1,(temp+PUMP_SPRITE_Y*k/2)*gSpeed[1].step9-(PUMP_SPRITE_Y)*(gSpeed[1].step9-1),gWArrow,rect9[sta] );
 			if(Data1[i+k][9]=='1')
-				ClpBlt(LP3_X1,(temp+PUMP_SPRITE_Y*k/2)*HighSpeed2p_3-(PUMP_SPRITE_Y)*(HighSpeed2p_3-1),gWArrow,rect3[sta] );
+				ClpBlt(LP3_X1,(temp+PUMP_SPRITE_Y*k/2)*gSpeed[1].step3-(PUMP_SPRITE_Y)*(gSpeed[1].step3-1),gWArrow,rect3[sta] );
 			
 			Data_y1[i+k]=(temp+PUMP_SPRITE_Y*k/2)*MinSpeed-(PUMP_SPRITE_Y)*(MinSpeed-1);
 			
 			if(Data1[i+k+1][5]=='1')
-				ClpBlt(LP1_X1,(25+temp+PUMP_SPRITE_Y*k/2)*HighSpeed2p_1-(PUMP_SPRITE_Y)*(HighSpeed2p_1-1),gWArrow,rect1[sta] );
+				ClpBlt(LP1_X1,(25+temp+PUMP_SPRITE_Y*k/2)*gSpeed[1].step1-(PUMP_SPRITE_Y)*(gSpeed[1].step1-1),gWArrow,rect1[sta] );
 			if(Data1[i+k+1][6]=='1')
-				ClpBlt(LP7_X1,(25+temp+PUMP_SPRITE_Y*k/2)*HighSpeed2p_7-(PUMP_SPRITE_Y)*(HighSpeed2p_7-1),gWArrow,rect7[sta] );
+				ClpBlt(LP7_X1,(25+temp+PUMP_SPRITE_Y*k/2)*gSpeed[1].step7-(PUMP_SPRITE_Y)*(gSpeed[1].step7-1),gWArrow,rect7[sta] );
 			if(Data1[i+k+1][7]=='1')
-				ClpBlt(LP5_X1,(25+temp+PUMP_SPRITE_Y*k/2)*HighSpeed2p_5-(PUMP_SPRITE_Y)*(HighSpeed2p_5-1),gWArrow,rect5[sta] );
+				ClpBlt(LP5_X1,(25+temp+PUMP_SPRITE_Y*k/2)*gSpeed[1].step5-(PUMP_SPRITE_Y)*(gSpeed[1].step5-1),gWArrow,rect5[sta] );
 			if(Data1[i+k+1][8]=='1')
-				ClpBlt(LP9_X1,(25+temp+PUMP_SPRITE_Y*k/2)*HighSpeed2p_9-(PUMP_SPRITE_Y)*(HighSpeed2p_9-1),gWArrow,rect9[sta] );
+				ClpBlt(LP9_X1,(25+temp+PUMP_SPRITE_Y*k/2)*gSpeed[1].step9-(PUMP_SPRITE_Y)*(gSpeed[1].step9-1),gWArrow,rect9[sta] );
 			if(Data1[i+k+1][9]=='1')
-				ClpBlt(LP3_X1,(25+temp+PUMP_SPRITE_Y*k/2)*HighSpeed2p_3-(PUMP_SPRITE_Y)*(HighSpeed2p_3-1),gWArrow,rect3[sta] );
+				ClpBlt(LP3_X1,(25+temp+PUMP_SPRITE_Y*k/2)*gSpeed[1].step3-(PUMP_SPRITE_Y)*(gSpeed[1].step3-1),gWArrow,rect3[sta] );
 
 			Data_y1[i+k+1]=(25+temp+PUMP_SPRITE_Y*k/2)*MinSpeed-(PUMP_SPRITE_Y)*(MinSpeed-1);
 
@@ -1171,54 +1171,54 @@ void KIU_STAGE(void)
 		{
 
 			if(Data1[i+k][5]=='1')
-				ClpBlt(LP1_X1,(temp+PUMP_SPRITE_Y*k/4)*HighSpeed2p_1-(PUMP_SPRITE_Y)*(HighSpeed2p_1-1),gWArrow,rect1[sta] );
+				ClpBlt(LP1_X1,(temp+PUMP_SPRITE_Y*k/4)*gSpeed[1].step1-(PUMP_SPRITE_Y)*(gSpeed[1].step1-1),gWArrow,rect1[sta] );
 			if(Data1[i+k][6]=='1')
-				ClpBlt(LP7_X1,(temp+PUMP_SPRITE_Y*k/4)*HighSpeed2p_7-(PUMP_SPRITE_Y)*(HighSpeed2p_7-1),gWArrow,rect7[sta] );
+				ClpBlt(LP7_X1,(temp+PUMP_SPRITE_Y*k/4)*gSpeed[1].step7-(PUMP_SPRITE_Y)*(gSpeed[1].step7-1),gWArrow,rect7[sta] );
 			if(Data1[i+k][7]=='1')
-				ClpBlt(LP5_X1,(temp+PUMP_SPRITE_Y*k/4)*HighSpeed2p_5-(PUMP_SPRITE_Y)*(HighSpeed2p_5-1),gWArrow,rect5[sta] );
+				ClpBlt(LP5_X1,(temp+PUMP_SPRITE_Y*k/4)*gSpeed[1].step5-(PUMP_SPRITE_Y)*(gSpeed[1].step5-1),gWArrow,rect5[sta] );
 			if(Data1[i+k][8]=='1')
-				ClpBlt(LP9_X1,(temp+PUMP_SPRITE_Y*k/4)*HighSpeed2p_9-(PUMP_SPRITE_Y)*(HighSpeed2p_9-1),gWArrow,rect9[sta] );
+				ClpBlt(LP9_X1,(temp+PUMP_SPRITE_Y*k/4)*gSpeed[1].step9-(PUMP_SPRITE_Y)*(gSpeed[1].step9-1),gWArrow,rect9[sta] );
 			if(Data1[i+k][9]=='1')
-				ClpBlt(LP3_X1,(temp+PUMP_SPRITE_Y*k/4)*HighSpeed2p_3-(PUMP_SPRITE_Y)*(HighSpeed2p_3-1),gWArrow,rect3[sta] );
+				ClpBlt(LP3_X1,(temp+PUMP_SPRITE_Y*k/4)*gSpeed[1].step3-(PUMP_SPRITE_Y)*(gSpeed[1].step3-1),gWArrow,rect3[sta] );
 
 			Data_y1[i+k]=(temp+PUMP_SPRITE_Y*k/4)*MinSpeed-(PUMP_SPRITE_Y)*(MinSpeed-1);
 
 			if(Data1[i+k+1][5]=='1')
-				ClpBlt(LP1_X1,(12+temp+PUMP_SPRITE_Y*k/4)*HighSpeed2p_1-(PUMP_SPRITE_Y)*(HighSpeed2p_1-1),gWArrow,rect1[sta] );
+				ClpBlt(LP1_X1,(12+temp+PUMP_SPRITE_Y*k/4)*gSpeed[1].step1-(PUMP_SPRITE_Y)*(gSpeed[1].step1-1),gWArrow,rect1[sta] );
 			if(Data1[i+k+1][6]=='1')
-				ClpBlt(LP7_X1,(12+temp+PUMP_SPRITE_Y*k/4)*HighSpeed2p_7-(PUMP_SPRITE_Y)*(HighSpeed2p_7-1),gWArrow,rect7[sta] );
+				ClpBlt(LP7_X1,(12+temp+PUMP_SPRITE_Y*k/4)*gSpeed[1].step7-(PUMP_SPRITE_Y)*(gSpeed[1].step7-1),gWArrow,rect7[sta] );
 			if(Data1[i+k+1][7]=='1')
-				ClpBlt(LP5_X1,(12+temp+PUMP_SPRITE_Y*k/4)*HighSpeed2p_5-(PUMP_SPRITE_Y)*(HighSpeed2p_5-1),gWArrow,rect5[sta] );
+				ClpBlt(LP5_X1,(12+temp+PUMP_SPRITE_Y*k/4)*gSpeed[1].step5-(PUMP_SPRITE_Y)*(gSpeed[1].step5-1),gWArrow,rect5[sta] );
 			if(Data1[i+k+1][8]=='1')
-				ClpBlt(LP9_X1,(12+temp+PUMP_SPRITE_Y*k/4)*HighSpeed2p_9-(PUMP_SPRITE_Y)*(HighSpeed2p_9-1),gWArrow,rect9[sta] );
+				ClpBlt(LP9_X1,(12+temp+PUMP_SPRITE_Y*k/4)*gSpeed[1].step9-(PUMP_SPRITE_Y)*(gSpeed[1].step9-1),gWArrow,rect9[sta] );
 			if(Data1[i+k+1][9]=='1')
-				ClpBlt(LP3_X1,(12+temp+PUMP_SPRITE_Y*k/4)*HighSpeed2p_3-(PUMP_SPRITE_Y)*(HighSpeed2p_3-1),gWArrow,rect3[sta] );
+				ClpBlt(LP3_X1,(12+temp+PUMP_SPRITE_Y*k/4)*gSpeed[1].step3-(PUMP_SPRITE_Y)*(gSpeed[1].step3-1),gWArrow,rect3[sta] );
 
 			Data_y1[i+k+1]=(12+temp+PUMP_SPRITE_Y*k/4)*MinSpeed-(PUMP_SPRITE_Y)*(MinSpeed-1);
 
 			if(Data1[i+k+2][5]=='1')
-				ClpBlt(LP1_X1,(25+temp+PUMP_SPRITE_Y*k/4)*HighSpeed2p_1-(PUMP_SPRITE_Y)*(HighSpeed2p_1-1),gWArrow,rect1[sta] );
+				ClpBlt(LP1_X1,(25+temp+PUMP_SPRITE_Y*k/4)*gSpeed[1].step1-(PUMP_SPRITE_Y)*(gSpeed[1].step1-1),gWArrow,rect1[sta] );
 			if(Data1[i+k+2][6]=='1')
-				ClpBlt(LP7_X1,(25+temp+PUMP_SPRITE_Y*k/4)*HighSpeed2p_7-(PUMP_SPRITE_Y)*(HighSpeed2p_7-1),gWArrow,rect7[sta] );
+				ClpBlt(LP7_X1,(25+temp+PUMP_SPRITE_Y*k/4)*gSpeed[1].step7-(PUMP_SPRITE_Y)*(gSpeed[1].step7-1),gWArrow,rect7[sta] );
 			if(Data1[i+k+2][7]=='1')
-				ClpBlt(LP5_X1,(25+temp+PUMP_SPRITE_Y*k/4)*HighSpeed2p_5-(PUMP_SPRITE_Y)*(HighSpeed2p_5-1),gWArrow,rect5[sta] );
+				ClpBlt(LP5_X1,(25+temp+PUMP_SPRITE_Y*k/4)*gSpeed[1].step5-(PUMP_SPRITE_Y)*(gSpeed[1].step5-1),gWArrow,rect5[sta] );
 			if(Data1[i+k+2][8]=='1')
-				ClpBlt(LP9_X1,(25+temp+PUMP_SPRITE_Y*k/4)*HighSpeed2p_9-(PUMP_SPRITE_Y)*(HighSpeed2p_9-1),gWArrow,rect9[sta] );
+				ClpBlt(LP9_X1,(25+temp+PUMP_SPRITE_Y*k/4)*gSpeed[1].step9-(PUMP_SPRITE_Y)*(gSpeed[1].step9-1),gWArrow,rect9[sta] );
 			if(Data1[i+k+2][9]=='1')
-				ClpBlt(LP3_X1,(25+temp+PUMP_SPRITE_Y*k/4)*HighSpeed2p_3-(PUMP_SPRITE_Y)*(HighSpeed2p_3-1),gWArrow,rect3[sta] );
+				ClpBlt(LP3_X1,(25+temp+PUMP_SPRITE_Y*k/4)*gSpeed[1].step3-(PUMP_SPRITE_Y)*(gSpeed[1].step3-1),gWArrow,rect3[sta] );
 
 			Data_y1[i+k+2]=(25+temp+PUMP_SPRITE_Y*k/4)*MinSpeed-(PUMP_SPRITE_Y)*(MinSpeed-1);
 		
 			if(Data1[i+k+3][5]=='1')
-				ClpBlt(LP1_X1,(38+temp+PUMP_SPRITE_Y*k/4)*HighSpeed2p_1-(PUMP_SPRITE_Y)*(HighSpeed2p_1-1),gWArrow,rect1[sta] );
+				ClpBlt(LP1_X1,(38+temp+PUMP_SPRITE_Y*k/4)*gSpeed[1].step1-(PUMP_SPRITE_Y)*(gSpeed[1].step1-1),gWArrow,rect1[sta] );
 			if(Data1[i+k+3][6]=='1')
-				ClpBlt(LP7_X1,(38+temp+PUMP_SPRITE_Y*k/4)*HighSpeed2p_7-(PUMP_SPRITE_Y)*(HighSpeed2p_7-1),gWArrow,rect7[sta] );
+				ClpBlt(LP7_X1,(38+temp+PUMP_SPRITE_Y*k/4)*gSpeed[1].step7-(PUMP_SPRITE_Y)*(gSpeed[1].step7-1),gWArrow,rect7[sta] );
 			if(Data1[i+k+3][7]=='1')
-				ClpBlt(LP5_X1,(38+temp+PUMP_SPRITE_Y*k/4)*HighSpeed2p_5-(PUMP_SPRITE_Y)*(HighSpeed2p_5-1),gWArrow,rect5[sta] );
+				ClpBlt(LP5_X1,(38+temp+PUMP_SPRITE_Y*k/4)*gSpeed[1].step5-(PUMP_SPRITE_Y)*(gSpeed[1].step5-1),gWArrow,rect5[sta] );
 			if(Data1[i+k+3][8]=='1')
-				ClpBlt(LP9_X1,(38+temp+PUMP_SPRITE_Y*k/4)*HighSpeed2p_9-(PUMP_SPRITE_Y)*(HighSpeed2p_9-1),gWArrow,rect9[sta] );
+				ClpBlt(LP9_X1,(38+temp+PUMP_SPRITE_Y*k/4)*gSpeed[1].step9-(PUMP_SPRITE_Y)*(gSpeed[1].step9-1),gWArrow,rect9[sta] );
 			if(Data1[i+k+3][9]=='1')
-				ClpBlt(LP3_X1,(38+temp+PUMP_SPRITE_Y*k/4)*HighSpeed2p_3-(PUMP_SPRITE_Y)*(HighSpeed2p_3-1),gWArrow,rect3[sta] );
+				ClpBlt(LP3_X1,(38+temp+PUMP_SPRITE_Y*k/4)*gSpeed[1].step3-(PUMP_SPRITE_Y)*(gSpeed[1].step3-1),gWArrow,rect3[sta] );
 
 			Data_y1[i+k+3]=(38+temp+PUMP_SPRITE_Y*k/4)*MinSpeed-(PUMP_SPRITE_Y)*(MinSpeed-1);
 
@@ -1348,7 +1348,7 @@ void KIU_STAGE(void)
 	if(bModeRandom1p)DrawMode(0,360,HMODE_RANDOM);
 	if(bModeVanish1p)DrawMode(0,400,HMODE_VANISH);
 
-	if(HighSpeed1p>1)DrawMode(0,160,HMODE_2X);
+	if(gSpeed[0].step>1)DrawMode(0,160,HMODE_2X);
 
 	if(bModeMirror2p)DrawMode(600,200,HMODE_MIRROR);
 	if(bModeNonstep2p)DrawMode(600,240,HMODE_NONSTEP);
@@ -1356,7 +1356,7 @@ void KIU_STAGE(void)
 	if(bModeRandom2p)DrawMode(600,360,HMODE_RANDOM);
 	if(bModeVanish2p)DrawMode(600,400,HMODE_VANISH);
 
-	if(HighSpeed2p>1)DrawMode(600,160,HMODE_2X);
+	if(gSpeed[1].step>1)DrawMode(600,160,HMODE_2X);
 
 	// Flipp();
 }
@@ -1838,7 +1838,7 @@ void DrawArrow1p(Uint32 cur)
 	{
 		if(bModeRandomS1p == true)
 		{
-			HighSpeed1p_1 = HighSpeed1p_3 = HighSpeed1p_5 = HighSpeed1p_7 = HighSpeed1p_9 = 1 + rand() % 8 ;
+			gSpeed[0].step1 = gSpeed[0].step3 = gSpeed[0].step5 = gSpeed[0].step7 = gSpeed[0].step9 = 1 + rand() % 8 ;
 		}
 		cur2=cur;
 		beat=4;
@@ -1959,11 +1959,11 @@ void DrawArrow1p(Uint32 cur)
 		if(PressedKey1p[1]==true)
 		for(count=0;count<18;count++)
 		{
-			if( ZONE_U*HighSpeed1p_1 < Data_y[cur+count] && 
-				ZONE_D*HighSpeed1p_1 > Data_y[cur+count]  )
+			if( ZONE_U*gSpeed[0].step1 < Data_y[cur+count] &&
+				ZONE_D*gSpeed[0].step1 > Data_y[cur+count]  )
 			{
-				if( PERFECT_ZONE_U*HighSpeed1p_1 < Data_y[cur+count] &&
-					PERFECT_ZONE_D*HighSpeed1p_1 > Data_y[cur+count])
+				if( PERFECT_ZONE_U*gSpeed[0].step1 < Data_y[cur+count] &&
+					PERFECT_ZONE_D*gSpeed[0].step1 > Data_y[cur+count])
 				{
 					if(Data_Judge[cur+count][0]=='1')
 					{
@@ -1979,8 +1979,8 @@ void DrawArrow1p(Uint32 cur)
 						break;
 					}
 				}
-				else if( GREAT_ZONE_U*HighSpeed1p_1 < Data_y[cur+count] && 
-						 GREAT_ZONE_D*HighSpeed1p_1 > Data_y[cur+count]  )
+				else if( GREAT_ZONE_U*gSpeed[0].step1 < Data_y[cur+count] &&
+						 GREAT_ZONE_D*gSpeed[0].step1 > Data_y[cur+count]  )
 				{
 					if(Data_Judge[cur+count][0]=='1')
 					{
@@ -1996,8 +1996,8 @@ void DrawArrow1p(Uint32 cur)
 						break;
 					}
 				}
-				else if( GOOD_ZONE_U*HighSpeed1p_1 < Data_y[cur+count] &&
-					     GOOD_ZONE_D*HighSpeed1p_1 > Data_y[cur+count] )
+				else if( GOOD_ZONE_U*gSpeed[0].step1 < Data_y[cur+count] &&
+					     GOOD_ZONE_D*gSpeed[0].step1 > Data_y[cur+count] )
 				{
 					if(Data_Judge[cur+count][0]=='1')
 					{
@@ -2011,8 +2011,8 @@ void DrawArrow1p(Uint32 cur)
 						break;
 					}
 				}
-				else if( BAD_ZONE_U*HighSpeed1p_1 < Data_y[cur+count] &&
-						 BAD_ZONE_D*HighSpeed1p_1 > Data_y[cur+count] )
+				else if( BAD_ZONE_U*gSpeed[0].step1 < Data_y[cur+count] &&
+						 BAD_ZONE_D*gSpeed[0].step1 > Data_y[cur+count] )
 				{
 					if(Data_Judge[cur+count][0]=='1')
 					{
@@ -2044,11 +2044,11 @@ void DrawArrow1p(Uint32 cur)
 		if(PressedKey1p[3]==true)
 		for(count=0;count<18;count++)
 		{
-			if( ZONE_U*HighSpeed1p_3 < Data_y[cur+count] &&
-				ZONE_D*HighSpeed1p_3 > Data_y[cur+count])
+			if( ZONE_U*gSpeed[0].step3 < Data_y[cur+count] &&
+				ZONE_D*gSpeed[0].step3 > Data_y[cur+count])
 			{
-				if( PERFECT_ZONE_U*HighSpeed1p_3 < Data_y[cur+count] &&
-				    PERFECT_ZONE_D*HighSpeed1p_3 > Data_y[cur+count])
+				if( PERFECT_ZONE_U*gSpeed[0].step3 < Data_y[cur+count] &&
+				    PERFECT_ZONE_D*gSpeed[0].step3 > Data_y[cur+count])
 				{
 					if(Data_Judge[cur+count][4]=='1')
 					{
@@ -2064,8 +2064,8 @@ void DrawArrow1p(Uint32 cur)
 						break;
 					}
 				}
-				else if( GREAT_ZONE_U*HighSpeed1p_3<Data_y[cur+count] &&
-					     GREAT_ZONE_D*HighSpeed1p_3>Data_y[cur+count] )
+				else if( GREAT_ZONE_U*gSpeed[0].step3<Data_y[cur+count] &&
+					     GREAT_ZONE_D*gSpeed[0].step3>Data_y[cur+count] )
 				{
 					if(Data_Judge[cur+count][4]=='1')
 					{
@@ -2081,8 +2081,8 @@ void DrawArrow1p(Uint32 cur)
 						break;
 					}
 				}
-				else if( GOOD_ZONE_U*HighSpeed1p_3 < Data_y[cur+count] &&
-						 GOOD_ZONE_D*HighSpeed1p_3 > Data_y[cur+count])
+				else if( GOOD_ZONE_U*gSpeed[0].step3 < Data_y[cur+count] &&
+						 GOOD_ZONE_D*gSpeed[0].step3 > Data_y[cur+count])
 				{
 					if(Data_Judge[cur+count][4]=='1')
 					{
@@ -2096,8 +2096,8 @@ void DrawArrow1p(Uint32 cur)
 						break;
 					}
 				}
-				else if( BAD_ZONE_U*HighSpeed1p_3<Data_y[cur+count] &&
-						 BAD_ZONE_D*HighSpeed1p_3>Data_y[cur+count])
+				else if( BAD_ZONE_U*gSpeed[0].step3<Data_y[cur+count] &&
+						 BAD_ZONE_D*gSpeed[0].step3>Data_y[cur+count])
 				{
 					if(Data_Judge[cur+count][4]=='1')
 					{
@@ -2129,11 +2129,11 @@ void DrawArrow1p(Uint32 cur)
 		if(PressedKey1p[5]==true)
 		for(count=0;count<18;count++)
 		{
-			if( ZONE_U*HighSpeed1p_5<Data_y[cur+count] &&
-				ZONE_D*HighSpeed1p_5>Data_y[cur+count])
+			if( ZONE_U*gSpeed[0].step5<Data_y[cur+count] &&
+				ZONE_D*gSpeed[0].step5>Data_y[cur+count])
 			{
-				if( PERFECT_ZONE_U*HighSpeed1p_5<Data_y[cur+count] &&
-					PERFECT_ZONE_D*HighSpeed1p_5>Data_y[cur+count])
+				if( PERFECT_ZONE_U*gSpeed[0].step5<Data_y[cur+count] &&
+					PERFECT_ZONE_D*gSpeed[0].step5>Data_y[cur+count])
 				{
 					if(Data_Judge[cur+count][2]=='1')
 					{
@@ -2149,8 +2149,8 @@ void DrawArrow1p(Uint32 cur)
 						break;
 					}
 				}
-				else if( GREAT_ZONE_U*HighSpeed1p_5<Data_y[cur+count] &&
-					     GREAT_ZONE_D*HighSpeed1p_5>Data_y[cur+count])
+				else if( GREAT_ZONE_U*gSpeed[0].step5<Data_y[cur+count] &&
+					     GREAT_ZONE_D*gSpeed[0].step5>Data_y[cur+count])
 				{
 					if(Data_Judge[cur+count][2]=='1')
 					{
@@ -2166,8 +2166,8 @@ void DrawArrow1p(Uint32 cur)
 						break;
 					}
 				}
-				else if( GOOD_ZONE_U*HighSpeed1p_5<Data_y[cur+count] &&
-					     GOOD_ZONE_D*HighSpeed1p_5>Data_y[cur+count])
+				else if( GOOD_ZONE_U*gSpeed[0].step5<Data_y[cur+count] &&
+					     GOOD_ZONE_D*gSpeed[0].step5>Data_y[cur+count])
 				{
 					if(Data_Judge[cur+count][2]=='1')
 					{
@@ -2181,8 +2181,8 @@ void DrawArrow1p(Uint32 cur)
 						break;
 					}
 				}
-				else if( BAD_ZONE_U*HighSpeed1p_5<Data_y[cur+count] &&
-					     BAD_ZONE_D*HighSpeed1p_5>Data_y[cur+count])
+				else if( BAD_ZONE_U*gSpeed[0].step5<Data_y[cur+count] &&
+					     BAD_ZONE_D*gSpeed[0].step5>Data_y[cur+count])
 				{
 					if(Data_Judge[cur+count][2]=='1')
 					{
@@ -2216,11 +2216,11 @@ void DrawArrow1p(Uint32 cur)
 		if(PressedKey1p[7]==true)
 		for(count=0;count<18;count++)
 		{
-			if( ZONE_U*HighSpeed1p_7 < Data_y[cur+count] &&
-				ZONE_D*HighSpeed1p_7 > Data_y[cur+count])
+			if( ZONE_U*gSpeed[0].step7 < Data_y[cur+count] &&
+				ZONE_D*gSpeed[0].step7 > Data_y[cur+count])
 			{
-				if( PERFECT_ZONE_U*HighSpeed1p_7 < Data_y[cur+count] &&
-					PERFECT_ZONE_D*HighSpeed1p_7 > Data_y[cur+count])
+				if( PERFECT_ZONE_U*gSpeed[0].step7 < Data_y[cur+count] &&
+					PERFECT_ZONE_D*gSpeed[0].step7 > Data_y[cur+count])
 				{
 					if(Data_Judge[cur+count][1]=='1')
 					{
@@ -2236,8 +2236,8 @@ void DrawArrow1p(Uint32 cur)
 						break;
 					}
 				}
-				else if( GREAT_ZONE_U*HighSpeed1p_7<Data_y[cur+count] &&
-					     GREAT_ZONE_D*HighSpeed1p_7>Data_y[cur+count])
+				else if( GREAT_ZONE_U*gSpeed[0].step7<Data_y[cur+count] &&
+					     GREAT_ZONE_D*gSpeed[0].step7>Data_y[cur+count])
 				{
 					if(Data_Judge[cur+count][1]=='1')
 					{
@@ -2253,8 +2253,8 @@ void DrawArrow1p(Uint32 cur)
 						break;
 					}
 				}
-				else if( GOOD_ZONE_U*HighSpeed1p_7<Data_y[cur+count] &&
-					     GOOD_ZONE_D*HighSpeed1p_7>Data_y[cur+count])
+				else if( GOOD_ZONE_U*gSpeed[0].step7<Data_y[cur+count] &&
+					     GOOD_ZONE_D*gSpeed[0].step7>Data_y[cur+count])
 				{
 					if(Data_Judge[cur+count][1]=='1')
 					{
@@ -2268,8 +2268,8 @@ void DrawArrow1p(Uint32 cur)
 						break;
 					}
 				}
-				else if( BAD_ZONE_U*HighSpeed1p_7<Data_y[cur+count] &&
-					     BAD_ZONE_D*HighSpeed1p_7>Data_y[cur+count])
+				else if( BAD_ZONE_U*gSpeed[0].step7<Data_y[cur+count] &&
+					     BAD_ZONE_D*gSpeed[0].step7>Data_y[cur+count])
 				{
 					if(Data_Judge[cur+count][1]=='1')
 					{
@@ -2303,11 +2303,11 @@ void DrawArrow1p(Uint32 cur)
 		if(PressedKey1p[9]==true)
 		for(count=0;count<18;count++)
 		{
-			if( ZONE_U*HighSpeed1p_9<Data_y[cur+count] &&
-				ZONE_D*HighSpeed1p_9>Data_y[cur+count])
+			if( ZONE_U*gSpeed[0].step9<Data_y[cur+count] &&
+				ZONE_D*gSpeed[0].step9>Data_y[cur+count])
 			{
-				if( PERFECT_ZONE_U*HighSpeed1p_9<Data_y[cur+count] &&
-					PERFECT_ZONE_D*HighSpeed1p_9>Data_y[cur+count])
+				if( PERFECT_ZONE_U*gSpeed[0].step9<Data_y[cur+count] &&
+					PERFECT_ZONE_D*gSpeed[0].step9>Data_y[cur+count])
 				{
 					if(Data_Judge[cur+count][3]=='1')
 					{
@@ -2323,8 +2323,8 @@ void DrawArrow1p(Uint32 cur)
 						break;
 					}
 				}
-				else if( GREAT_ZONE_U*HighSpeed1p_9<Data_y[cur+count] &&
-					     GREAT_ZONE_D*HighSpeed1p_9>Data_y[cur+count])
+				else if( GREAT_ZONE_U*gSpeed[0].step9<Data_y[cur+count] &&
+					     GREAT_ZONE_D*gSpeed[0].step9>Data_y[cur+count])
 				{
 					if(Data_Judge[cur+count][3]=='1')
 					{
@@ -2340,8 +2340,8 @@ void DrawArrow1p(Uint32 cur)
 						break;
 					}
 				}
-				else if( GOOD_ZONE_U*HighSpeed1p_9<Data_y[cur+count] &&
-					     GOOD_ZONE_D*HighSpeed1p_9>Data_y[cur+count])
+				else if( GOOD_ZONE_U*gSpeed[0].step9<Data_y[cur+count] &&
+					     GOOD_ZONE_D*gSpeed[0].step9>Data_y[cur+count])
 				{
 					if(Data_Judge[cur+count][3]=='1')
 					{
@@ -2355,8 +2355,8 @@ void DrawArrow1p(Uint32 cur)
 						break;
 					}
 				}
-				else if( BAD_ZONE_U*HighSpeed1p_9<Data_y[cur+count] &&
-					     BAD_ZONE_D*HighSpeed1p_9>Data_y[cur+count])
+				else if( BAD_ZONE_U*gSpeed[0].step9<Data_y[cur+count] &&
+					     BAD_ZONE_D*gSpeed[0].step9>Data_y[cur+count])
 				{
 					if(Data_Judge[cur+count][3]=='1')
 					{
@@ -2624,7 +2624,7 @@ void DrawArrow2p(Uint32 cur)
 	{
 		if(bModeRandomS2p == true)
 		{
-			HighSpeed2p_1 = HighSpeed2p_3 = HighSpeed2p_5 = HighSpeed2p_7 = HighSpeed2p_9 = 1 + rand() % 8 ;
+			gSpeed[1].step1 = gSpeed[1].step3 = gSpeed[1].step5 = gSpeed[1].step7 = gSpeed[1].step9 = 1 + rand() % 8 ;
 		}
 		cur2=cur;
 		beat=4;
@@ -2744,11 +2744,11 @@ void DrawArrow2p(Uint32 cur)
 		if(PressedKey2p[1]==true)
 		for(count=0;count<18;count++)
 		{
-			if( ZONE_U*HighSpeed2p_1 < Data_y1[cur+count] && 
-				ZONE_D*HighSpeed2p_1 > Data_y1[cur+count]  )
+			if( ZONE_U*gSpeed[1].step1 < Data_y1[cur+count] &&
+				ZONE_D*gSpeed[1].step1 > Data_y1[cur+count]  )
 			{
-				if( PERFECT_ZONE_U*HighSpeed2p_1 < Data_y1[cur+count] &&
-					PERFECT_ZONE_D*HighSpeed2p_1 > Data_y1[cur+count])
+				if( PERFECT_ZONE_U*gSpeed[1].step1 < Data_y1[cur+count] &&
+					PERFECT_ZONE_D*gSpeed[1].step1 > Data_y1[cur+count])
 				{
 					if(Data_Judge1[cur+count][5]=='1')
 					{
@@ -2764,8 +2764,8 @@ void DrawArrow2p(Uint32 cur)
 						break;
 					}
 				}
-				else if( GREAT_ZONE_U*HighSpeed2p_1 < Data_y1[cur+count] && 
-						 GREAT_ZONE_D*HighSpeed2p_1 > Data_y1[cur+count]  )
+				else if( GREAT_ZONE_U*gSpeed[1].step1 < Data_y1[cur+count] &&
+						 GREAT_ZONE_D*gSpeed[1].step1 > Data_y1[cur+count]  )
 				{
 					if(Data_Judge1[cur+count][5]=='1')
 					{
@@ -2781,8 +2781,8 @@ void DrawArrow2p(Uint32 cur)
 						break;
 					}
 				}
-				else if( GOOD_ZONE_U*HighSpeed2p_1 < Data_y1[cur+count] &&
-					     GOOD_ZONE_D*HighSpeed2p_1 > Data_y1[cur+count] )
+				else if( GOOD_ZONE_U*gSpeed[1].step1 < Data_y1[cur+count] &&
+					     GOOD_ZONE_D*gSpeed[1].step1 > Data_y1[cur+count] )
 				{
 					if(Data_Judge1[cur+count][5]=='1')
 					{
@@ -2796,8 +2796,8 @@ void DrawArrow2p(Uint32 cur)
 						break;
 					}
 				}
-				else if( BAD_ZONE_U*HighSpeed2p_1 < Data_y1[cur+count] &&
-						 BAD_ZONE_D*HighSpeed2p_1 > Data_y1[cur+count] )
+				else if( BAD_ZONE_U*gSpeed[1].step1 < Data_y1[cur+count] &&
+						 BAD_ZONE_D*gSpeed[1].step1 > Data_y1[cur+count] )
 				{
 					if(Data_Judge1[cur+count][5]=='1')
 					{
@@ -2829,11 +2829,11 @@ void DrawArrow2p(Uint32 cur)
 		if(PressedKey2p[3]==true)
 		for(count=0;count<18;count++)
 		{
-			if( ZONE_U*HighSpeed2p_3 < Data_y1[cur+count] &&
-				ZONE_D*HighSpeed2p_3 > Data_y1[cur+count])
+			if( ZONE_U*gSpeed[1].step3 < Data_y1[cur+count] &&
+				ZONE_D*gSpeed[1].step3 > Data_y1[cur+count])
 			{
-				if( PERFECT_ZONE_U*HighSpeed2p_3 < Data_y1[cur+count] &&
-				    PERFECT_ZONE_D*HighSpeed2p_3 > Data_y1[cur+count])
+				if( PERFECT_ZONE_U*gSpeed[1].step3 < Data_y1[cur+count] &&
+				    PERFECT_ZONE_D*gSpeed[1].step3 > Data_y1[cur+count])
 				{
 					if(Data_Judge1[cur+count][9]=='1')
 					{
@@ -2849,8 +2849,8 @@ void DrawArrow2p(Uint32 cur)
 						break;
 					}
 				}
-				else if( GREAT_ZONE_U*HighSpeed2p_3<Data_y1[cur+count] &&
-					     GREAT_ZONE_D*HighSpeed2p_3>Data_y1[cur+count] )
+				else if( GREAT_ZONE_U*gSpeed[1].step3<Data_y1[cur+count] &&
+					     GREAT_ZONE_D*gSpeed[1].step3>Data_y1[cur+count] )
 				{
 					if(Data_Judge1[cur+count][9]=='1')
 					{
@@ -2866,8 +2866,8 @@ void DrawArrow2p(Uint32 cur)
 						break;
 					}
 				}
-				else if( GOOD_ZONE_U*HighSpeed2p_3 < Data_y1[cur+count] &&
-						 GOOD_ZONE_D*HighSpeed2p_3 > Data_y1[cur+count])
+				else if( GOOD_ZONE_U*gSpeed[1].step3 < Data_y1[cur+count] &&
+						 GOOD_ZONE_D*gSpeed[1].step3 > Data_y1[cur+count])
 				{
 					if(Data_Judge1[cur+count][9]=='1')
 					{
@@ -2881,8 +2881,8 @@ void DrawArrow2p(Uint32 cur)
 						break;
 					}
 				}
-				else if( BAD_ZONE_U*HighSpeed2p_3<Data_y1[cur+count] &&
-						 BAD_ZONE_D*HighSpeed2p_3>Data_y1[cur+count])
+				else if( BAD_ZONE_U*gSpeed[1].step3<Data_y1[cur+count] &&
+						 BAD_ZONE_D*gSpeed[1].step3>Data_y1[cur+count])
 				{
 					if(Data_Judge1[cur+count][9]=='1')
 					{
@@ -2914,11 +2914,11 @@ void DrawArrow2p(Uint32 cur)
 		if(PressedKey2p[5]==true)
 		for(count=0;count<18;count++)
 		{
-			if( ZONE_U*HighSpeed2p_5<Data_y1[cur+count] &&
-				ZONE_D*HighSpeed2p_5>Data_y1[cur+count])
+			if( ZONE_U*gSpeed[1].step5<Data_y1[cur+count] &&
+				ZONE_D*gSpeed[1].step5>Data_y1[cur+count])
 			{
-				if( PERFECT_ZONE_U*HighSpeed2p_5<Data_y1[cur+count] &&
-					PERFECT_ZONE_D*HighSpeed2p_5>Data_y1[cur+count])
+				if( PERFECT_ZONE_U*gSpeed[1].step5<Data_y1[cur+count] &&
+					PERFECT_ZONE_D*gSpeed[1].step5>Data_y1[cur+count])
 				{
 					if(Data_Judge1[cur+count][7]=='1')
 					{
@@ -2934,8 +2934,8 @@ void DrawArrow2p(Uint32 cur)
 						break;
 					}
 				}
-				else if( GREAT_ZONE_U*HighSpeed2p_5<Data_y1[cur+count] &&
-					     GREAT_ZONE_D*HighSpeed2p_5>Data_y1[cur+count])
+				else if( GREAT_ZONE_U*gSpeed[1].step5<Data_y1[cur+count] &&
+					     GREAT_ZONE_D*gSpeed[1].step5>Data_y1[cur+count])
 				{
 					if(Data_Judge1[cur+count][7]=='1')
 					{
@@ -2951,8 +2951,8 @@ void DrawArrow2p(Uint32 cur)
 						break;
 					}
 				}
-				else if( GOOD_ZONE_U*HighSpeed2p_5<Data_y1[cur+count] &&
-					     GOOD_ZONE_D*HighSpeed2p_5>Data_y1[cur+count])
+				else if( GOOD_ZONE_U*gSpeed[1].step5<Data_y1[cur+count] &&
+					     GOOD_ZONE_D*gSpeed[1].step5>Data_y1[cur+count])
 				{
 					if(Data_Judge1[cur+count][7]=='1')
 					{
@@ -2966,8 +2966,8 @@ void DrawArrow2p(Uint32 cur)
 						break;
 					}
 				}
-				else if( BAD_ZONE_U*HighSpeed2p_5<Data_y1[cur+count] &&
-					     BAD_ZONE_D*HighSpeed2p_5>Data_y1[cur+count])
+				else if( BAD_ZONE_U*gSpeed[1].step5<Data_y1[cur+count] &&
+					     BAD_ZONE_D*gSpeed[1].step5>Data_y1[cur+count])
 				{
 					if(Data_Judge1[cur+count][7]=='1')
 					{
@@ -3001,11 +3001,11 @@ void DrawArrow2p(Uint32 cur)
 		if(PressedKey2p[7]==true)
 		for(count=0;count<18;count++)
 		{
-			if( ZONE_U*HighSpeed2p_7 < Data_y1[cur+count] &&
-				ZONE_D*HighSpeed2p_7 > Data_y1[cur+count])
+			if( ZONE_U*gSpeed[1].step7 < Data_y1[cur+count] &&
+				ZONE_D*gSpeed[1].step7 > Data_y1[cur+count])
 			{
-				if( PERFECT_ZONE_U*HighSpeed2p_7 < Data_y1[cur+count] &&
-					PERFECT_ZONE_D*HighSpeed2p_7 > Data_y1[cur+count])
+				if( PERFECT_ZONE_U*gSpeed[1].step7 < Data_y1[cur+count] &&
+					PERFECT_ZONE_D*gSpeed[1].step7 > Data_y1[cur+count])
 				{
 					if(Data_Judge1[cur+count][6]=='1')
 					{
@@ -3021,8 +3021,8 @@ void DrawArrow2p(Uint32 cur)
 						break;
 					}
 				}
-				else if( GREAT_ZONE_U*HighSpeed2p_7<Data_y1[cur+count] &&
-					     GREAT_ZONE_D*HighSpeed2p_7>Data_y1[cur+count])
+				else if( GREAT_ZONE_U*gSpeed[1].step7<Data_y1[cur+count] &&
+					     GREAT_ZONE_D*gSpeed[1].step7>Data_y1[cur+count])
 				{
 					if(Data_Judge1[cur+count][6]=='1')
 					{
@@ -3038,8 +3038,8 @@ void DrawArrow2p(Uint32 cur)
 						break;
 					}
 				}
-				else if( GOOD_ZONE_U*HighSpeed2p_7<Data_y1[cur+count] &&
-					     GOOD_ZONE_D*HighSpeed2p_7>Data_y1[cur+count])
+				else if( GOOD_ZONE_U*gSpeed[1].step7<Data_y1[cur+count] &&
+					     GOOD_ZONE_D*gSpeed[1].step7>Data_y1[cur+count])
 				{
 					if(Data_Judge1[cur+count][6]=='1')
 					{
@@ -3053,8 +3053,8 @@ void DrawArrow2p(Uint32 cur)
 						break;
 					}
 				}
-				else if( BAD_ZONE_U*HighSpeed2p_7<Data_y1[cur+count] &&
-					     BAD_ZONE_D*HighSpeed2p_7>Data_y1[cur+count])
+				else if( BAD_ZONE_U*gSpeed[1].step7<Data_y1[cur+count] &&
+					     BAD_ZONE_D*gSpeed[1].step7>Data_y1[cur+count])
 				{
 					if(Data_Judge1[cur+count][6]=='1')
 					{
@@ -3088,11 +3088,11 @@ void DrawArrow2p(Uint32 cur)
 		if(PressedKey2p[9]==true)
 		for(count=0;count<18;count++)
 		{
-			if( ZONE_U*HighSpeed2p_9<Data_y1[cur+count] &&
-				ZONE_D*HighSpeed2p_9>Data_y1[cur+count])
+			if( ZONE_U*gSpeed[1].step9<Data_y1[cur+count] &&
+				ZONE_D*gSpeed[1].step9>Data_y1[cur+count])
 			{
-				if( PERFECT_ZONE_U*HighSpeed2p_9<Data_y1[cur+count] &&
-					PERFECT_ZONE_D*HighSpeed2p_9>Data_y1[cur+count])
+				if( PERFECT_ZONE_U*gSpeed[1].step9<Data_y1[cur+count] &&
+					PERFECT_ZONE_D*gSpeed[1].step9>Data_y1[cur+count])
 				{
 					if(Data_Judge1[cur+count][8]=='1')
 					{
@@ -3108,8 +3108,8 @@ void DrawArrow2p(Uint32 cur)
 						break;
 					}
 				}
-				else if( GREAT_ZONE_U*HighSpeed2p_9<Data_y1[cur+count] &&
-					     GREAT_ZONE_D*HighSpeed2p_9>Data_y1[cur+count])
+				else if( GREAT_ZONE_U*gSpeed[1].step9<Data_y1[cur+count] &&
+					     GREAT_ZONE_D*gSpeed[1].step9>Data_y1[cur+count])
 				{
 					if(Data_Judge1[cur+count][8]=='1')
 					{
@@ -3125,8 +3125,8 @@ void DrawArrow2p(Uint32 cur)
 						break;
 					}
 				}
-				else if( GOOD_ZONE_U*HighSpeed2p_9<Data_y1[cur+count] &&
-					     GOOD_ZONE_D*HighSpeed2p_9>Data_y1[cur+count])
+				else if( GOOD_ZONE_U*gSpeed[1].step9<Data_y1[cur+count] &&
+					     GOOD_ZONE_D*gSpeed[1].step9>Data_y1[cur+count])
 				{
 					if(Data_Judge1[cur+count][8]=='1')
 					{
@@ -3140,8 +3140,8 @@ void DrawArrow2p(Uint32 cur)
 						break;
 					}
 				}
-				else if( BAD_ZONE_U*HighSpeed2p_9<Data_y1[cur+count] &&
-					     BAD_ZONE_D*HighSpeed2p_9>Data_y1[cur+count])
+				else if( BAD_ZONE_U*gSpeed[1].step9<Data_y1[cur+count] &&
+					     BAD_ZONE_D*gSpeed[1].step9>Data_y1[cur+count])
 				{
 					if(Data_Judge1[cur+count][8]=='1')
 					{

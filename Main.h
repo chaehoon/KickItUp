@@ -66,6 +66,7 @@ extern Music    gSong;
 struct st_HighSpeed {
 	int		step;
 	int		step1;
+	int		step3;
 	int		step5;
 	int		step7;
 	int		step9;

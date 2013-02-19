@@ -500,19 +500,19 @@ void SelectSong ( void )
 			break;
 		case HMODE_RANDOMS:
 			bModeRandomS1p=true;
-			HighSpeed1p=1;
+			gSpeed[0].step=1;
 			gMode.Play();
 			break;
 		case HMODE_2X:
-			HighSpeed1p=2;
+			gSpeed[0].step=2;
 			gMode.Play();
 			break;
 		case HMODE_4X:
-			HighSpeed1p=4;
+			gSpeed[0].step=4;
 			gMode.Play();
 			break;
 		case HMODE_8X:
-			HighSpeed1p=8;
+			gSpeed[0].step=8;
 			gMode.Play();
 			break;
 		case HMODE_MIRROR:
@@ -538,11 +538,11 @@ void SelectSong ( void )
 		case HMODE_4DMIX:
 			srand ( ( unsigned ) time ( NULL ) );
 
-			HighSpeed1p_1=1+rand() %8;
-			HighSpeed1p_3=1+rand() %8;
-			HighSpeed1p_5=1+rand() %8;
-			HighSpeed1p_7=1+rand() %8;
-			HighSpeed1p_9=1+rand() %8;
+			gSpeed[0].step1=1+rand() %8;
+			gSpeed[0].step3=1+rand() %8;
+			gSpeed[0].step5=1+rand() %8;
+			gSpeed[0].step7=1+rand() %8;
+			gSpeed[0].step9=1+rand() %8;
 
 			b4dMix1p=true;
 			gMode.Play();
@@ -559,18 +559,18 @@ void SelectSong ( void )
 						break;*/
 		case HMODE_CANCEL:
 			gCancel.Play();
-			HighSpeed1p=1;
+			gSpeed[0].step=1;
 			bModeMirror1p=false;
 			bModeNonstep1p=false;
 			bModeSynchro=false;
 			bModeUnion1p=false;
 			bModeRandom1p=false;
 			b4dMix1p=false;
-			HighSpeed1p_1=1;
-			HighSpeed1p_3=1;
-			HighSpeed1p_5=1;
-			HighSpeed1p_7=1;
-			HighSpeed1p_9=1;
+			gSpeed[0].step1=1;
+			gSpeed[0].step3=1;
+			gSpeed[0].step5=1;
+			gSpeed[0].step7=1;
+			gSpeed[0].step9=1;
 			bModeVanish1p=false;
 			bModeSuddenR1p=false;
 			bModeRandomS1p=false;
@@ -599,20 +599,20 @@ void SelectSong ( void )
 			break;
 		case HMODE_RANDOMS:
 			bModeRandomS2p=true;
-			HighSpeed2p=1;
+			gSpeed[1].step=1;
 
 			gMode.Play();
 			break;
 		case HMODE_2X:
-			HighSpeed2p=2;
+			gSpeed[1].step=2;
 			gMode.Play();
 			break;
 		case HMODE_4X:
-			HighSpeed2p=4;
+			gSpeed[1].step=4;
 			gMode.Play();
 			break;
 		case HMODE_8X:
-			HighSpeed2p=8;
+			gSpeed[1].step=8;
 			gMode.Play();
 			break;
 		case HMODE_MIRROR:
@@ -639,11 +639,11 @@ void SelectSong ( void )
 
 			srand ( ( unsigned ) time ( NULL ) );
 
-			HighSpeed2p_1 = 1+rand() %8;
-			HighSpeed2p_3 = 1+rand() %8;
-			HighSpeed2p_5 = 1+rand() %8;
-			HighSpeed2p_7 = 1+rand() %8;
-			HighSpeed2p_9 = 1+rand() %8;
+			gSpeed[1].step1 = 1+rand() %8;
+			gSpeed[1].step3 = 1+rand() %8;
+			gSpeed[1].step5 = 1+rand() %8;
+			gSpeed[1].step7 = 1+rand() %8;
+			gSpeed[1].step9 = 1+rand() %8;
 
 			b4dMix2p=true;
 			gMode.Play();
@@ -656,17 +656,17 @@ void SelectSong ( void )
 
 		case HMODE_CANCEL:
 			gCancel.Play();
-			HighSpeed2p=1;
+			gSpeed[1].step=1;
 			bModeMirror2p=false;
 			bModeNonstep2p=false;
 			bModeUnion2p=false;
 			bModeRandom2p=false;
 			b4dMix2p=false;
-			HighSpeed2p_1=1;
-			HighSpeed2p_3=1;
-			HighSpeed2p_5=1;
-			HighSpeed2p_7=1;
-			HighSpeed2p_9=1;
+			gSpeed[1].step1=1;
+			gSpeed[1].step3=1;
+			gSpeed[1].step5=1;
+			gSpeed[1].step7=1;
+			gSpeed[1].step9=1;
 			bModeVanish2p=false;
 			bModeSuddenR2p=false;
 			bModeRandomS2p=false;
@@ -1192,7 +1192,7 @@ void SelectSong ( void )
 		DrawMode ( 0,360,HMODE_RANDOM );
 	if ( bModeVanish1p )
 		DrawMode ( 0,400,HMODE_VANISH );
-	if ( HighSpeed1p>1 )
+	if ( gSpeed[0].step>1 )
 		DrawMode ( 0,160,HMODE_2X );
 
 	// draw 2p mode pictures.
@@ -1206,7 +1206,7 @@ void SelectSong ( void )
 		DrawMode ( 600,360,HMODE_RANDOM );
 	if ( bModeVanish2p )
 		DrawMode ( 600,400,HMODE_VANISH );
-	if ( HighSpeed2p>1 )
+	if ( gSpeed[1].step>1 )
 		DrawMode ( 600,160,HMODE_2X );
 
 	// Draw level icon to next to the title image.

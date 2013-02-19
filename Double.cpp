@@ -811,7 +811,7 @@ void DrawArrow_DB(Uint32 cur)
 						break;
 					}
 				}
-				else if( BAD_ZONE_U*HighSpeed_5<Data_y[cur+count] && 
+				else if( BAD_ZONE_U*HighSpeed_5<Data_y[cur+count] &&
 					     BAD_ZONE_D*HighSpeed_5>Data_y[cur+count])
 				{
 					if(Data_Double_Judge[cur+count][2]=='1')
@@ -1257,7 +1257,7 @@ void DrawArrow_DB(Uint32 cur)
 						break;
 					}
 				}
-				else if( BAD_ZONE_U*HighSpeed_5<Data_y[cur+count] && 
+				else if( BAD_ZONE_U*HighSpeed_5<Data_y[cur+count] &&
 					     BAD_ZONE_D*HighSpeed_5>Data_y[cur+count])
 				{
 					if(Data_Double_Judge[cur+count][7]=='1')
@@ -1857,12 +1857,12 @@ void KIU_STAGE_DOUBLE(void)
 		if(Start1p)
 		{
 
-			HighSpeed=HighSpeed1p;
-			HighSpeed_1=HighSpeed1p_1;
-			HighSpeed_3=HighSpeed1p_3;
-			HighSpeed_5=HighSpeed1p_5;
-			HighSpeed_7=HighSpeed1p_7;
-			HighSpeed_9=HighSpeed1p_9;
+			HighSpeed=gSpeed[0].step;
+			HighSpeed_1=gSpeed[0].step1;
+			HighSpeed_3=gSpeed[0].step3;
+			HighSpeed_5=gSpeed[0].step5;
+			HighSpeed_7=gSpeed[0].step7;
+			HighSpeed_9=gSpeed[0].step9;
 
 			bModeMirror=bModeMirror1p;
 			bModeNonstep=bModeNonstep1p;
@@ -1874,12 +1874,12 @@ void KIU_STAGE_DOUBLE(void)
 
 		else if(Start2p)
 		{
-			HighSpeed=HighSpeed2p;
-			HighSpeed_1=HighSpeed2p_1;
-			HighSpeed_3=HighSpeed2p_3;
-			HighSpeed_5=HighSpeed2p_5;
-			HighSpeed_7=HighSpeed2p_7;
-			HighSpeed_9=HighSpeed2p_9;
+			HighSpeed=gSpeed[1].step;
+			HighSpeed_1=gSpeed[1].step1;
+			HighSpeed_3=gSpeed[1].step3;
+			HighSpeed_5=gSpeed[1].step5;
+			HighSpeed_7=gSpeed[1].step7;
+			HighSpeed_9=gSpeed[1].step9;
 
 			bModeMirror=bModeMirror2p;
 			bModeNonstep=bModeNonstep2p;
@@ -2606,7 +2606,7 @@ void KIU_STAGE_DOUBLE(void)
 		if(bModeRandom1p)DrawMode(0,360,HMODE_RANDOM);
 		if(bModeVanish1p)DrawMode(0,400,HMODE_VANISH);
 
-		if(HighSpeed1p>1)DrawMode(0,160,HMODE_2X);
+		if(gSpeed[0].step>1)DrawMode(0,160,HMODE_2X);
 
 		DrawGaugeDB_1p();
 		DrawScore1p();
@@ -2619,7 +2619,7 @@ void KIU_STAGE_DOUBLE(void)
 		if(bModeRandom2p)DrawMode(600,360,HMODE_RANDOM);
 		if(bModeVanish2p)DrawMode(600,400,HMODE_VANISH);
 
-		if(HighSpeed2p>1)DrawMode(600,160,HMODE_2X);
+		if(gSpeed[1].step>1)DrawMode(600,160,HMODE_2X);
 
 		DrawGaugeDB_2p();
 		DrawScore2p();
