@@ -407,82 +407,22 @@ int ZoomInOut()
 
 }
 
-void SelectSong ( void )
+/**
+ * set hidden Mode for 1Player
+ */
+void SetHiddenMode1p()
 {
-	static Uint32 current;
-	static Uint32 SelectCurrent;
-	static int Selected;
-	static	int a,b;
-	static	int iMove;
-
-	char s[50];
-
-	if ( First==0 )	{
-		startTimer=SDL_GetTicks();
-		if ( Start1p==false ) {
-			bModeMirror1p=false;
-			bModeNonstep1p=false;
-			bModeSynchro=false;
-			bModeUnion1p=false;
-			bModeRandom1p=false;
-			b4dMix1p=false;
-			bModeVanish1p=false;
-			bModeSuddenR1p=false;
-			bModeRandomS1p=false;
-
-			gSpeed[0].reset();
-		}
-
-		if ( Start2p==false )	{
-			bModeMirror2p=false;
-			bModeNonstep2p=false;
-			bModeUnion2p=false;
-			bModeRandom2p=false;
-			b4dMix2p=false;
-			bModeVanish2p=false;
-			bModeSuddenR1p=false;
-			bModeRandomS1p=false;
-
-			gSpeed[1].reset();
-		}
-		// paint the background black.
-		gScreen.FillRect ( 0, 0 );
-
-		// Draw BackGround as select image.
-		gSelectBack.BltFast ( 0, 0, gScreen );
-
-		a=Start1p;b=Start2p;
-		First++;
-		gSelectSong.Play ( true );
-	}
-
-	// 선택화면에서 보이는 좌우 음악을 연결 시킨다.
-	SortSong();
-
-	ReadGameInput();
-
-	if ( PressedKey1p[5]==true ) {
-		Start1p=true;
-	}
-
-	if ( PressedKey2p[5]==true ) {
-		Start2p=true;
-	}
-
 	// Get 1Player hidden mode.
 	int ModeTemp1p = ScanHiddenMode1p();
 
-	if ( ModeTemp1p )
-	{
-		if ( IntroFlag )
-		{
+	if ( ModeTemp1p ) {
+		if ( IntroFlag ) {
 			gIntro.Halt();
 			IntroFlag=false;
 		}
 	}
 
-	switch ( ModeTemp1p )
-	{
+	switch ( ModeTemp1p ) {
 		case HMODE_SUDDENR:
 			bModeSuddenR1p=true;
 			bModeVanish1p=false;
@@ -560,18 +500,23 @@ void SelectSong ( void )
 		default:
 			break;
 	}
+}
 
+/**
+ * set hidden Mode for 2Player
+ */
+void SetHiddenMode2p()
+{
 	// Get 2Player hidden mode.
 	int ModeTemp2p=ScanHiddenMode2p();
-	if ( ModeTemp2p )
-		if ( IntroFlag )
-		{
+	if ( ModeTemp2p ) {
+		if ( IntroFlag ) {
 			gIntro.Halt();
 			IntroFlag=false;
 		}
+	}
 
-	switch ( ModeTemp2p )
-	{
+	switch ( ModeTemp2p ) {
 		case HMODE_SUDDENR:
 			bModeSuddenR2p=true;
 			bModeVanish2p=false;
@@ -645,8 +590,74 @@ void SelectSong ( void )
 			bModeSuddenR2p=false;
 			bModeRandomS2p=false;
 			Double=false;
-			break;
+			break;	}
+}
+
+void SelectSong ( void )
+{
+	static Uint32 current;
+	static Uint32 SelectCurrent;
+	static int Selected;
+	static	int a,b;
+	static	int iMove;
+
+	char s[50];
+
+	if ( First==0 )	{
+		startTimer=SDL_GetTicks();
+		if ( Start1p==false ) {
+			bModeMirror1p=false;
+			bModeNonstep1p=false;
+			bModeSynchro=false;
+			bModeUnion1p=false;
+			bModeRandom1p=false;
+			b4dMix1p=false;
+			bModeVanish1p=false;
+			bModeSuddenR1p=false;
+			bModeRandomS1p=false;
+
+			gSpeed[0].reset();
+		}
+
+		if ( Start2p==false )	{
+			bModeMirror2p=false;
+			bModeNonstep2p=false;
+			bModeUnion2p=false;
+			bModeRandom2p=false;
+			b4dMix2p=false;
+			bModeVanish2p=false;
+			bModeSuddenR1p=false;
+			bModeRandomS1p=false;
+
+			gSpeed[1].reset();
+		}
+		// paint the background black.
+		gScreen.FillRect ( 0, 0 );
+
+		// Draw BackGround as select image.
+		gSelectBack.BltFast ( 0, 0, gScreen );
+
+		a=Start1p;b=Start2p;
+		First++;
+		gSelectSong.Play ( true );
 	}
+
+	// 선택화면에서 보이는 좌우 음악을 연결 시킨다.
+	SortSong();
+
+	ReadGameInput();
+
+	if ( PressedKey1p[5]==true ) {
+		Start1p=true;
+	}
+
+	if ( PressedKey2p[5]==true ) {
+		Start2p=true;
+	}
+
+	// TODO: setHiddenMode
+	SetHiddenMode1p();
+	SetHiddenMode2p();
 
 	// change screen to left.
 	if ( ( Start1p && PressedKey1p[1] ) || ( Start2p && PressedKey2p[1] ) )
