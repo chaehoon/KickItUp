@@ -413,16 +413,16 @@ int ZoomInOut()
 void SetHiddenMode1p()
 {
 	// Get 1Player hidden mode.
-	int ModeTemp1p = ScanHiddenMode1p();
+	int mode = ScanHiddenMode1p();
 
-	if ( ModeTemp1p ) {
+	if ( mode ) {
 		if ( IntroFlag ) {
 			gIntro.Halt();
 			IntroFlag=false;
 		}
 	}
 
-	switch ( ModeTemp1p ) {
+	switch ( mode ) {
 		case HMODE_SUDDENR:
 			bModeSuddenR1p=true;
 			bModeVanish1p=false;
@@ -508,15 +508,15 @@ void SetHiddenMode1p()
 void SetHiddenMode2p()
 {
 	// Get 2Player hidden mode.
-	int ModeTemp2p=ScanHiddenMode2p();
-	if ( ModeTemp2p ) {
+	int mode = ScanHiddenMode2p();
+	if ( mode  ) {
 		if ( IntroFlag ) {
 			gIntro.Halt();
 			IntroFlag=false;
 		}
 	}
 
-	switch ( ModeTemp2p ) {
+	switch ( mode  ) {
 		case HMODE_SUDDENR:
 			bModeSuddenR2p=true;
 			bModeVanish2p=false;
@@ -590,7 +590,39 @@ void SetHiddenMode2p()
 			bModeSuddenR2p=false;
 			bModeRandomS2p=false;
 			Double=false;
-			break;	}
+			break;
+	}
+}
+
+void ChageSelectScreen(Uint32 * selectedIndex, int * selected, int * move)
+{
+	// change screen to left.
+	if ( ( Start1p && PressedKey1p[1] ) || ( Start2p && PressedKey2p[1] ) )	{
+		if ( IntroFlag ) {
+			gIntro.Halt();
+			IntroFlag=false;
+		}
+		gMove.Play();
+
+		*selected =0 ;
+
+		*move = 1;
+		*selectedIndex = CSONG[CSONG[*selectedIndex].Prev].Prev;
+	}
+
+	// change screen to right.
+	if ( ( Start1p && PressedKey1p[3] ) || ( Start2p && PressedKey2p[3] ) )	{
+		if ( IntroFlag ) {
+			gIntro.Halt();
+			IntroFlag=false;
+		}
+		gMove.Play();
+
+		*selected = 0;
+
+		*move = -1;
+		*selectedIndex = CSONG[CSONG[*selectedIndex].Next].Next;
+	}
 }
 
 void SelectSong ( void )
@@ -659,53 +691,20 @@ void SelectSong ( void )
 	SetHiddenMode1p();
 	SetHiddenMode2p();
 
-	// change screen to left.
-	if ( ( Start1p && PressedKey1p[1] ) || ( Start2p && PressedKey2p[1] ) )
-	{
-		if ( IntroFlag )
-		{
-			gIntro.Halt();
-			IntroFlag=false;
-		}
-		gMove.Play();
-
-		Selected=0;
-
-		iMove=1;
-		current = CSONG[CSONG[current].Prev].Prev;
-	}
-
-	// change screen to right.
-	if ( ( Start1p && PressedKey1p[3] ) || ( Start2p && PressedKey2p[3] ) )
-	{
-		if ( IntroFlag )
-		{
-			gIntro.Halt();
-			IntroFlag=false;
-		}
-		gMove.Play();
-
-		Selected=0;
-
-		iMove=-1;
-		current = CSONG[CSONG[current].Next].Next;
-	}
+	// 1, 3 번 버튼을 누르면 화면을 좌우로 움직인다.
+	ChageSelectScreen(&current, &Selected, &iMove);
 
 	// select the left song.
-	if ( ( Start1p && PressedKey1p[7] ) || ( Start2p && PressedKey2p[7] ) )
-	{
+	if ( ( Start1p && PressedKey1p[7] ) || ( Start2p && PressedKey2p[7] ) )	{
 		// if 7button pressed twice then move to the next stage.
-		if ( Selected==7 )
-		{
+		if ( Selected==7 )	{
 			SelectCurrent=current;
 			PressedKey1p[0]=3;
 		}
 		// if 7button pressed once then select music.
-		else
-		{
+		else	{
 			// if intro music is playing then stop.
-			if ( IntroFlag )
-			{
+			if ( IntroFlag ) {
 				gIntro.Halt();
 				IntroFlag=false;
 			}
@@ -715,14 +714,12 @@ void SelectSong ( void )
 
 			// start New intro music.
 			gIntro.Halt();
-			if ( access ( CSONG[current].IntroWavPath,04 ) ==0 )
-			{
+			if ( access ( CSONG[current].IntroWavPath,04 ) ==0 ) {
 				IntroFlag=true;
 				gIntro.Load ( CSONG[current].IntroWavPath );
 				gIntro.Play ( true );
 			}
-			else if ( access ( CSONG[current].IntroMp3Path,04 ) ==0 )
-			{
+			else if ( access ( CSONG[current].IntroMp3Path,04 ) ==0 ) {
 				IntroFlag=true;
 				gIntro.Load ( CSONG[current].IntroMp3Path );
 				gIntro.Play ( true );
