@@ -5,6 +5,7 @@
 #include "Music.h"
 #include <stdio.h>
 #include <algorithm>
+#include "GameMode.h"
 
 using std::max;
 using std::min;
@@ -117,26 +118,8 @@ extern Surface gScreen;
 
 extern	bool	SongFlag;
 
-extern	bool	bModeMirror1p;
-extern	bool	bModeNonstep1p;
-extern	bool	bModeSynchro;
-extern	bool	bModeUnion1p;
-extern	bool	bModeRandom1p;
-extern	bool	b4dMix1p;
-extern	bool	bModeVanish1p;
-extern	bool	bModeSuddenR1p;
-extern	bool	bModeRandomS1p;
-
-extern	bool	bModeMirror2p;
-extern	bool	bModeNonstep2p;
-extern	bool	bModeUnion2p;
-extern	bool	bModeRandom2p;
-extern	bool	b4dMix2p;
-extern	bool	bModeVanish2p;
-extern	bool	bModeSuddenR2p;
-extern	bool	bModeRandomS2p;
-
-extern st_HighSpeed	gSpeed[2];
+extern	GameMode	gGameMode[2];
+extern	st_HighSpeed	gSpeed[2];
 
 extern	int		MaxSpeed;
 extern	int		MinSpeed;

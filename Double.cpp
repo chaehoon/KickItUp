@@ -22,6 +22,7 @@
 #include "Config.h"
 #include "Surface.h"
 #include "Chunk.h"
+#include "GameMode.h"
 
 using std::max;
 using std::min;
@@ -73,20 +74,7 @@ extern Chunk    gBeat;
 
 
 st_HighSpeed	sSpeed;
-
-//int		HighSpeed;
-//int		sSpeed.step1;
-//int		sSpeed.step3;
-//int		sSpeed.step5;
-//int		sSpeed.step7;
-//int		sSpeed.step9;
-
-bool	bModeMirror;
-bool	bModeNonstep;
-bool	bModeUnion;
-bool	bModeRandom;
-bool	b4dMix;
-bool	bModeVanish;
+GameMode	sGameMode;
 
 extern int	dwGameCount;
 extern	KIUCONFIG	KCFG;
@@ -1859,24 +1847,13 @@ void KIU_STAGE_DOUBLE(void)
 	if(start1 == 0) {
 		if(Start1p) {
 			sSpeed = gSpeed[0];
-			bModeMirror=bModeMirror1p;
-			bModeNonstep=bModeNonstep1p;
-			bModeUnion=bModeUnion1p;
-			bModeRandom=bModeRandom1p;
-			b4dMix=b4dMix1p;
-			//bModeVanish=bModeVanish;
+			sGameMode = gGameMode[0];
 		} else if(Start2p)	{
 			sSpeed = gSpeed[2];
-
-			bModeMirror=bModeMirror2p;
-			bModeNonstep=bModeNonstep2p;
-			bModeUnion=bModeUnion2p;
-			bModeRandom=bModeRandom2p;
-			b4dMix=b4dMix2p;
-			//bModeVanish=bModeVanish;
+			sGameMode = gGameMode[1];
 		}
 
-		if(b4dMix) {
+		if(sGameMode.IsSet(GameMode::eMODE_MIX)) {
 			MaxSpeed = sSpeed.getMax();
 			MinSpeed = sSpeed.getMin();
 		} else {

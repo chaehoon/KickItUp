@@ -151,9 +151,6 @@ long				Score2p;
 
 int					Gauge1p=10;
 int					Gauge2p=10;
-
-char				GameMode=MODE_HARD;
-
 char				Couple=false;
 char				Double=false;
 
@@ -173,24 +170,9 @@ int		MinSpeed;
 
 int		JudgeArray[110];
 
-bool	bModeMirror1p;
-bool	bModeNonstep1p;
-bool	bModeSynchro;
-bool	bModeUnion1p;
-bool	bModeRandom1p;
-bool	b4dMix1p;			// 1p 4DMIX mode.
-bool	bModeVanish1p;
-bool	bModeSuddenR1p;
-bool	bModeRandomS1p;
 
-bool	bModeMirror2p;
-bool	bModeNonstep2p;
-bool	bModeUnion2p;
-bool	bModeRandom2p;
-bool	b4dMix2p;
-bool	bModeVanish2p;
-bool	bModeSuddenR2p;
-bool	bModeRandomS2p;
+
+GameMode	gGameMode[2];
 
 int	ALPHA=0;
 int	inc=20;
@@ -263,30 +245,10 @@ void	DisplayStageCount(const int count)
 
 void ClearMode(void)
 {
-	bModeMirror1p=false;
-	bModeNonstep1p=false;
-	bModeSynchro=false;
-	bModeUnion1p=false;
-	bModeRandom1p=false;
-	b4dMix1p=false;
-	bModeVanish1p=false;
-	bModeRandomS1p=false;
-	bModeSuddenR1p=false;
-
-	bModeMirror2p=false;
-	bModeNonstep2p=false;
-	bModeUnion2p=false;
-	bModeRandom2p=false;
-	b4dMix2p=false;
-
-	bModeVanish2p=false;
-	Double=false;
-	bModeRandomS2p=false;
-	bModeSuddenR2p=false;
-
-	gSpeed[0].reset();
-	gSpeed[1].reset();
-
+	for(int i = 0 ; i < 2 ; ++i) {
+		gGameMode[i].Reset();
+		gSpeed[i].reset();
+	}
 }
 
 void	GameOver1(void)
@@ -487,20 +449,14 @@ void KIU_STAGE(void)
 	DisplayMessage(0,112,s);
 
 	if(start1==0) {
-		if(b4dMix1p==true) {
-			MaxSpeed = gSpeed[0].getMax();
-			MinSpeed = gSpeed[0].getMin();
-		} else {
-			MaxSpeed = MinSpeed = gSpeed[0].step;
-			gSpeed[0].reset(gSpeed[0].step);
-		}
-
-		if(b4dMix2p) {
-			MaxSpeed = gSpeed[1].getMax();
-			MinSpeed = gSpeed[1].getMin();
-		} else {
-			MaxSpeed = MinSpeed = gSpeed[1].step;
-			gSpeed[1].reset(gSpeed[1].step);
+		for(int i = 0 ; i < 2 ; ++i) {
+			if(gGameMode[i].IsSet(GameMode::eMODE_MIX)) {
+				MaxSpeed = gSpeed[i].getMax();
+				MinSpeed = gSpeed[i].getMin();
+			} else {
+				MaxSpeed = MinSpeed = gSpeed[i].step;
+				gSpeed[0].reset(gSpeed[i].step);
+			}
 		}
 
 		for(sta=0;sta<6;sta++) {
@@ -534,9 +490,9 @@ void KIU_STAGE(void)
 		Gauge1p=10;
 		Gauge2p=10;
 
-		if(bModeRandom1p)
+		if(gGameMode[0].IsSet(GameMode::eMODE_RAMDOM))
 		{
-			for(i=0;i<MAX_DATA;i++)
+			for(int i=0;i<MAX_DATA;i++)
 			{
 				Data[MAX_DATA][0]=Data[i][0];
 				Data[MAX_DATA][1]=Data[i][1];
@@ -556,11 +512,9 @@ void KIU_STAGE(void)
 			}
 		}
 		
-		if(bModeRandom2p)
+		if(gGameMode[1].IsSet(GameMode::eMODE_RAMDOM))
 		{
-			if(!bModeRandom1p)srand((unsigned) time(&t));
-			
-			for(i=0;i<MAX_DATA;i++)
+			for(int i=0;i<MAX_DATA;i++)
 			{
 				Data1[MAX_DATA][5]=Data1[i][5];
 				Data1[MAX_DATA][6]=Data1[i][6];
@@ -580,9 +534,9 @@ void KIU_STAGE(void)
 			}
 		}
 
-		if(bModeMirror1p)
+		if(gGameMode[0].IsSet(GameMode::eMODE_MIRROR))
 		{
-			for(i=0;i<MAX_DATA;i++)
+			for(int i=0;i<MAX_DATA;i++)
 			{
 				Data[MAX_DATA][0]=Data[i][0];
 				Data[MAX_DATA][1]=Data[i][1];
@@ -600,9 +554,10 @@ void KIU_STAGE(void)
 
 			}
 		}
-		if(bModeMirror2p)
+
+		if(gGameMode[1].IsSet(GameMode::eMODE_MIRROR))
 		{
-			for(i=0;i<MAX_DATA;i++)
+			for(int i=0;i<MAX_DATA;i++)
 			{
 				Data1[MAX_DATA][5]=Data1[i][5];
 				Data1[MAX_DATA][6]=Data1[i][6];
@@ -624,9 +579,9 @@ void KIU_STAGE(void)
 		memcpy(&Data_Judge,&Data,sizeof(Data));
 		memcpy(&Data_Judge1,&Data1,sizeof(Data));
 	
-		if(bModeNonstep1p)
+		if(gGameMode[0].IsSet(GameMode::eMODE_NONSTOP))
 		{
-			for(i=0;i<MAX_DATA;i++)
+			for(int i=0;i<MAX_DATA;i++)
 			{
 				if(!(Data[i][0]=='0' && Data[i][1]=='0' && Data[i][2]=='0' && Data[i][3]=='0' && Data[i][4]=='0'))
 				{
@@ -647,9 +602,9 @@ void KIU_STAGE(void)
 			}
 		}
 		
-		if(bModeNonstep2p)
+		if(gGameMode[1].IsSet(GameMode::eMODE_NONSTOP))
 		{
-			for(i=0;i<MAX_DATA;i++)
+			for(int i=0;i<MAX_DATA;i++)
 			{
 				if(!(Data1[i][5]=='0' && Data1[i][6]=='0' && Data1[i][7]=='0' && Data1[i][8]=='0' && Data1[i][9]=='0'))
 				{
@@ -811,7 +766,7 @@ void KIU_STAGE(void)
 
 			Data_y[i+k+1]=(25+temp+PUMP_SPRITE_Y*k/2)*MinSpeed-(PUMP_SPRITE_Y)*(MinSpeed-1);
 
-			if(bModeSuddenR1p)
+			if(gGameMode[0].IsSet(GameMode::eMODE_SUDDENR))
 			{
 				if(Data_y[i+k]>240 && Data_y[i+k]<290)
 				{
@@ -920,7 +875,7 @@ void KIU_STAGE(void)
 
 			Data_y[i+k+3]=(38+temp+PUMP_SPRITE_Y*k/4)*MinSpeed-(PUMP_SPRITE_Y)*(MinSpeed-1);
 
-			if(bModeSuddenR1p)
+			if(gGameMode[0].IsSet(GameMode::eMODE_SUDDENR))
 			{
 				if(Data_y[i+k]>240 && Data_y[i+k]<290)
 				{
@@ -1070,7 +1025,7 @@ void KIU_STAGE(void)
 
 			Data_y1[i+k+1]=(25+temp+PUMP_SPRITE_Y*k/2)*MinSpeed-(PUMP_SPRITE_Y)*(MinSpeed-1);
 
-			if(bModeSuddenR2p)
+			if(gGameMode[1].IsSet(GameMode::eMODE_SUDDENR))
 			{
 				if(Data_y1[i+k]>240 && Data_y1[i+k]<290)
 				{
@@ -1179,7 +1134,7 @@ void KIU_STAGE(void)
 
 			Data_y1[i+k+3]=(38+temp+PUMP_SPRITE_Y*k/4)*MinSpeed-(PUMP_SPRITE_Y)*(MinSpeed-1);
 
-			if(bModeSuddenR2p)
+			if(gGameMode[1].IsSet(GameMode::eMODE_SUDDENR))
 			{
 				if(Data_y1[i+k]>240 && Data_y1[i+k]<290)
 				{
@@ -1298,24 +1253,28 @@ void KIU_STAGE(void)
 		DrawScore2p();
 	}
 
-	if(bModeMirror1p)DrawMode(0,200,HMODE_MIRROR);
-	if(bModeNonstep1p)DrawMode(0,240,HMODE_NONSTEP);
-	if(bModeSynchro)DrawMode(0,280,HMODE_SYNCHRO);
-	if(bModeUnion1p)DrawMode(0,320,HMODE_UNION);
-	if(bModeRandom1p)DrawMode(0,360,HMODE_RANDOM);
-	if(bModeVanish1p)DrawMode(0,400,HMODE_VANISH);
+	for(int i = 0 ; i < 2 ; ++i) {
+		int	x[2] = {0, 600};
+		if(gGameMode[i].IsSet(GameMode::eMODE_MIRROR))
+			DrawMode(x[i], 200, HMODE_MIRROR);
 
-	if(gSpeed[0].step>1)DrawMode(0,160,HMODE_2X);
+		if(gGameMode[i].IsSet(GameMode::eMODE_NONSTOP))
+			DrawMode(x[i],240,HMODE_NONSTEP);
 
-	if(bModeMirror2p)DrawMode(600,200,HMODE_MIRROR);
-	if(bModeNonstep2p)DrawMode(600,240,HMODE_NONSTEP);
-	if(bModeUnion2p)DrawMode(600,320,HMODE_UNION);
-	if(bModeRandom2p)DrawMode(600,360,HMODE_RANDOM);
-	if(bModeVanish2p)DrawMode(600,400,HMODE_VANISH);
+		if(gGameMode[i].IsSet(GameMode::eMODE_SYNCHRO))
+			DrawMode(x[i],280,HMODE_SYNCHRO);
 
-	if(gSpeed[1].step>1)DrawMode(600,160,HMODE_2X);
+		if(gGameMode[i].IsSet(GameMode::eMODE_UNION))
+			DrawMode(x[i],320,HMODE_UNION);
 
-	// Flipp();
+		if(gGameMode[i].IsSet(GameMode::eMODE_RAMDOM))
+			DrawMode(x[i],360,HMODE_RANDOM);
+		if(gGameMode[i].IsSet(GameMode::eMODE_VANISH))
+			DrawMode(x[i],400,HMODE_VANISH);
+
+		if(gSpeed[i].step>1)DrawMode(x[i],160,HMODE_2X);
+
+	}
 }
 
 

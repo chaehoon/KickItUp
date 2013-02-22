@@ -407,14 +407,9 @@ int ZoomInOut()
 
 }
 
-/**
- * set hidden Mode for 1Player
- */
-void SetHiddenMode1p()
-{
-	// Get 1Player hidden mode.
-	int mode = ScanHiddenMode1p();
 
+void _setHiddenMode(const int player, const int mode)
+{
 	if ( mode ) {
 		if ( IntroFlag ) {
 			gIntro.Halt();
@@ -422,84 +417,80 @@ void SetHiddenMode1p()
 		}
 	}
 
+	GameMode & gameMode = gGameMode[player];
+	st_Speed speed = gSpeed[player];
+
 	switch ( mode ) {
 		case HMODE_SUDDENR:
-			bModeSuddenR1p=true;
-			bModeVanish1p=false;
+			gameMode.Set(GameMode::eMODE_SUDDENR);
+			gameMode.UnSet(GameMode::eMODE_VANISH);
 			gMode.Play();
 			break;
 		case HMODE_RANDOMS:
-			bModeRandomS1p=true;
-			gSpeed[0].step=1;
+			gameMode.Set(GameMode::eMODE_RAMDOMS);
+			speed.step=1;
 			gMode.Play();
 			break;
 		case HMODE_2X:
-			gSpeed[0].step=2;
+			speed.step=2;
 			gMode.Play();
 			break;
 		case HMODE_4X:
-			gSpeed[0].step=4;
+			speed.step=4;
 			gMode.Play();
 			break;
 		case HMODE_8X:
-			gSpeed[0].step=8;
+			speed.step=8;
 			gMode.Play();
 			break;
 		case HMODE_MIRROR:
-			bModeMirror1p=true;
+			gameMode.Set(GameMode::eMODE_MIRROR);
 			gMode.Play();
 			break;
 		case HMODE_NONSTEP:
-			bModeNonstep1p=true;
+			gameMode.Set(GameMode::eMODE_NONSTOP);
 			gMode.Play();
 			break;
 		case HMODE_SYNCHRO:
-			bModeSynchro=true;
+			gameMode.Set(GameMode::eMODE_SYNCHRO);
 			gMode.Play();
 			break;
 		case HMODE_UNION:
-			bModeUnion1p=true;
+			gameMode.Set(GameMode::eMODE_UNION);
 			gMode.Play();
 			break;
 		case HMODE_RANDOM:
-			bModeRandom1p=true;
+			gameMode.Set(GameMode::eMODE_RAMDOM);
 			gMode.Play();
 			break;
 		case HMODE_4DMIX:
-			gSpeed[0].setRandom();
-
-			b4dMix1p=true;
+			speed.setRandom();
+			gameMode.Set(GameMode::eMODE_MIX);
 			gMode.Play();
 			break;
 		case HMODE_VANISH:
-			bModeVanish1p=true;
-			bModeSuddenR2p=false;
+			gameMode.Set(GameMode::eMODE_VANISH);
+			gameMode.UnSet(GameMode::eMODE_SUDDENR);
 			gMode.Play();
 			break;
-			/*		case HMODE_NONSTOPDOUBLE:
-						if(Start1p&&Start2p)break;
-						Double=true;
-						gMode.Play();
-						break;*/
 		case HMODE_CANCEL:
 			gCancel.Play();
-			gSpeed[0].reset();
-
-			bModeMirror1p=false;
-			bModeNonstep1p=false;
-			bModeSynchro=false;
-			bModeUnion1p=false;
-			bModeRandom1p=false;
-			b4dMix1p=false;
-
-			bModeVanish1p=false;
-			bModeSuddenR1p=false;
-			bModeRandomS1p=false;
-			Double=false;
+			speed.reset();
+			gameMode.Reset();
 			break;
 		default:
 			break;
 	}
+}
+
+/**
+ * set hidden Mode for 1Player
+ */
+void SetHiddenMode1p()
+{
+	// Get 1Player hidden mode.
+	int mode = ScanHiddenMode1p();
+	_setHiddenMode(1, mode);
 }
 
 /**
