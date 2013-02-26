@@ -10,8 +10,8 @@
 using std::max;
 using std::min;
 
-extern Music    gIntro;
-extern Music    gSong;
+extern Music    gMusicIntro;
+extern Music    gMusicSong;
 
 #define	NORMAL		0
 #define	PRESS		1
@@ -88,6 +88,7 @@ public:
 
 	int getMax() const {
 		int ret = step;
+		ret = max(ret, step1);
 		ret = max(ret, step3);
 		ret = max(ret, step5);
 		ret = max(ret, step7);
@@ -97,6 +98,7 @@ public:
 
 	int getMin() const {
 		int ret = step;
+		ret = min(ret, step1);
 		ret = min(ret, step3);
 		ret = min(ret, step5);
 		ret = min(ret, step7);
@@ -118,7 +120,7 @@ extern Surface gScreen;
 
 extern	bool	SongFlag;
 
-extern	GameMode	gGameMode[2];
+extern	GameMode	gMode[2];
 extern	st_HighSpeed	gSpeed[2];
 
 extern	int		MaxSpeed;

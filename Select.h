@@ -24,5 +24,6 @@ void Read(void);
 int	ScanHiddenMode1p(void);
 int	ScanHiddenMode2p(void);
 void DrawMode(int x, int y, int Mode);
+void DrawModeIcon(const int player);
 
 #endif	// _SELECT_H

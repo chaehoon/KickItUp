@@ -9,7 +9,7 @@
 #include "Chunk.h"
 #include "Timer.h"
 
-extern  Chunk   gDead;
+extern  Chunk   gSndDead;
 extern	Surface     DeadScreen;
 extern	Surface		GameOver;
 
@@ -43,7 +43,7 @@ void Dead(void)
 
 	if(Firs==1)
 	{
-        gDead.Play();
+        gSndDead.Play();
 
         if( 50 < timer.GetTicks() )
         {

@@ -81,16 +81,16 @@ Surface	ResultFont;
 Surface	ResultBack;
 
 
-Chunk	gOpening;
-Chunk	gDead;
-Chunk	gMode;
-Chunk	gCancel;
-Chunk	gMove;
-Chunk	gBeat;
-Chunk	gSelectSong;
+Chunk	gSndOpening;
+Chunk	gSndDead;
+Chunk	gSndMode;
+Chunk	gSndCancel;
+Chunk	gSndMove;
+Chunk	gSndBeat;
+Chunk	gSndSelect;
 
-Music   gIntro;
-Music   gSong;
+Music   gMusicIntro;
+Music   gMusicSong;
 
 
 st_HighSpeed	gSpeed[2];
@@ -172,7 +172,8 @@ int		JudgeArray[110];
 
 
 
-GameMode	gGameMode[2];
+GameMode	gMode[2];
+char		gchGameMode;
 
 int	ALPHA=0;
 int	inc=20;
@@ -246,7 +247,7 @@ void	DisplayStageCount(const int count)
 void ClearMode(void)
 {
 	for(int i = 0 ; i < 2 ; ++i) {
-		gGameMode[i].Reset();
+		gMode[i].Reset();
 		gSpeed[i].reset();
 	}
 }
@@ -420,8 +421,6 @@ void KIU_STAGE(void)
 
 	static double tail;
 
-	static time_t t;
-
 	char s[50];
 
 	double bpmpix=(PUMP_SPRITE_Y)*bpm/60000;
@@ -449,8 +448,8 @@ void KIU_STAGE(void)
 	DisplayMessage(0,112,s);
 
 	if(start1==0) {
-		for(int i = 0 ; i < 2 ; ++i) {
-			if(gGameMode[i].IsSet(GameMode::eMODE_MIX)) {
+		for(i = 0 ; i < 2 ; ++i) {
+			if(gMode[i].IsSet(GameMode::eMODE_MIX)) {
 				MaxSpeed = gSpeed[i].getMax();
 				MinSpeed = gSpeed[i].getMin();
 			} else {
@@ -490,9 +489,9 @@ void KIU_STAGE(void)
 		Gauge1p=10;
 		Gauge2p=10;
 
-		if(gGameMode[0].IsSet(GameMode::eMODE_RAMDOM))
+		if(gMode[0].IsSet(GameMode::eMODE_RAMDOM))
 		{
-			for(int i=0;i<MAX_DATA;i++)
+			for(i=0;i<MAX_DATA;i++)
 			{
 				Data[MAX_DATA][0]=Data[i][0];
 				Data[MAX_DATA][1]=Data[i][1];
@@ -512,7 +511,7 @@ void KIU_STAGE(void)
 			}
 		}
 		
-		if(gGameMode[1].IsSet(GameMode::eMODE_RAMDOM))
+		if(gMode[1].IsSet(GameMode::eMODE_RAMDOM))
 		{
 			for(int i=0;i<MAX_DATA;i++)
 			{
@@ -534,7 +533,7 @@ void KIU_STAGE(void)
 			}
 		}
 
-		if(gGameMode[0].IsSet(GameMode::eMODE_MIRROR))
+		if(gMode[0].IsSet(GameMode::eMODE_MIRROR))
 		{
 			for(int i=0;i<MAX_DATA;i++)
 			{
@@ -555,7 +554,7 @@ void KIU_STAGE(void)
 			}
 		}
 
-		if(gGameMode[1].IsSet(GameMode::eMODE_MIRROR))
+		if(gMode[1].IsSet(GameMode::eMODE_MIRROR))
 		{
 			for(int i=0;i<MAX_DATA;i++)
 			{
@@ -579,9 +578,9 @@ void KIU_STAGE(void)
 		memcpy(&Data_Judge,&Data,sizeof(Data));
 		memcpy(&Data_Judge1,&Data1,sizeof(Data));
 	
-		if(gGameMode[0].IsSet(GameMode::eMODE_NONSTOP))
+		if(gMode[0].IsSet(GameMode::eMODE_NONSTOP))
 		{
-			for(int i=0;i<MAX_DATA;i++)
+			for(i=0;i<MAX_DATA;i++)
 			{
 				if(!(Data[i][0]=='0' && Data[i][1]=='0' && Data[i][2]=='0' && Data[i][3]=='0' && Data[i][4]=='0'))
 				{
@@ -602,9 +601,9 @@ void KIU_STAGE(void)
 			}
 		}
 		
-		if(gGameMode[1].IsSet(GameMode::eMODE_NONSTOP))
+		if(gMode[1].IsSet(GameMode::eMODE_NONSTOP))
 		{
-			for(int i=0;i<MAX_DATA;i++)
+			for(i=0;i<MAX_DATA;i++)
 			{
 				if(!(Data1[i][5]=='0' && Data1[i][6]=='0' && Data1[i][7]=='0' && Data1[i][8]=='0' && Data1[i][9]=='0'))
 				{
@@ -629,7 +628,7 @@ void KIU_STAGE(void)
 
 		if(SongFlag==true)
 		{
-            gSong.Play();
+            gMusicSong.Play();
 		}
 
 		start*=10;
@@ -686,7 +685,7 @@ void KIU_STAGE(void)
 			temp=+55;
 			tail=0;
 
-			curtime = gSong.GetCurrentPosition();
+			curtime = gMusicSong.GetCurrentPosition();
 
 			if(curtime > starttime) 
 			    delta=(Uint32)curtime-starttime;
@@ -730,7 +729,7 @@ void KIU_STAGE(void)
 			k=48;
 			if(SongFlag)
 			{
-				gSong.Halt();
+				gMusicSong.Halt();
 				SongFlag=false;
 			}
 			g_ProgramState=RESULT;
@@ -766,7 +765,7 @@ void KIU_STAGE(void)
 
 			Data_y[i+k+1]=(25+temp+PUMP_SPRITE_Y*k/2)*MinSpeed-(PUMP_SPRITE_Y)*(MinSpeed-1);
 
-			if(gGameMode[0].IsSet(GameMode::eMODE_SUDDENR))
+			if(gMode[0].IsSet(GameMode::eMODE_SUDDENR))
 			{
 				if(Data_y[i+k]>240 && Data_y[i+k]<290)
 				{
@@ -875,7 +874,7 @@ void KIU_STAGE(void)
 
 			Data_y[i+k+3]=(38+temp+PUMP_SPRITE_Y*k/4)*MinSpeed-(PUMP_SPRITE_Y)*(MinSpeed-1);
 
-			if(gGameMode[0].IsSet(GameMode::eMODE_SUDDENR))
+			if(gMode[0].IsSet(GameMode::eMODE_SUDDENR))
 			{
 				if(Data_y[i+k]>240 && Data_y[i+k]<290)
 				{
@@ -989,7 +988,7 @@ void KIU_STAGE(void)
 			k=48;
 			if(SongFlag)
 			{
-				gSong.Halt();
+				gMusicSong.Halt();
 				SongFlag=false;
 			}
 			g_ProgramState=RESULT;
@@ -1025,7 +1024,7 @@ void KIU_STAGE(void)
 
 			Data_y1[i+k+1]=(25+temp+PUMP_SPRITE_Y*k/2)*MinSpeed-(PUMP_SPRITE_Y)*(MinSpeed-1);
 
-			if(gGameMode[1].IsSet(GameMode::eMODE_SUDDENR))
+			if(gMode[1].IsSet(GameMode::eMODE_SUDDENR))
 			{
 				if(Data_y1[i+k]>240 && Data_y1[i+k]<290)
 				{
@@ -1134,7 +1133,7 @@ void KIU_STAGE(void)
 
 			Data_y1[i+k+3]=(38+temp+PUMP_SPRITE_Y*k/4)*MinSpeed-(PUMP_SPRITE_Y)*(MinSpeed-1);
 
-			if(gGameMode[1].IsSet(GameMode::eMODE_SUDDENR))
+			if(gMode[1].IsSet(GameMode::eMODE_SUDDENR))
 			{
 				if(Data_y1[i+k]>240 && Data_y1[i+k]<290)
 				{
@@ -1254,39 +1253,20 @@ void KIU_STAGE(void)
 	}
 
 	for(int i = 0 ; i < 2 ; ++i) {
-		int	x[2] = {0, 600};
-		if(gGameMode[i].IsSet(GameMode::eMODE_MIRROR))
-			DrawMode(x[i], 200, HMODE_MIRROR);
-
-		if(gGameMode[i].IsSet(GameMode::eMODE_NONSTOP))
-			DrawMode(x[i],240,HMODE_NONSTEP);
-
-		if(gGameMode[i].IsSet(GameMode::eMODE_SYNCHRO))
-			DrawMode(x[i],280,HMODE_SYNCHRO);
-
-		if(gGameMode[i].IsSet(GameMode::eMODE_UNION))
-			DrawMode(x[i],320,HMODE_UNION);
-
-		if(gGameMode[i].IsSet(GameMode::eMODE_RAMDOM))
-			DrawMode(x[i],360,HMODE_RANDOM);
-		if(gGameMode[i].IsSet(GameMode::eMODE_VANISH))
-			DrawMode(x[i],400,HMODE_VANISH);
-
-		if(gSpeed[i].step>1)DrawMode(x[i],160,HMODE_2X);
-
+		DrawModeIcon(i);
 	}
 }
 
 
 void WaveSet_Loading(void)
 {
-    gOpening.Load( "wave/opening.wav" );
-    gDead.Load( "wave/dead.wav" );
-    gMode.Load( "wave/mode.wav" );
-    gCancel.Load( "wave/cancel.wav" );
-    gMove.Load( "wave/move.wav" );
-    gBeat.Load( "wave/beat.wav" );
-    gSelectSong.Load( "wave/music_select.wav" );
+    gSndOpening.Load( "wave/opening.wav" );
+    gSndDead.Load( "wave/dead.wav" );
+    gSndMode.Load( "wave/mode.wav" );
+    gSndCancel.Load( "wave/cancel.wav" );
+    gSndMove.Load( "wave/move.wav" );
+    gSndBeat.Load( "wave/beat.wav" );
+    gSndSelect.Load( "wave/music_select.wav" );
 }
 
 void DisplayMessage(int x, int y, const char * message)
@@ -1344,14 +1324,14 @@ bool ClpBlt(int x ,int y ,Surface & surface, const SDL_Rect & srect)
     }
 
 	if(g_ProgramState == DOUBLEST) {
-		if(bModeVanish1p || bModeVanish2p) {
+		if(gMode[0].IsSet(GameMode::eMODE_VANISH) || gMode[1].IsSet(GameMode::eMODE_VANISH)) {
 			if(y<150)
 				return true;
 
             if(y<250)
                 surface.SetAlpha( (y-150) * 2 );
 		}
-		else if(bModeSuddenR1p || bModeSuddenR2p) {
+		else if(gMode[0].IsSet(GameMode::eMODE_SUDDENR) || gMode[1].IsSet(GameMode::eMODE_SUDDENR)) {
             if(100 < y && y <= 200)
                 surface.SetAlpha( (200-y)*2 );
 			else if(200 < y && y < 320)
@@ -1361,13 +1341,13 @@ bool ClpBlt(int x ,int y ,Surface & surface, const SDL_Rect & srect)
 		}
 	}
 	else if(x < 320) {
-		if(bModeVanish1p) {
+		if(gMode[0].IsSet(GameMode::eMODE_VANISH)) {
 			if(y < 150)
                 return true;
             if(y < 250)
                 surface.SetAlpha( (y-150) * 2 );
 		}
-		else if(bModeSuddenR1p) {
+		else if(gMode[0].IsSet(GameMode::eMODE_SUDDENR)) {
             if(100 < y && y <= 200)
                 surface.SetAlpha( (200-y)*2 );
 			else if(200 < y && y < 320)
@@ -1377,13 +1357,13 @@ bool ClpBlt(int x ,int y ,Surface & surface, const SDL_Rect & srect)
 		}
 	}
 	else if(x>320) {
-		if(bModeVanish2p) {
+		if(gMode[1].IsSet(GameMode::eMODE_VANISH)) {
 			if(y<150)
                 return true;
             if(y<250)
                 surface.SetAlpha( (y-150) * 2 );
 		}
-		else if(bModeSuddenR2p) {
+		else if(gMode[1].IsSet(GameMode::eMODE_SUDDENR)) {
             if(y>100 && y<=200)
                 surface.SetAlpha( (200-y)*2 );
             else if(y>200 && y<320)
@@ -1406,7 +1386,7 @@ void StageTitle(void)
 		Start1p=false;
 		Start2p=false;
 		First++;
-		gOpening.Play( true );
+		gSndOpening.Play( true );
 	}
 
 	ReadGameInput();
@@ -1438,7 +1418,7 @@ void StageTitle(void)
 		Couple = Start1p && Start2p;
 
 		First=0;
-		gOpening.Halt();
+		gSndOpening.Halt();
 		PressedKey2p[0]=0;
 
 		// Change ProgramState to SelectSong Stage
@@ -1752,7 +1732,7 @@ void DrawArrow1p(Uint32 cur)
 
 	if(cur2!=cur)
 	{
-		if(bModeRandomS1p == true)
+		if(gMode[0].IsSet(GameMode::eMODE_RAMDOMS))
 		{
 			gSpeed[0].step1 = gSpeed[0].step3 = gSpeed[0].step5 = gSpeed[0].step7 = gSpeed[0].step9 = 1 + rand() % 8 ;
 		}
@@ -2355,8 +2335,8 @@ void DrawArrow1p(Uint32 cur)
 	}
 
 	if(Judgement1p==PERFECT || Judgement1p==GREAT)	{
-        gBeat.Halt();
-        gBeat.Play();
+        gSndBeat.Halt();
+        gSndBeat.Play();
 
 		if(Judgement1p==PERFECT)cPerfect1p++;
 		if(Judgement1p==GREAT)cGreat1p++;
@@ -2416,7 +2396,7 @@ void DrawArrow1p(Uint32 cur)
 			{
 				if(SongFlag)
 				{
-					gSong.Halt();
+					gMusicSong.Halt();
 					SongFlag=false;
 				}
 				g_ProgramState=DEAD;
@@ -2428,7 +2408,7 @@ void DrawArrow1p(Uint32 cur)
 			{
 				if(SongFlag)
 				{
-					gSong.Halt();
+					gMusicSong.Halt();
 					SongFlag=false;
 				}
 				g_ProgramState=DEAD;
@@ -2538,7 +2518,7 @@ void DrawArrow2p(Uint32 cur)
 	if(Start2p==true && Start1p==false)ReadGameInput();
 	if(cur2!=cur)
 	{
-		if(bModeRandomS2p == true)
+		if(gMode[1].IsSet(GameMode::eMODE_RAMDOMS))
 		{
 			gSpeed[1].step1 = gSpeed[1].step3 = gSpeed[1].step5 = gSpeed[1].step7 = gSpeed[1].step9 = 1 + rand() % 8 ;
 		}
@@ -3142,8 +3122,8 @@ void DrawArrow2p(Uint32 cur)
 	}
 
 	if(Judgement2p==PERFECT || Judgement2p==GREAT) {
-        gBeat.Halt();
-        gBeat.Play();
+        gSndBeat.Halt();
+        gSndBeat.Play();
 
         Combo2p++;
 		if(Judgement2p==PERFECT)cPerfect2p++;
@@ -3203,7 +3183,7 @@ void DrawArrow2p(Uint32 cur)
 			{
 				if(SongFlag)
 				{
-					gSong.Halt();
+					gMusicSong.Halt();
 					SongFlag=false;
 				}
 				g_ProgramState=DEAD;
@@ -3215,7 +3195,7 @@ void DrawArrow2p(Uint32 cur)
 			{
 				if(SongFlag)
 				{
-					gSong.Halt();
+					gMusicSong.Halt();
 					SongFlag=false;
 				}
 				g_ProgramState=DEAD;
@@ -3630,16 +3610,16 @@ bool init()
 
 void clean_up()
 {
-    gOpening.Free();
-    gDead.Free();
-    gMode.Free();
-    gCancel.Free();
-    gMove.Free();
-    gBeat.Free();
-    gSelectSong.Free();
+    gSndOpening.Free();
+    gSndDead.Free();
+    gSndMode.Free();
+    gSndCancel.Free();
+    gSndMove.Free();
+    gSndBeat.Free();
+    gSndSelect.Free();
 
-    gIntro.Free();
-	gSong.Free();
+    gMusicIntro.Free();
+	gMusicSong.Free();
 
     gSongTitle.Free();
     gSongBack.Free();
@@ -3706,16 +3686,16 @@ void process_Keydown( const SDLKey & keyValue )
             case SELECTSONG:
                 g_ProgramState=GAMETITLE;
                 if(IntroFlag){
-                    gIntro.Halt();
+                    gMusicIntro.Halt();
                     IntroFlag=false;
                 }
-                gSelectSong.Halt();
+                gSndSelect.Halt();
                 First=0;
                 break;
 
             case STAGE1:
                 if(SongFlag) {
-                    gSong.Halt();
+                    gMusicSong.Halt();
                     SongFlag=false;
                 }
                 First=0;
@@ -3723,7 +3703,7 @@ void process_Keydown( const SDLKey & keyValue )
                 break;
             case DOUBLEST:
                 if(SongFlag){
-                    gSong.Halt();
+                    gMusicSong.Halt();
                     SongFlag=false;
                 }
                 First=0;
@@ -3731,7 +3711,7 @@ void process_Keydown( const SDLKey & keyValue )
                 break;
             case COUPLE:
                 if(SongFlag) {
-                    gSong.Halt();
+                    gMusicSong.Halt();
                     SongFlag=false;
                 }
                 First=0;

@@ -70,7 +70,7 @@ extern	Surface	ComboFont;
 extern Surface	GaugeWaku;
 extern Surface	Gauge;
 
-extern Chunk    gBeat;
+extern Chunk    gSndBeat;
 
 
 st_HighSpeed	sSpeed;
@@ -1560,8 +1560,8 @@ void DrawArrow_DB(Uint32 cur)
 
 	if(Judgement1p==PERFECT || Judgement1p==GREAT)
 	{
-        gBeat.Halt();
-        gBeat.Play();
+        gSndBeat.Halt();
+        gSndBeat.Play();
 
         Combo1p++;
 		if(Start1p)
@@ -1665,7 +1665,7 @@ void DrawArrow_DB(Uint32 cur)
 		{
 			if(SongFlag)
 			{
-                gSong.Halt();
+                gMusicSong.Halt();
 				SongFlag=false;
 			}
 			g_ProgramState=DEAD;
@@ -1847,10 +1847,10 @@ void KIU_STAGE_DOUBLE(void)
 	if(start1 == 0) {
 		if(Start1p) {
 			sSpeed = gSpeed[0];
-			sGameMode = gGameMode[0];
+			sGameMode = gMode[0];
 		} else if(Start2p)	{
 			sSpeed = gSpeed[2];
-			sGameMode = gGameMode[1];
+			sGameMode = gMode[1];
 		}
 
 		if(sGameMode.IsSet(GameMode::eMODE_MIX)) {
@@ -1889,7 +1889,7 @@ void KIU_STAGE_DOUBLE(void)
 		}
 		sta=0;
 		
-		if(bModeMirror) {
+		if(sGameMode.IsSet(GameMode::eMODE_MIRROR)) {
 			for(i=0;i<MAX_DATA;i++) {
 				Data_Double[MAX_DATA][0]=Data_Double[i][0];
 				Data_Double[MAX_DATA][1]=Data_Double[i][1];
@@ -1921,7 +1921,7 @@ void KIU_STAGE_DOUBLE(void)
 			}
 		}
 			
-		if(bModeRandom)
+		if(sGameMode.IsSet(GameMode::eMODE_RAMDOM))
 		{
 			for(i=0;i<MAX_DATA;i++)
 			{
@@ -1954,7 +1954,7 @@ void KIU_STAGE_DOUBLE(void)
 			}
 		}
 
-		if(bModeUnion)
+		if(sGameMode.IsSet(GameMode::eMODE_UNION))
 		{
 			for(i=0;i<(MAX_DATA);i++)
 			{
@@ -1987,7 +1987,7 @@ void KIU_STAGE_DOUBLE(void)
 
 		memcpy(&Data_Double_Judge,&Data_Double,sizeof(Data_Double_Judge));
 
-		if(bModeNonstep)
+		if(sGameMode.IsSet(GameMode::eMODE_NONSTOP))
 		{
 			for(i=0;i<MAX_DATA;i++)
 			{
@@ -2021,7 +2021,7 @@ void KIU_STAGE_DOUBLE(void)
 
 		if(SongFlag==true)
 		{
-			gSong.Play();
+			gMusicSong.Play();
 		}
 
 		start*=10;
@@ -2079,7 +2079,7 @@ void KIU_STAGE_DOUBLE(void)
 			temp=+55;
 			tail=0;
 
-			curtime = gSong.GetCurrentPosition();
+			curtime = gMusicSong.GetCurrentPosition();
 
 			if(curtime > starttime) 
 			delta=(Uint32)curtime-starttime;
@@ -2125,7 +2125,7 @@ void KIU_STAGE_DOUBLE(void)
 			k=48;
 			if(SongFlag)
 			{
-                gSong.Halt();
+                gMusicSong.Halt();
 				SongFlag=false;
 			}
 			g_ProgramState=RESULT;
@@ -2133,7 +2133,7 @@ void KIU_STAGE_DOUBLE(void)
 
 		if(tick==2)
 		{
-			if(bModeSuddenR1p || bModeSuddenR2p)
+			if(gMode[0].IsSet(GameMode::eMODE_SUDDENR) || gMode[1].IsSet(GameMode::eMODE_SUDDENR) )
 			{
 				if(Data_Double_y[i+k]>240 && Data_Double_y[i+k]<290)
 				{
@@ -2243,7 +2243,7 @@ void KIU_STAGE_DOUBLE(void)
 		}	
 		else if(tick==4)
 		{
-			if(bModeSuddenR1p || bModeSuddenR2p)
+			if(gMode[0].IsSet(GameMode::eMODE_SUDDENR) || gMode[1].IsSet(GameMode::eMODE_SUDDENR) )
 			{
 				if(Data_Double_y[i+k]>240 && Data_Double_y[i+k]<290)
 				{
@@ -2545,28 +2545,13 @@ void KIU_STAGE_DOUBLE(void)
 	}
 	if(Start1p)
 	{
-		if(bModeMirror1p)DrawMode(0,200,HMODE_MIRROR);
-		if(bModeNonstep1p)DrawMode(0,240,HMODE_NONSTEP);
-		if(bModeSynchro)DrawMode(0,280,HMODE_SYNCHRO);
-		if(bModeUnion1p)DrawMode(0,320,HMODE_UNION);
-		if(bModeRandom1p)DrawMode(0,360,HMODE_RANDOM);
-		if(bModeVanish1p)DrawMode(0,400,HMODE_VANISH);
-
-		if(gSpeed[0].step>1)DrawMode(0,160,HMODE_2X);
-
+		DrawModeIcon(0);
 		DrawGaugeDB_1p();
 		DrawScore1p();
 	}
 	else if(Start2p)
 	{
-		if(bModeMirror2p)DrawMode(600,200,HMODE_MIRROR);
-		if(bModeNonstep2p)DrawMode(600,240,HMODE_NONSTEP);
-		if(bModeUnion2p)DrawMode(600,320,HMODE_UNION);
-		if(bModeRandom2p)DrawMode(600,360,HMODE_RANDOM);
-		if(bModeVanish2p)DrawMode(600,400,HMODE_VANISH);
-
-		if(gSpeed[1].step>1)DrawMode(600,160,HMODE_2X);
-
+		DrawModeIcon(1);
 		DrawGaugeDB_2p();
 		DrawScore2p();
 	}

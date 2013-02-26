@@ -54,7 +54,7 @@ extern char					SongName3[PATH_LEN+1];
 extern char					Title[PATH_LEN+1];
 extern	int					start1;
 
-extern	char				GameMode;
+extern	char				gchGameMode;
 
 extern	char				Couple;
 extern	char				Double;
@@ -62,10 +62,10 @@ extern	char				Double;
 
 
 #include "Chunk.h"
-extern Chunk			gMode;
-extern Chunk            gCancel;
-extern Chunk			gMove;
-extern Chunk			gSelectSong;
+extern Chunk			gSndMode;
+extern Chunk            gSndCancel;
+extern Chunk			gSndMove;
+extern Chunk			gSndSelect;
 
 extern char First;
 
@@ -412,69 +412,69 @@ void _setHiddenMode(const int player, const int mode)
 {
 	if ( mode ) {
 		if ( IntroFlag ) {
-			gIntro.Halt();
+			gMusicIntro.Halt();
 			IntroFlag=false;
 		}
 	}
 
-	GameMode & gameMode = gGameMode[player];
-	st_Speed speed = gSpeed[player];
+	GameMode & gameMode = gMode[player];
+	st_HighSpeed & speed = gSpeed[player];
 
 	switch ( mode ) {
 		case HMODE_SUDDENR:
 			gameMode.Set(GameMode::eMODE_SUDDENR);
 			gameMode.UnSet(GameMode::eMODE_VANISH);
-			gMode.Play();
+			gSndMode.Play();
 			break;
 		case HMODE_RANDOMS:
 			gameMode.Set(GameMode::eMODE_RAMDOMS);
-			speed.step=1;
-			gMode.Play();
+			speed.reset(1);
+			gSndMode.Play();
 			break;
 		case HMODE_2X:
-			speed.step=2;
-			gMode.Play();
+			speed.reset(2);
+			gSndMode.Play();
 			break;
 		case HMODE_4X:
-			speed.step=4;
-			gMode.Play();
+			speed.reset(4);
+			gSndMode.Play();
 			break;
 		case HMODE_8X:
-			speed.step=8;
-			gMode.Play();
+			speed.reset(8);
+			gSndMode.Play();
 			break;
 		case HMODE_MIRROR:
 			gameMode.Set(GameMode::eMODE_MIRROR);
-			gMode.Play();
+			gSndMode.Play();
 			break;
 		case HMODE_NONSTEP:
 			gameMode.Set(GameMode::eMODE_NONSTOP);
-			gMode.Play();
+			gSndMode.Play();
 			break;
 		case HMODE_SYNCHRO:
 			gameMode.Set(GameMode::eMODE_SYNCHRO);
-			gMode.Play();
+			gSndMode.Play();
 			break;
 		case HMODE_UNION:
 			gameMode.Set(GameMode::eMODE_UNION);
-			gMode.Play();
+			gSndMode.Play();
 			break;
 		case HMODE_RANDOM:
 			gameMode.Set(GameMode::eMODE_RAMDOM);
-			gMode.Play();
+			gSndMode.Play();
 			break;
 		case HMODE_4DMIX:
 			speed.setRandom();
 			gameMode.Set(GameMode::eMODE_MIX);
-			gMode.Play();
+			gSndMode.Play();
 			break;
 		case HMODE_VANISH:
 			gameMode.Set(GameMode::eMODE_VANISH);
 			gameMode.UnSet(GameMode::eMODE_SUDDENR);
-			gMode.Play();
+			gSndMode.Play();
 			break;
 		case HMODE_CANCEL:
-			gCancel.Play();
+			gSndCancel.Play();
 			speed.reset();
 			gameMode.Reset();
 			break;
@@ -490,7 +490,7 @@ void SetHiddenMode1p()
 {
 	// Get 1Player hidden mode.
 	int mode = ScanHiddenMode1p();
-	_setHiddenMode(1, mode);
+	_setHiddenMode(0, mode);
 }
 
 /**
@@ -499,90 +499,9 @@ void SetHiddenMode1p()
 void SetHiddenMode2p()
 {
 	// Get 2Player hidden mode.
+	// Get 1Player hidden mode.
 	int mode = ScanHiddenMode2p();
-	if ( mode  ) {
-		if ( IntroFlag ) {
-			gIntro.Halt();
-			IntroFlag=false;
-		}
-	}
-
-	switch ( mode  ) {
-		case HMODE_SUDDENR:
-			bModeSuddenR2p=true;
-			bModeVanish2p=false;
-
-			gMode.Play();
-			break;
-		case HMODE_RANDOMS:
-			bModeRandomS2p=true;
-			gSpeed[1].step=1;
-
-			gMode.Play();
-			break;
-		case HMODE_2X:
-			gSpeed[1].step=2;
-			gMode.Play();
-			break;
-		case HMODE_4X:
-			gSpeed[1].step=4;
-			gMode.Play();
-			break;
-		case HMODE_8X:
-			gSpeed[1].step=8;
-			gMode.Play();
-			break;
-		case HMODE_MIRROR:
-			bModeMirror2p=true;
-			gMode.Play();
-			break;
-		case HMODE_NONSTEP:
-			bModeNonstep2p=true;
-			gMode.Play();
-			break;
-		case HMODE_SYNCHRO:
-			bModeSynchro=true;
-			gMode.Play();
-			break;
-		case HMODE_UNION:
-			bModeUnion2p=true;
-			gMode.Play();
-			break;
-		case HMODE_RANDOM:
-			bModeRandom2p=true;
-			gMode.Play();
-			break;
-		case HMODE_4DMIX:
-			gSpeed[1].setRandom();
-
-			b4dMix2p=true;
-			gMode.Play();
-			break;
-		case HMODE_VANISH:
-			bModeVanish2p=true;
-			bModeSuddenR2p=false;
-			gMode.Play();
-			break;
-
-		case HMODE_CANCEL:
-			gCancel.Play();
-			gSpeed[1].step=1;
-			bModeMirror2p=false;
-			bModeNonstep2p=false;
-			bModeUnion2p=false;
-			bModeRandom2p=false;
-			b4dMix2p=false;
-			gSpeed[1].step1=1;
-			gSpeed[1].step3=1;
-			gSpeed[1].step5=1;
-			gSpeed[1].step7=1;
-			gSpeed[1].step9=1;
-			bModeVanish2p=false;
-			bModeSuddenR2p=false;
-			bModeRandomS2p=false;
-			Double=false;
-			break;
-	}
+	_setHiddenMode(1, mode);
 }
 
 void ChageSelectScreen(Uint32 * selectedIndex, int * selected, int * move)
@@ -590,10 +509,10 @@ void ChageSelectScreen(Uint32 * selectedIndex, int * selected, int * move)
 	// change screen to left.
 	if ( ( Start1p && PressedKey1p[1] ) || ( Start2p && PressedKey2p[1] ) )	{
 		if ( IntroFlag ) {
-			gIntro.Halt();
+			gMusicIntro.Halt();
 			IntroFlag=false;
 		}
-		gMove.Play();
+		gSndMove.Play();
 
 		*selected =0 ;
 
@@ -604,10 +523,10 @@ void ChageSelectScreen(Uint32 * selectedIndex, int * selected, int * move)
 	// change screen to right.
 	if ( ( Start1p && PressedKey1p[3] ) || ( Start2p && PressedKey2p[3] ) )	{
 		if ( IntroFlag ) {
-			gIntro.Halt();
+			gMusicIntro.Halt();
 			IntroFlag=false;
 		}
-		gMove.Play();
+		gSndMove.Play();
 
 		*selected = 0;
 
@@ -629,29 +548,12 @@ void SelectSong ( void )
 	if ( First==0 )	{
 		startTimer=SDL_GetTicks();
 		if ( Start1p==false ) {
-			bModeMirror1p=false;
-			bModeNonstep1p=false;
-			bModeSynchro=false;
-			bModeUnion1p=false;
-			bModeRandom1p=false;
-			b4dMix1p=false;
-			bModeVanish1p=false;
-			bModeSuddenR1p=false;
-			bModeRandomS1p=false;
-
+			gMode[0].Reset();
 			gSpeed[0].reset();
 		}
 
 		if ( Start2p==false )	{
-			bModeMirror2p=false;
-			bModeNonstep2p=false;
-			bModeUnion2p=false;
-			bModeRandom2p=false;
-			b4dMix2p=false;
-			bModeVanish2p=false;
-			bModeSuddenR1p=false;
-			bModeRandomS1p=false;
-
+			gMode[1].Reset();
 			gSpeed[1].reset();
 		}
 		// paint the background black.
@@ -662,7 +564,7 @@ void SelectSong ( void )
 
 		a=Start1p;b=Start2p;
 		First++;
-		gSelectSong.Play ( true );
+		gSndSelect.Play ( true );
 	}
 
 	// 선택화면에서 보이는 좌우 음악을 연결 시킨다.
@@ -696,24 +598,24 @@ void SelectSong ( void )
 		else	{
 			// if intro music is playing then stop.
 			if ( IntroFlag ) {
-				gIntro.Halt();
+				gMusicIntro.Halt();
 				IntroFlag=false;
 			}
 
 			// if moving music is playing then stop.
-			gMove.Play();
+			gSndMove.Play();
 
 			// start New intro music.
-			gIntro.Halt();
+			gMusicIntro.Halt();
 			if ( access ( CSONG[current].IntroWavPath,04 ) ==0 ) {
 				IntroFlag=true;
-				gIntro.Load ( CSONG[current].IntroWavPath );
-				gIntro.Play ( true );
+				gMusicIntro.Load ( CSONG[current].IntroWavPath );
+				gMusicIntro.Play ( true );
 			}
 			else if ( access ( CSONG[current].IntroMp3Path,04 ) ==0 ) {
 				IntroFlag=true;
-				gIntro.Load ( CSONG[current].IntroMp3Path );
-				gIntro.Play ( true );
+				gMusicIntro.Load ( CSONG[current].IntroMp3Path );
+				gMusicIntro.Play ( true );
 			}
 
 			Selected=7;
@@ -735,26 +637,26 @@ void SelectSong ( void )
 			// intro sound stop.
 			if ( IntroFlag )
 			{
-				gIntro.Halt();
+				gMusicIntro.Halt();
 				IntroFlag=false;
 			}
 
 			// moving sound stop.
-			gMove.Play();
+			gSndMove.Play();
 
 			// selected song intro sound start.
-			gIntro.Halt();
+			gMusicIntro.Halt();
 			if ( access ( CSONG[CSONG[current].Next].IntroWavPath,04 ) ==0 )
 			{
 				IntroFlag=true;
-				gIntro.Load ( CSONG[CSONG[current].Next].IntroWavPath );
-				gIntro.Play ( true );
+				gMusicIntro.Load ( CSONG[CSONG[current].Next].IntroWavPath );
+				gMusicIntro.Play ( true );
 			}
 			else if ( access ( CSONG[CSONG[current].Next].IntroMp3Path,04 ) ==0 )
 			{
 				IntroFlag=true;
-				gIntro.Load ( CSONG[CSONG[current].Next].IntroMp3Path );
-				gIntro.Play ( true );
+				gMusicIntro.Load ( CSONG[CSONG[current].Next].IntroMp3Path );
+				gMusicIntro.Play ( true );
 			}
 
 			Selected=9;
@@ -768,24 +670,26 @@ void SelectSong ( void )
 
 		// Game Mode setting.
 		Song &	selectedSong = CSONG[SelectCurrent];
-		if ( selectedSong.HaveCrazy==true ) GameMode=MODE_CRAZY,Double=false;
-		else if ( selectedSong.HaveDouble==true ) GameMode=MODE_DOUBLE,Double=true;
-		else if ( selectedSong.HaveEasy==true ) GameMode=MODE_EASY,Double=false;
-		else if ( selectedSong.HaveHard==true ) GameMode=MODE_HARD,Double=false;
+		if ( selectedSong.HaveCrazy==true ) gchGameMode=MODE_CRAZY,Double=false;
+		else if ( selectedSong.HaveDouble==true ) gchGameMode=MODE_DOUBLE,Double=true;
+		else if ( selectedSong.HaveEasy==true ) gchGameMode=MODE_EASY,Double=false;
+		else if ( selectedSong.HaveHard==true ) gchGameMode=MODE_HARD,Double=false;
 		else return;
 
 		// Couple mode setting.
 		if ( Start1p && Start2p )
 		{
 			Couple=true;
-			if ( selectedSong.HaveCouple==false )
-				bModeSynchro=true;
+			if ( selectedSong.HaveCouple==false ) {
+				gMode[0].Set(GameMode::eMODE_SYNCHRO);
+				gMode[1].Set(GameMode::eMODE_SYNCHRO);
+			}
 		}
 		else
 			Couple=false;
 
 		// Cancel sound restart.
-		gCancel.Play();
+		gSndCancel.Play();
 
 		// selected song background setting.
 		gSongBack.LoadBmp ( selectedSong.BgImgPath );
@@ -809,14 +713,14 @@ void SelectSong ( void )
 		gSongTitle.BltFast ( 0, 0, gScreen );
 
 		// double mode
-		if ( GameMode == MODE_DOUBLE ) {
+		if ( gchGameMode == MODE_DOUBLE ) {
 			memcpy ( &Data_Double, &selectedSong.getStep1().step, sizeof ( selectedSong.getStep1().step ) );
 		}
 		// couple mode
 		else if ( Couple==true ) {
-			switch ( GameMode )		{
+			switch ( gchGameMode )		{
 				case MODE_CRAZY:
-					if ( bModeSynchro )	{
+					if (gMode[0].IsSet(GameMode::eMODE_SYNCHRO) )	{
 						memcpy ( &Data,  &selectedSong.getStep1().step, sizeof ( selectedSong.getStep1().step ) );
 						memcpy ( &Data1, &selectedSong.getStep1().step, sizeof ( selectedSong.getStep1().step ) );
 
@@ -835,7 +739,7 @@ void SelectSong ( void )
 					break;
 
 				case MODE_EASY:
-					if ( bModeSynchro )	{
+					if ( gMode[0].IsSet(GameMode::eMODE_SYNCHRO) )	{
 						memcpy ( &Data, &selectedSong.getStep1().step, sizeof ( selectedSong.getStep1().step ) );
 						memcpy ( &Data1,&selectedSong.getStep1().step, sizeof ( selectedSong.getStep1().step ) );
 
@@ -855,7 +759,7 @@ void SelectSong ( void )
 					break;
 
 				case MODE_HARD:
-					if ( bModeSynchro )	{
+					if ( gMode[0].IsSet(GameMode::eMODE_SYNCHRO) )	{
 						memcpy ( &Data, &selectedSong.getStep1().step, sizeof ( selectedSong.getStep1().step ) );
 						memcpy ( &Data1,&selectedSong.getStep1().step, sizeof ( selectedSong.getStep1().step ) );
 
@@ -876,7 +780,7 @@ void SelectSong ( void )
 		}
 		// single mode.
 		else	{
-			switch ( GameMode )	{
+			switch ( gchGameMode )	{
 				case MODE_CRAZY:
 					if ( Start1p )
 						memcpy ( &Data, selectedSong.getStep1().step, sizeof ( Data ) );
@@ -933,7 +837,7 @@ void SelectSong ( void )
 		bunki=selectedSong.getStep1().bunki1;
 		bunki2=selectedSong.getStep1().bunki2;
 
-		switch ( GameMode )	{
+		switch ( gchGameMode )	{
 			case MODE_CRAZY:
 			case MODE_HARD:
 			case MODE_EASY:
@@ -961,31 +865,31 @@ void SelectSong ( void )
 		Judgement1p=NONE;
 		Judgement2p=NONE;
 
-		if ( GameMode==MODE_DOUBLE )
+		if ( gchGameMode==MODE_DOUBLE )
 			g_ProgramState=DOUBLEST;
 		else
 			g_ProgramState=STAGE1;
 
-		if ( GameMode==MODE_DOUBLE )	{
+		if ( gchGameMode==MODE_DOUBLE )	{
 			if ( Start1p && Start2p )
 				Start2p=false;
 		}
 		Selected=0;
 
-		gSelectSong.Halt();
+		gSndSelect.Halt();
 		if ( IntroFlag )	{
-			gIntro.Halt();
+			gMusicIntro.Halt();
 			IntroFlag=false;
 		}
 
 		// open play song.
 		if ( access ( SongName,04 ) ==0 )	{
 			SongFlag=true;
-			gSong.Load ( SongName );
+			gMusicSong.Load ( SongName );
 		}
 		else if ( access ( SongName2,04 ) ==0 )	{
 			SongFlag=true;
-			gSong.Load ( SongName2 );
+			gMusicSong.Load ( SongName2 );
 		}
 		else
 			SongFlag=false;
@@ -1153,32 +1057,11 @@ void SelectSong ( void )
 		DisplayMessage ( 200, 300, CSONG[CSONG[current].Next].SongTitle );
 
 	// draw 1p mode pictures.
-	if ( bModeMirror1p )
-		DrawMode ( 0,200,HMODE_MIRROR );
-	if ( bModeNonstep1p )
-		DrawMode ( 0,240,HMODE_NONSTEP );
-	if ( bModeSynchro )
-		DrawMode ( 0,280,HMODE_SYNCHRO );
-	if ( bModeUnion1p )
-		DrawMode ( 0,320,HMODE_UNION );
-	if ( bModeRandom1p )
-		DrawMode ( 0,360,HMODE_RANDOM );
-	if ( bModeVanish1p )
-		DrawMode ( 0,400,HMODE_VANISH );
+	DrawModeIcon(0);
+	DrawModeIcon(1);
 	if ( gSpeed[0].step>1 )
 		DrawMode ( 0,160,HMODE_2X );
 
-	// draw 2p mode pictures.
-	if ( bModeMirror2p )
-		DrawMode ( 600,200,HMODE_MIRROR );
-	if ( bModeNonstep2p )
-		DrawMode ( 600,240,HMODE_NONSTEP );
-	if ( bModeUnion2p )
-		DrawMode ( 600,320,HMODE_UNION );
-	if ( bModeRandom2p )
-		DrawMode ( 600,360,HMODE_RANDOM );
-	if ( bModeVanish2p )
-		DrawMode ( 600,400,HMODE_VANISH );
 	if ( gSpeed[1].step>1 )
 		DrawMode ( 600,160,HMODE_2X );
 
@@ -1524,4 +1407,28 @@ void DrawMode ( int x, int y, int Mode )
 	}
 
 	gModeIcon.BltFast ( x, y, gScreen, &modeRect );
+}
+
+void DrawModeIcon(const int player)
+{
+	int	x[2] = {0, 600};
+	if(gMode[player].IsSet(GameMode::eMODE_MIRROR))
+		DrawMode(x[player], 200, HMODE_MIRROR);
+
+	if(gMode[player].IsSet(GameMode::eMODE_NONSTOP))
+		DrawMode(x[player],240,HMODE_NONSTEP);
+
+	if(gMode[player].IsSet(GameMode::eMODE_SYNCHRO))
+		DrawMode(x[player],280,HMODE_SYNCHRO);
+
+	if(gMode[player].IsSet(GameMode::eMODE_UNION))
+		DrawMode(x[player],320,HMODE_UNION);
+
+	if(gMode[player].IsSet(GameMode::eMODE_RAMDOM))
+		DrawMode(x[player],360,HMODE_RANDOM);
+	if(gMode[player].IsSet(GameMode::eMODE_VANISH))
+		DrawMode(x[player],400,HMODE_VANISH);
+
+	if(gSpeed[player].step>1)
+		DrawMode(x[player],160,HMODE_2X);
 }
