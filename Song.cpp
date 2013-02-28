@@ -286,8 +286,12 @@ bool _getFullPathName( const char * fileName, char * outputDir, const size_t siz
 
     char realFileName[64] = {0, };
 
-    GetRealFileName(fileName, realFileName, sizeof(realFileName));
-    snprintf(outputDir, size, "%s/%s", buff, realFileName);
+    if(GetRealFileName(fileName, realFileName, sizeof(realFileName))) {
+    	snprintf(outputDir, size, "%s/%s", buff, realFileName);
+    }
+    else {
+    	outputDir[0] = '\0';
+    }
     return true;
 
 }

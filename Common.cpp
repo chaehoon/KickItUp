@@ -6,28 +6,10 @@
  */
 
 #include <cstring>
-
-#ifdef _WIN32
-
-/**
- * 윈도우에서는 대소문자를 구분하지 않아 그냥 파일명을 넘긴다.
- *
- * @param	filename	파일명
- * @param	buff		진짜 파일명 반환.
- * @param	size		buff size.
- * @return	파일이 있는지 여부.
- */
-bool GetRealFileName(const char * filename, char * buff, unsigned int size)
-{
-	strncpy(buff, filename, size);
-	return true;
-}
-
-#else	// _WIN32
-
 #include <sys/types.h>
 #include <dirent.h>
 #include <strings.h>
+#include <sstream>
 
 /**
  * 파일이나 디렉토리명을 대소문자 구분없이 찾아 파일명을 반환한다.
@@ -62,10 +44,9 @@ bool GetRealFileName(const char * filename, char * buff, unsigned int size)
 	if ( !bFound )	{
 		std::stringstream	str ( filename );
 		str << "directory or file is not found :" << filename;
-		MsgBox ( str.str().c_str(),"KICKITUP ERROR",MB_OK );
+		// DebugPrintf( str.str().c_str());
 		return false;
 	}
 	return true;
 }
 
-#endif // ! _WIN32

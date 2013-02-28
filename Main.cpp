@@ -199,7 +199,7 @@ KIUCONFIG	KCFG;
 int		dwGameCount;
 
 bool debugflag=true;
-char g_szDebugName[PATH_LEN];
+char g_szDebugName[PATH_LEN] = "debug.txt";
 
 bool	g_fullscreen=false;
 

@@ -13,15 +13,22 @@
 #include <string.h>
 #include <time.h>
 #include <sstream>
+#include <vector>
+#include <string>
+#include <sys/stat.h>
+#include <dirent.h>
 
 #include "Common.h"
 #include "Main.h"
 #include "Input.h"
 #include "Select.h"
 #include "Result.h"
-
 #include "Song.h"
 #include "Surface.h"
+#include "Chunk.h"
+
+using std::string;
+using std::vector;
 
 // Hidden Mode define
 #define	HMODE_CANCEL	99
@@ -79,8 +86,6 @@ extern	char				Couple;
 extern	char				Double;
 // End of the COUPLE DATA
 
-
-#include "Chunk.h"
 extern Chunk			gSndMode;
 extern Chunk            gSndCancel;
 extern Chunk			gSndMove;
@@ -91,7 +96,6 @@ extern bool	IntroFlag;
 
 Uint32	startTimer, curTimer;
 static char sKeyHistory[2][10];
-
 
 void _init();
 void _setHiddenMode();
@@ -108,6 +112,7 @@ void _moveToRightSong(int * pCurrent, int * pSelected, int * pSelectCurrent);
 bool _isStartBtnPressed();
 void _startStage(int * pSelected, int * pSelectCurrent);
 void _drawScreen(const int * pCurrent, const int * pSelected, int * pIMove);
+bool _getDirs ( vector<string> & dirs );
 
 
 void SelectSong ( void )
@@ -154,245 +159,6 @@ void SelectSong ( void )
 	_drawScreen(&_current, &_selected, &_iMove);
 }
 
-bool	ClpBlt3 ( int x ,int y ,Surface & surface, const SDL_Rect & srect )
-{
-	SDL_Rect sRect;
-
-	sRect = srect;
-
-	if ( 640 < x || 480 < y )
-		return true;
-
-	if ( sRect.h < -y || sRect.w < -x )
-		return true;
-
-	if ( 480 < ( y + sRect.h ) )
-		sRect.h = 480 - y;
-
-	if ( y < 0 )	{
-		sRect.y -= y;
-		sRect.h += y;
-		y = 0;
-	}
-
-	if ( 640 < x + sRect.w )
-		sRect.w = 640 - x;
-
-	if ( x < 0 )	{
-		sRect.x -= x;
-		sRect.w += x;
-		x = 0;
-	}
-
-	surface.BltFast ( x, y, gScreen, &sRect );
-
-	return true;
-
-}
-
-void _init()
-{
-	startTimer=SDL_GetTicks();
-	if ( Start1p==false ) {
-		gMode[0].Reset();
-		gSpeed[0].reset();
-	}
-
-	if ( Start2p==false )	{
-		gMode[1].Reset();
-		gSpeed[1].reset();
-	}
-
-	// 선택화면에서 보이는 좌우 음악을 연결 시킨다.
-	_sortSong();
-
-	// paint the background black.
-	gScreen.FillRect ( 0, 0 );
-
-	// Draw BackGround as select image.
-	gSelectBack.BltFast ( 0, 0, gScreen );
-	gSndSelect.Play ( true );
-
-	Couple = false;
-}
-
-#ifdef _WIN32
-
-#include <Windows.h>
-void Read()
-{
-	HANDLE	hFind;
-	Uint32	Count=0;
-	WIN32_FIND_DATA lpData;
-
-	char    cPathStr[PATH_LEN+1];;
-
-	hFind= ( HANDLE ) FindFirstFile ( "*.*",&lpData );
-	strncpy ( cPathStr, lpData.cFileName, sizeof ( cPathStr ) );
-	if ( stricmp ( cPathStr,"SONG" ) !=0 )
-	{
-		for ( ;; )
-		{
-			if ( FindNextFile ( hFind,&lpData ) ==false ) break;
-			strncpy ( cPathStr, lpData.cFileName, sizeof ( cPathStr ) );
-			if ( stricmp ( cPathStr,"SONG" ) ==0 ) break;
-		}
-	}
-	if ( lpData.dwFileAttributes==FILE_ATTRIBUTE_DIRECTORY )
-	{
-		SetCurrentDirectory ( cPathStr );
-		hFind=FindFirstFile ( "*.*",&lpData );
-		if ( lpData.cFileName[0]!='.' && lpData.dwFileAttributes==FILE_ATTRIBUTE_DIRECTORY )
-		{
-			SetCurrentDirectory ( lpData.cFileName );
-
-			if ( access ( "Crazy_2.stf",04 ) ==0 )
-				CSONG[Count].ReadCrazy_2( "Crazy_2.stf" );
-			else if ( access ( "Crazy_2.ksf",04 ) ==0 )
-				CSONG[Count].ReadCrazy_2 ( "Crazy_2.ksf" );
-
-			if ( access ( "Crazy_1.stf",04 ) ==0 )
-				CSONG[Count].ReadCrazy_1( "Crazy_1.stf" ),Count++;
-			else if ( access ( "Crazy_1.ksf",04 ) ==0 )
-				CSONG[Count].ReadCrazy_1 ( "Crazy_1.ksf" ),Count++;
-
-			if ( access ( "Hard_2.stf",04 ) ==0 )
-				CSONG[Count].ReadHard_2( "Hard_2.stf" );
-			else if ( access ( "Hard_2.ksf",04 ) ==0 )
-				CSONG[Count].ReadHard_2 ( "Hard_2.ksf" );
-
-			if ( access ( "Hard_1.stf",04 ) ==0 )
-				CSONG[Count].ReadHard_1( "Hard_1.stf" ),Count++;
-			else if ( access ( "Hard_1.ksf",04 ) ==0 )
-				CSONG[Count].ReadHard_1( "Hard_1.ksf" ),Count++;
-
-			if ( access ( "Easy_2.stf",04 ) ==0 )
-				CSONG[Count].ReadEasy_2( "Easy_2.stf" );
-			else if ( access ( "Easy_2.ksf",04 ) ==0 )
-				CSONG[Count].ReadEasy_2( "Easy_2.ksf" );
-
-			if ( access ( "Easy_1.stf",04 ) ==0 )
-				CSONG[Count].ReadEasy_1( "Easy_1.stf" ),Count++;
-			else if ( access ( "Easy_1.ksf",04 ) ==0 )
-				CSONG[Count].ReadEasy_1( "Easy_1.ksf" ),Count++;
-
-			if ( access ( "Double.stf",04 ) ==0 )
-				CSONG[Count].ReadDouble( "Double.stf" ),Count++;
-			else if ( access ( "Double.ksf",04 ) ==0 )
-				CSONG[Count].ReadDouble( "Double.ksf" );
-
-			//if(CSONG[Count].bpm!=0)Count++;
-			SetCurrentDirectory ( "..\\" );
-		}
-
-		for ( ;; )
-		{
-			if ( FindNextFile ( hFind,&lpData ) ==false ) break;
-			else
-			{
-				if ( lpData.cFileName[0]!='.' && lpData.dwFileAttributes==FILE_ATTRIBUTE_DIRECTORY )
-				{
-					SetCurrentDirectory ( lpData.cFileName );
-
-					if ( access ( "Crazy_2.stf",04 ) == 0 )
-						CSONG[Count].ReadCrazy_2 ( "Crazy_2.stf" );
-					else if ( access ( "Crazy_2.ksf",04 ) ==0 )
-						CSONG[Count].ReadCrazy_2 ( "Crazy_2.ksf" );
-
-					if ( access ( "Crazy_1.stf",04 ) ==0 )
-						CSONG[Count].ReadCrazy_1( "Crazy_1.stf" ),Count++;
-					else if ( access ( "Crazy_1.ksf",04 ) ==0 )
-						CSONG[Count].ReadCrazy_1( "Crazy_1.ksf" ),Count++;
-
-					if ( access ( "Hard_2.stf",04 ) ==0 )
-						CSONG[Count].ReadHard_2( "Hard_2.stf" );
-					else if ( access ( "Hard_2.ksf",04 ) ==0 )
-						CSONG[Count].ReadHard_2( "Hard_2.ksf" );
-
-					if ( access ( "Hard_1.stf",04 ) ==0 )
-						CSONG[Count].ReadHard_1( "Hard_1.stf" ),Count++;
-					else if ( access ( "Hard_1.ksf",04 ) ==0 )
-						CSONG[Count].ReadHard_1( "Hard_1.ksf" ),Count++;
-
-					if ( access ( "Easy_2.stf",04 ) ==0 )
-						CSONG[Count].ReadEasy_2( "Easy_2.stf" );
-					else if ( access ( "Easy_2.ksf",04 ) ==0 )
-						CSONG[Count].ReadEasy_2( "Easy_2.ksf" );
-
-					if ( access ( "Easy_1.stf",04 ) ==0 )
-						CSONG[Count].ReadEasy_1( "Easy_1.stf" ),Count++;
-					else if ( access ( "Easy_1.ksf",04 ) ==0 )
-						CSONG[Count].ReadEasy_1( "Easy_1.ksf" ),Count++;
-
-					if ( access ( "Double.stf",04 ) ==0 )
-						CSONG[Count].ReadDouble( "Double.stf" ),Count++;
-					else if ( access ( "Double.ksf",04 ) ==0 )
-						CSONG[Count].ReadDouble( "Double.ksf" ),Count++;
-
-					//if(CSONG[Count].bpm!=0)Count++;
-					SetCurrentDirectory ( "..\\" );
-				}
-			}
-		}
-		SetCurrentDirectory ( "..\\" );
-	}
-	FindClose ( hFind );
-
-	if ( CSONG[0].getStep1().bpm1==0 && CSONG[0].getStep2().bpm1==0 )
-		MsgBox ( "Song directory not found or No song data.","KICKITUP ERROR",MB_OK );
-}
-
-#else // _WIN32
-
-#include <vector>
-#include <string>
-#include <sys/stat.h>
-#include <dirent.h>
-using std::string;
-using std::vector;
-
-/**
- * 현재 디렉토리 리스트를 얻는다.
- * @param	dirs	디렉토리 리스트.
- * @return	디렉토리 리스트가 있는지 없는지.
- */
-bool _getDirs ( vector<string> & dirs )
-{
-	struct dirent * item;
-	DIR * dp;
-	char    cPathStr[PATH_LEN+1] = { 0, };
-
-	dp = opendir ( "." );
-
-	while ( dp != NULL )
-	{
-		item = readdir ( dp );
-		if ( item == NULL )
-			break;
-
-		if ( item->d_name[0] == '.' )
-			continue;
-
-		// is dir?
-		struct stat stat_p;
-		if ( lstat ( item->d_name, &stat_p ) == -1 )
-			continue;
-		if ( !S_ISDIR ( stat_p.st_mode ) )
-			continue;
-
-		string	dirname ( item->d_name );
-		dirs.push_back ( dirname );
-	}
-	closedir ( dp );
-
-	if ( dirs.empty() ) {
-		std::stringstream	str;
-		str << "GetDirs() - directory or file is not found";
-		MsgBox ( str.str().c_str(),"KICKITUP ERROR",MB_OK );
-		return false;
-	}
-	return true;
-}
 
 void Read()
 {
@@ -468,7 +234,111 @@ void Read()
 	}
 	chdir ( ".." );
 }
-#endif // _WIN32
+
+
+bool	ClpBlt3 ( int x ,int y ,Surface & surface, const SDL_Rect & srect )
+{
+	SDL_Rect sRect;
+
+	sRect = srect;
+
+	if ( 640 < x || 480 < y )
+		return true;
+
+	if ( sRect.h < -y || sRect.w < -x )
+		return true;
+
+	if ( 480 < ( y + sRect.h ) )
+		sRect.h = 480 - y;
+
+	if ( y < 0 )	{
+		sRect.y -= y;
+		sRect.h += y;
+		y = 0;
+	}
+
+	if ( 640 < x + sRect.w )
+		sRect.w = 640 - x;
+
+	if ( x < 0 )	{
+		sRect.x -= x;
+		sRect.w += x;
+		x = 0;
+	}
+
+	surface.BltFast ( x, y, gScreen, &sRect );
+
+	return true;
+
+}
+
+void _init()
+{
+	startTimer=SDL_GetTicks();
+	if ( Start1p==false ) {
+		gMode[0].Reset();
+		gSpeed[0].reset();
+	}
+
+	if ( Start2p==false )	{
+		gMode[1].Reset();
+		gSpeed[1].reset();
+	}
+
+	// 선택화면에서 보이는 좌우 음악을 연결 시킨다.
+	_sortSong();
+
+	// paint the background black.
+	gScreen.FillRect ( 0, 0 );
+
+	// Draw BackGround as select image.
+	gSelectBack.BltFast ( 0, 0, gScreen );
+	gSndSelect.Play ( true );
+
+	Couple = false;
+}
+
+/**
+ * 현재 디렉토리 리스트를 얻는다.
+ * @param	dirs	디렉토리 리스트.
+ * @return	디렉토리 리스트가 있는지 없는지.
+ */
+bool _getDirs ( vector<string> & dirs )
+{
+	struct dirent * item;
+	DIR * dp;
+
+	dp = opendir ( "." );
+
+	while ( dp != NULL )
+	{
+		item = readdir ( dp );
+		if ( item == NULL )
+			break;
+
+		if ( item->d_name[0] == '.' )
+			continue;
+
+		// is dir?
+		struct stat stat_p;
+		if ( stat ( item->d_name, &stat_p ) == -1 )
+			continue;
+		if ( !S_ISDIR ( stat_p.st_mode ) )
+			continue;
+
+		string	dirname ( item->d_name );
+		dirs.push_back ( dirname );
+	}
+	closedir ( dp );
+
+	if ( dirs.empty() ) {
+		std::stringstream	str;
+		str << "GetDirs() - directory or file is not found";
+		MsgBox ( str.str().c_str(),"KICKITUP ERROR",MB_OK );
+		return false;
+	}
+	return true;
+}
 
 /**
  * 음악을 정렬시킨다.
