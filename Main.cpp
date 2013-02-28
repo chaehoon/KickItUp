@@ -454,7 +454,7 @@ void KIU_STAGE(void)
 				MinSpeed = gSpeed[i].getMin();
 			} else {
 				MaxSpeed = MinSpeed = gSpeed[i].step;
-				gSpeed[0].reset(gSpeed[i].step);
+				gSpeed[i].reset(gSpeed[i].step);
 			}
 		}
 
