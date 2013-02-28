@@ -160,7 +160,7 @@ void SelectSong ( void )
 }
 
 
-void Read()
+void ReadData()
 {
 	char  cPathStr[PATH_LEN+1] = { 0, };
 	int	Count=0;
@@ -233,43 +233,6 @@ void Read()
 		chdir ( ".." );
 	}
 	chdir ( ".." );
-}
-
-
-bool	ClpBlt3 ( int x ,int y ,Surface & surface, const SDL_Rect & srect )
-{
-	SDL_Rect sRect;
-
-	sRect = srect;
-
-	if ( 640 < x || 480 < y )
-		return true;
-
-	if ( sRect.h < -y || sRect.w < -x )
-		return true;
-
-	if ( 480 < ( y + sRect.h ) )
-		sRect.h = 480 - y;
-
-	if ( y < 0 )	{
-		sRect.y -= y;
-		sRect.h += y;
-		y = 0;
-	}
-
-	if ( 640 < x + sRect.w )
-		sRect.w = 640 - x;
-
-	if ( x < 0 )	{
-		sRect.x -= x;
-		sRect.w += x;
-		x = 0;
-	}
-
-	surface.BltFast ( x, y, gScreen, &sRect );
-
-	return true;
-
 }
 
 void _init()
@@ -917,8 +880,11 @@ void _drawScreen(const int * pCurrent, const int * pSelected, int * pIMove)
 		else	{
 			*pIMove-=8;
 
-			ClpBlt3 ( 10+(*pIMove),50, *CSONG[prevSong.Prev].mpDiskImage, DiscSize );
-			ClpBlt3 ( 650+(*pIMove),50, *curSong.mpDiskImage, DiscSize );
+			const Song & leftSong = CSONG[prevSong.Prev];
+			const Song & rightSong = curSong;
+
+			leftSong.mpDiskImage->BltFast(10+(*pIMove), 50, gScreen, &DiscSize );
+			rightSong.mpDiskImage->BltFast(650+(*pIMove), 50, gScreen, &DiscSize );
 		}
 	}
 	// change left screen.
@@ -928,8 +894,11 @@ void _drawScreen(const int * pCurrent, const int * pSelected, int * pIMove)
 		else	{
 			*pIMove+=8;
 
-			ClpBlt3 ( -630+(*pIMove),50, *curSong.mpDiskImage, DiscSize );
-			ClpBlt3 ( 10+(*pIMove),50, *CSONG[nextSong.Next].mpDiskImage, DiscSize );
+			const Song & leftSong = curSong;
+			const Song & rightSong = CSONG[nextSong.Next];
+
+			leftSong.mpDiskImage->BltFast(-630+(*pIMove), 50, gScreen, &DiscSize );
+			rightSong.mpDiskImage->BltFast(10+(*pIMove), 50, gScreen, &DiscSize );
 		}
 	}
 	else if ( *pIMove==0 ) {
@@ -960,8 +929,11 @@ void _drawScreen(const int * pCurrent, const int * pSelected, int * pIMove)
 		else	{
 			*pIMove-=8;
 
-			ClpBlt3 ( 330+(*pIMove),50, *CSONG[CSONG[prevSong.Prev].Next].mpDiskImage, DiscSize );
-			ClpBlt3 ( 970+(*pIMove),50, *nextSong.mpDiskImage, DiscSize );
+			const Song & leftSong = prevSong;
+			const Song & rightSong = nextSong;
+
+			leftSong.mpDiskImage->BltFast(330+(*pIMove), 50, gScreen, &DiscSize);
+			rightSong.mpDiskImage->BltFast(970+(*pIMove), 50, gScreen, &DiscSize);
 		}
 	}
 	// draw right disk image.
@@ -970,8 +942,13 @@ void _drawScreen(const int * pCurrent, const int * pSelected, int * pIMove)
 			*pIMove=0;
 		else	{
 			*pIMove+=8;
-			ClpBlt3 ( -310+(*pIMove),50, *nextSong.mpDiskImage, DiscSize );
-			ClpBlt3 ( 330+(*pIMove),50, *CSONG[CSONG[nextSong.Next].Next].mpDiskImage, DiscSize );
+
+			const Song & leftSong = nextSong;
+			const Song & rightSong = CSONG[CSONG[nextSong.Next].Next];
+
+			leftSong.mpDiskImage->BltFast(-330+(*pIMove), 50, gScreen, &DiscSize);
+			rightSong.mpDiskImage->BltFast(330+(*pIMove), 50, gScreen, &DiscSize);
+
 		}
 	}
 	else if ( *pIMove==0 ) {

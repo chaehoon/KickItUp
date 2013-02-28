@@ -128,8 +128,6 @@ void	DisplayNumber(int x, int y, char *message)
 	}
 }
 
-extern bool	ClpBlt3(int x ,int y ,Surface & surface, const SDL_Rect & srect);
-
 void Result(void)
 {
 	SDL_Rect	sRect;
@@ -153,10 +151,10 @@ void Result(void)
 		sRect.w=640;
 		sRect.h=480;
 
-		for(Count=480;Count>0;Count-=24)
-		{
-			ClpBlt3( Count,Count,ResultBack, sRect );
+		for(Count=480;Count>0;Count-=24){
+			ResultBack.BltFast(Count, Count, gScreen, &sRect);
 		}
+
 		Judge1p=JudgeAnaly1p();
 		Judge2p=JudgeAnaly2p();
 

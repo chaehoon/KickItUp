@@ -3598,7 +3598,7 @@ bool init()
     if( !KLoadImage() )
         return false;
 
-    Read();
+    ReadData();
 
     WaveSet_Loading();
 
