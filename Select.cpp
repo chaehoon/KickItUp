@@ -87,20 +87,72 @@ extern Chunk			gSndMove;
 extern Chunk			gSndSelect;
 
 extern char First;
-
-Uint32	startTimer, curTimer;
-
 extern bool	IntroFlag;
 
-int	_scanHiddenMode1p(void);
-int	_scanHiddenMode2p(void);
+Uint32	startTimer, curTimer;
+static char sKeyHistory[2][10];
+
+
+void _init();
+void _setHiddenMode();
+int	_scanHiddenMode(const int player, const Uint32 * pPressedKey);
 void _drawMode(const int x, const int y, const int Mode);
 void _sortSong();
 int _zoomInOut();
 void _setHiddenMode(const int player, const int mode);
-void _setHiddenMode1p();
-void _setHiddenMode2p();
-bool	ClpBlt3( int x ,int y ,Surface & surface, const SDL_Rect & srect );
+void _chageSelectScreen(int * selectedIndex, int * selected, int * move);
+bool _isLeftMoved();
+void _moveToLeftSong(int * pCurrent, int * pSelected, int * pSelectCurrent);
+bool _isRightMoved();
+void _moveToRightSong(int * pCurrent, int * pSelected, int * pSelectCurrent);
+bool _isStartBtnPressed();
+void _startStage(int * pSelected, int * pSelectCurrent);
+void _drawScreen(const int * pCurrent, const int * pSelected, int * pIMove);
+
+
+void SelectSong ( void )
+{
+	static 	int _current;
+	static 	int _selectCurrent;
+	static 	int _selected;
+	static	int _iMove;
+
+	if ( First==0 )	{
+		_init();
+		First++;
+	}
+
+	ReadGameInput();
+
+	if ( PressedKey1p[5]==true ) {
+		Start1p=true;
+	}
+
+	if ( PressedKey2p[5]==true ) {
+		Start2p=true;
+	}
+
+	_setHiddenMode();
+
+	// 1, 3 번 버튼을 누르면 화면을 좌우로 움직인다.
+	_chageSelectScreen(&_current, &_selected, &_iMove);
+
+	// select the left song.
+	if(_isLeftMoved()) {
+		_moveToLeftSong(&_current, &_selected, &_selectCurrent);
+	}
+
+	if(_isRightMoved()) {
+		_moveToRightSong(&_current, &_selected, &_selectCurrent);
+	}
+
+	if(_isStartBtnPressed()) {
+		_startStage(&_selected, &_selectCurrent);
+		return;
+	}
+
+	_drawScreen(&_current, &_selected, &_iMove);
+}
 
 bool	ClpBlt3 ( int x ,int y ,Surface & surface, const SDL_Rect & srect )
 {
@@ -136,6 +188,32 @@ bool	ClpBlt3 ( int x ,int y ,Surface & surface, const SDL_Rect & srect )
 
 	return true;
 
+}
+
+void _init()
+{
+	startTimer=SDL_GetTicks();
+	if ( Start1p==false ) {
+		gMode[0].Reset();
+		gSpeed[0].reset();
+	}
+
+	if ( Start2p==false )	{
+		gMode[1].Reset();
+		gSpeed[1].reset();
+	}
+
+	// 선택화면에서 보이는 좌우 음악을 연결 시킨다.
+	_sortSong();
+
+	// paint the background black.
+	gScreen.FillRect ( 0, 0 );
+
+	// Draw BackGround as select image.
+	gSelectBack.BltFast ( 0, 0, gScreen );
+	gSndSelect.Play ( true );
+
+	Couple = false;
 }
 
 #ifdef _WIN32
@@ -439,11 +517,13 @@ int _zoomInOut()
 
 void _setHiddenMode(const int player, const int mode)
 {
-	if ( mode ) {
-		if ( IntroFlag ) {
-			gMusicIntro.Halt();
-			IntroFlag=false;
-		}
+	if(mode == HMODE_NONE) {
+		return;
+	}
+
+	if ( IntroFlag ) {
+		gMusicIntro.Halt();
+		IntroFlag=false;
 	}
 
 	GameMode & gameMode = gMode[player];
@@ -515,22 +595,16 @@ void _setHiddenMode(const int player, const int mode)
 /**
  * set hidden Mode for 1Player
  */
-void _setHiddenMode1p()
+void _setHiddenMode()
 {
+
 	// Get 1Player hidden mode.
-	const int mode = _scanHiddenMode1p();
-	_setHiddenMode(0, mode);
+	_setHiddenMode(0, _scanHiddenMode(0, PressedKey1p));
+
+	// Get 1Player hidden mode.
+	_setHiddenMode(1, _scanHiddenMode(1, PressedKey2p));
 }
 
-/**
- * set hidden Mode for 2Player
- */
-void _setHiddenMode2p()
-{
-	// Get 2Player hidden mode.
-	const int mode = _scanHiddenMode2p();
-	_setHiddenMode(1, mode);
-}
 
 void _chageSelectScreen(int * selectedIndex, int * selected, int * move)
 {
@@ -932,10 +1006,10 @@ void _drawScreen(const int * pCurrent, const int * pSelected, int * pIMove)
 	curTimer = SDL_GetTicks();
 
 	char s[50];
-	int i2 = ( int ) ( curTimer-startTimer ) /1000;
-	sprintf ( s,"%02d", ( 40 - i2 ) );
+	const int playSec = ( int ) ( curTimer-startTimer ) / 1000;
+	sprintf ( s,"%02d", ( 40 - playSec ) );
 
-	DisplayNumber ( 560,8,s );
+	DisplayNumber(560, 8, s);
 
 	// 선택된 타이틀을 줌인 줌아웃 시킨다.
 	int zoom = _zoomInOut();
@@ -1118,303 +1192,108 @@ void _drawScreen(const int * pCurrent, const int * pSelected, int * pIMove)
 	}
 }
 
-void SelectSong ( void )
+int	_scanHiddenMode(const int player, const Uint32 * pPressedKey)
 {
-	static 	int _current;
-	static 	int _selectCurrent;
-	static 	int _selected;
-	static	int _a,_b;
-	static	int _iMove;
-
-	if ( First==0 )	{
-		startTimer=SDL_GetTicks();
-		if ( Start1p==false ) {
-			gMode[0].Reset();
-			gSpeed[0].reset();
-		}
-
-		if ( Start2p==false )	{
-			gMode[1].Reset();
-			gSpeed[1].reset();
-		}
-		// paint the background black.
-		gScreen.FillRect ( 0, 0 );
-
-		// Draw BackGround as select image.
-		gSelectBack.BltFast ( 0, 0, gScreen );
-
-		_a = Start1p;
-		_b = Start2p;
-		First++;
-		gSndSelect.Play ( true );
-	}
-
-	// 선택화면에서 보이는 좌우 음악을 연결 시킨다.
-	_sortSong();
-
-	ReadGameInput();
-
-	if ( PressedKey1p[5]==true ) {
-		Start1p=true;
-	}
-
-	if ( PressedKey2p[5]==true ) {
-		Start2p=true;
-	}
-
-	// TODO: setHiddenMode
-	_setHiddenMode1p();
-	_setHiddenMode2p();
-
-	// 1, 3 번 버튼을 누르면 화면을 좌우로 움직인다.
-	_chageSelectScreen(&_current, &_selected, &_iMove);
-
-	// select the left song.
-	if(_isLeftMoved()) {
-		_moveToLeftSong(&_current, &_selected, &_selectCurrent);
-	}
-
-	if(_isRightMoved()) {
-		_moveToRightSong(&_current, &_selected, &_selectCurrent);
-	}
-
-	if(_isStartBtnPressed()) {
-		_startStage(&_selected, &_selectCurrent);
-		return;
-	}
-
-	_drawScreen(&_current, &_selected, &_iMove);
-
-	if ( Start1p )	{
-		if ( _a == 0 ) {
-			_a++;
-			if ( Start1p && Start2p )
-				Couple=true;
-			else
-				Couple=false;
+	char * pKeyHistory = sKeyHistory[player];
+	if ( pPressedKey[1] || pPressedKey[3] || pPressedKey[5] || pPressedKey[7] || pPressedKey[9] ) {
+		for(int i=0 ; i<7 ; i++ ) {
+			pKeyHistory[i] = pKeyHistory[i+1];
 		}
 	}
 
-	if ( Start2p ) {
-		if ( _b == 0 ) {
-			_b++;
-			if ( Start1p && Start2p )
-				Couple=true;
-			else
-				Couple=false;
-		}
-	}
-}
+	if( pPressedKey[1] )
+		pKeyHistory[7]='1';
+	if( pPressedKey[3])
+		pKeyHistory[7]='3';
+	if(pPressedKey[5])
+		pKeyHistory[7]='5';
+	if(pPressedKey[7])
+		pKeyHistory[7]='7';
+	if(pPressedKey[9])
+		pKeyHistory[7]='9';
 
-int	_scanHiddenMode1p ( void )
-{
-	static char IntKey1p[10];
-	int i;
-
-	if ( PressedKey1p[1] || PressedKey1p[3] || PressedKey1p[5] || PressedKey1p[7] || PressedKey1p[9] )
-		for ( i=0;i<7;i++ ) IntKey1p[i]=IntKey1p[i+1];
-
-	if ( PressedKey1p[1] ) IntKey1p[7]='1';
-	if ( PressedKey1p[3] ) IntKey1p[7]='3';
-	if ( PressedKey1p[5] ) IntKey1p[7]='5';
-	if ( PressedKey1p[7] ) IntKey1p[7]='7';
-	if ( PressedKey1p[9] ) IntKey1p[7]='9';
-
-	// 2배속 ?�니??
-	if ( strcmp ( IntKey1p,"55755595" ) ==0 )
-	{
-		IntKey1p[7]='0';
+	// 2x Mode
+	if ( strcmp ( pKeyHistory,"55755595" ) == 0 ) {
+		pKeyHistory[7]='0';
 		return HMODE_2X;
 	}
-	// 4배속 ?�니??
-	else if ( strcmp ( IntKey1p,"55355755" ) ==0 )
-	{
-		IntKey1p[7]='0';
+	// 4x Mode
+	else if ( strcmp ( pKeyHistory,"55355755" ) == 0 ) {
+		pKeyHistory[7]='0';
 		return HMODE_4X;
 	}
-	// 8배속 ?�니??
-	else if ( strcmp ( IntKey1p,"55153555" ) ==0 )
-	{
-		IntKey1p[7]='0';
+	// 8x Mode
+	else if ( strcmp ( pKeyHistory,"55153555" ) ==0 ) {
+		pKeyHistory[7]='0';
 		return HMODE_8X;
 	}
-	// 배니???�니??
-	else if ( strcmp ( IntKey1p,"55975315" ) ==0 )
-	{
-		IntKey1p[7]='0';
+	// Banish Mode
+	else if ( strcmp ( pKeyHistory,"55975315" ) == 0 ) {
+		pKeyHistory[7]='0';
 		return HMODE_VANISH;
 	}
-	// 미러모드 ?�니??
-	else if ( strcmp ( IntKey1p,"55159357" ) ==0 )
-	{
-		IntKey1p[7]='0';
+	// 미러모드 Mode
+	else if ( strcmp ( pKeyHistory,"55159357" ) == 0 ) {
+		pKeyHistory[7]='0';
 		return HMODE_MIRROR;
 	}
-	// ?�덤모드 ?�니??
-	else if ( strcmp ( IntKey1p,"51535957" ) ==0 )
-	{
-		IntKey1p[7]='0';
+	// Ramdorm Mode
+	else if ( strcmp ( pKeyHistory,"51535957" ) == 0 ) {
+		pKeyHistory[7]='0';
 		return HMODE_RANDOM;
 	}
-	/*	// 커플모드 ?�니??
+	/*	// couple Mode
 		else if(strcmp(IntKey1p,"55979755")==0)
 		{
 			IntKey1p[7]='0';
 			return HMODE_COUPLE;
 		}
-	*/	// ?�크�?모드?�니??
-	else if ( strcmp ( IntKey1p,"55797955" ) ==0 )
-	{
-		IntKey1p[7]='0';
+	*/	// Synchro Mode
+	else if ( strcmp ( pKeyHistory,"55797955" ) == 0 ) {
+		pKeyHistory[7]='0';
 		return HMODE_SYNCHRO;
 	}
-	// ?�스?�모???�니??
-	else if ( strcmp ( IntKey1p,"79579579" ) ==0 )
-	{
-		IntKey1p[7]='0';
+	// Nonstep Mode
+	else if ( strcmp ( pKeyHistory,"79579579" ) == 0 ) {
+		pKeyHistory[7]='0';
 		return HMODE_NONSTEP;
 	}
-	/*	// ?�스?�더�??�니??
-		else if(strcmp(IntKey1p,"17159395")==0)
-		{
+	/*	// Nonstep double Mode
+		else if(strcmp(IntKey1p,"17159395")== 0) {
 			IntKey1p[7]='0';
 			return HMODE_NONSTOPDOUBLE;
 		}*/
-	// ?�니?�모???�니??
-	else if ( strcmp ( IntKey1p,"13573159" ) ==0 )
-	{
-		IntKey1p[7]='0';
+	// Union Mode
+	else if ( strcmp ( pKeyHistory,"13573159" ) == 0 ) {
+		pKeyHistory[7]='0';
 		return HMODE_UNION;
 	}
-	/*	// ?�?�트???�니??
-		else if(strcmp(IntKey1p,"95197537")==0)
-		{
+	/*	// select Mode
+		else if(strcmp(IntKey1p,"95197537") == 0) {
 			IntKey1p[7]='0';
 			return HMODE_SELECTALL;
 		}*/
-	// 캔슬 ?�니??
-	else if ( strcmp ( IntKey1p,"55555555" ) ==0 )
-	{
-		IntKey1p[7]='0';
+	// Cancel
+	else if ( strcmp ( pKeyHistory,"55555555" ) == 0 ) {
+		pKeyHistory[7]='0';
 		return HMODE_CANCEL;
 	}
-	else if ( strcmp ( IntKey1p,"55955575" ) ==0 )
-	{
-		IntKey1p[7]='0';
+	else if ( strcmp ( pKeyHistory,"55955575" ) ==0 ) {
+		pKeyHistory[7]='0';
 		return HMODE_4DMIX;
 	}
-	else if ( strcmp ( IntKey1p,"79513579" ) ==0 )
-	{
-		IntKey1p[7]='0';
+	else if ( strcmp ( pKeyHistory,"79513579" ) ==0 ) {
+		pKeyHistory[7]='0';
 		return HMODE_SUDDENR;
 	}
-	else if ( strcmp ( IntKey1p,"17931793" ) ==0 )
-	{
-		IntKey1p[7]='0';
+	else if ( strcmp ( pKeyHistory,"17931793" ) ==0 ) {
+		pKeyHistory[7]='0';
 		return HMODE_RANDOMS;
 	}
-	else
-		return HMODE_NONE;
+
+	return HMODE_NONE;
 }
 
-int	_scanHiddenMode2p ( void )
-{
-	static char IntKey2p[10];
-	int i;
-
-	if ( PressedKey2p[1] || PressedKey2p[3] || PressedKey2p[5] || PressedKey2p[7] || PressedKey2p[9] )
-		for ( i=0;i<7;i++ ) IntKey2p[i]=IntKey2p[i+1];
-
-	if ( PressedKey2p[1] ) IntKey2p[7]='1';
-	if ( PressedKey2p[3] ) IntKey2p[7]='3';
-	if ( PressedKey2p[5] ) IntKey2p[7]='5';
-	if ( PressedKey2p[7] ) IntKey2p[7]='7';
-	if ( PressedKey2p[9] ) IntKey2p[7]='9';
-
-	if ( strcmp ( IntKey2p,"55755595" ) ==0 )
-	{
-		IntKey2p[7]='0';
-		return HMODE_2X;
-	} // 2배속 ?�니??
-	else if ( strcmp ( IntKey2p,"55355755" ) ==0 )
-	{
-		IntKey2p[7]='0';
-		return HMODE_4X;
-	} // 4배속 ?�니??
-	else if ( strcmp ( IntKey2p,"55153555" ) ==0 )
-	{
-		IntKey2p[7]='0';
-		return HMODE_8X;
-	} // 8배속 ?�니??
-	else if ( strcmp ( IntKey2p,"55975315" ) ==0 )
-	{
-		IntKey2p[7]='0';
-		return HMODE_VANISH;
-	} // 배니???�니??
-	else if ( strcmp ( IntKey2p,"55159357" ) ==0 )
-	{
-		IntKey2p[7]='0';
-		return HMODE_MIRROR;
-	} // 미러모드 ?�니??
-	else if ( strcmp ( IntKey2p,"51535957" ) ==0 )
-	{
-		IntKey2p[7]='0';
-		return HMODE_RANDOM;
-	} // ?�덤모드 ?�니??
-	/*	else if(strcmp(IntKey2p,"55979755")==0)
-		{
-			IntKey2p[7]='0';
-			return HMODE_COUPLE;
-		} // 커플모드 ?�니??
-	*/
-	else if ( strcmp ( IntKey2p,"55797955" ) ==0 )
-	{
-		IntKey2p[7]='0';
-		return HMODE_SYNCHRO;
-	} // ?�크�?모드?�니??
-	else if ( strcmp ( IntKey2p,"79579579" ) ==0 )
-	{
-		IntKey2p[7]='0';
-		return HMODE_NONSTEP;
-	} // ?�스?�모???�니??
-	/*	else if(strcmp(IntKey2p,"17159395")==0)
-		{
-			IntKey2p[7]='0';
-			return HMODE_NONSTOPDOUBLE;
-		} // ?�스?�더�??�니??*/
-	else if ( strcmp ( IntKey2p,"13573159" ) ==0 )
-	{
-		IntKey2p[7]='0';
-		return HMODE_UNION;
-	} // ?�니?�모???�니??
-	/*	else if(strcmp(IntKey2p,"95197537")==0)
-		{
-			IntKey2p[7]='0';
-			return HMODE_SELECTALL;
-		} // ?�?�트???�니?? */
-	else if ( strcmp ( IntKey2p,"55555555" ) ==0 )
-	{
-		IntKey2p[7]='0';
-		return HMODE_CANCEL;
-	} // 캔슬 ?�니??
-
-	else if ( strcmp ( IntKey2p,"55955575" ) ==0 )
-	{
-		IntKey2p[7]='0';
-		return HMODE_4DMIX;
-	}
-	else if ( strcmp ( IntKey2p,"79513579" ) ==0 )
-	{
-		IntKey2p[7]='0';
-		return HMODE_SUDDENR;
-	}
-	else if ( strcmp ( IntKey2p,"17931793" ) ==0 )
-	{
-		IntKey2p[7]='0';
-		return HMODE_RANDOMS;
-	}
-	else return HMODE_NONE;
-}
 
 void _drawMode(const int x, const int y, const int Mode)
 {
@@ -1423,8 +1302,7 @@ void _drawMode(const int x, const int y, const int Mode)
 	modeRect.w = 37;
 	modeRect.h = 37;
 
-	switch ( Mode )
-	{
+	switch ( Mode )	{
 		case HMODE_2X:
 		case HMODE_4X:
 		case HMODE_8X:
@@ -1465,19 +1343,19 @@ void DrawModeIcon(const int player)
 		_drawMode(x[player], 200, HMODE_MIRROR);
 
 	if(gMode[player].IsSet(GameMode::eMODE_NONSTOP))
-		_drawMode(x[player],240,HMODE_NONSTEP);
+		_drawMode(x[player], 240, HMODE_NONSTEP);
 
 	if(gMode[player].IsSet(GameMode::eMODE_SYNCHRO))
-		_drawMode(x[player],280,HMODE_SYNCHRO);
+		_drawMode(x[player], 280, HMODE_SYNCHRO);
 
 	if(gMode[player].IsSet(GameMode::eMODE_UNION))
-		_drawMode(x[player],320,HMODE_UNION);
+		_drawMode(x[player], 320, HMODE_UNION);
 
 	if(gMode[player].IsSet(GameMode::eMODE_RAMDOM))
-		_drawMode(x[player],360,HMODE_RANDOM);
+		_drawMode(x[player], 360, HMODE_RANDOM);
 	if(gMode[player].IsSet(GameMode::eMODE_VANISH))
-		_drawMode(x[player],400,HMODE_VANISH);
+		_drawMode(x[player], 400, HMODE_VANISH);
 
-	if(gSpeed[player].step>1)
-		_drawMode(x[player],160,HMODE_2X);
+	if(1 < gSpeed[player].step)
+		_drawMode(x[player], 160, HMODE_2X);
 }
