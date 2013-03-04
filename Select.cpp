@@ -18,7 +18,7 @@
 #include <sys/stat.h>
 #include <dirent.h>
 
-#include "Common.h"
+#include "Util.h"
 #include "Main.h"
 #include "Input.h"
 #include "Select.h"
@@ -344,7 +344,7 @@ void _setHiddenMode(const int player, const int mode)
 	}
 
 	if ( IntroFlag ) {
-		gMusicIntro.Halt();
+		gMusicIntro.Stop();
 		IntroFlag = false;
 	}
 
@@ -424,7 +424,7 @@ void _chageSelectScreen(int * selectedIndex, int * selected, int * move)
 	// change screen to left.
 	if ( ( Start1p && PressedKey1p[1] ) || ( Start2p && PressedKey2p[1] ) )	{
 		if ( IntroFlag ) {
-			gMusicIntro.Halt();
+			gMusicIntro.Stop();
 			IntroFlag=false;
 		}
 		gSndMove.Play();
@@ -438,7 +438,7 @@ void _chageSelectScreen(int * selectedIndex, int * selected, int * move)
 	// change screen to right.
 	if ( ( Start1p && PressedKey1p[3] ) || ( Start2p && PressedKey2p[3] ) )	{
 		if ( IntroFlag ) {
-			gMusicIntro.Halt();
+			gMusicIntro.Stop();
 			IntroFlag=false;
 		}
 		gSndMove.Play();
@@ -470,7 +470,7 @@ void _moveToLeftSong(int * pCurrent, int * pSelected, int * pSelectCurrent)
 	else	{
 		// if intro music is playing then stop.
 		if ( IntroFlag ) {
-			gMusicIntro.Halt();
+			gMusicIntro.Stop();
 			IntroFlag=false;
 		}
 
@@ -479,7 +479,7 @@ void _moveToLeftSong(int * pCurrent, int * pSelected, int * pSelectCurrent)
 
 		// start New intro music.
 		Song & curSong = CSONG[*pCurrent];
-		gMusicIntro.Halt();
+		gMusicIntro.Stop();
 		if ( access ( curSong.IntroPath,04 ) ==0 ) {
 			IntroFlag=true;
 			gMusicIntro.Load ( curSong.IntroPath );
@@ -510,7 +510,7 @@ void _moveToRightSong(int * pCurrent, int * pSelected, int * pSelectCurrent)
 	else {
 		// intro sound stop.
 		if ( IntroFlag ) {
-			gMusicIntro.Halt();
+			gMusicIntro.Stop();
 			IntroFlag=false;
 		}
 
@@ -746,9 +746,9 @@ void _startStage(int * pSelected, int * pSelectCurrent)
 			Start2p=false;
 	}
 
-	gSndSelect.Halt();
+	gSndSelect.Stop();
 	if ( IntroFlag )	{
-		gMusicIntro.Halt();
+		gMusicIntro.Stop();
 		IntroFlag=false;
 	}
 

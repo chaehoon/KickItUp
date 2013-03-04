@@ -1,32 +1,39 @@
-#ifndef _KICKITUP_MUSIC_H
-#define _KICKITUP_MUSIC_H
+/*
+ * FmodSound.h
+ *
+ *  Created on: 2013. 3. 4.
+ *      Author: chaehoon-win
+ */
 
-#include "Sound.h"
+#ifndef FMODSOUND_H_
+#define FMODSOUND_H_
+
+#include <string>
 #include <fmodex/fmod.h>
+#include "Sound.h"
 
-class Music :   public Sound
-{
+class FmodSound :	public	Sound {
 private:
 	FMOD_SYSTEM  *	m_pSystem;
 	FMOD_SOUND  *	m_pSound;
 	FMOD_CHANNEL  *	m_pChannel;
 
 public:
-	Music();
-	virtual ~Music(void);
+	FmodSound( FMOD_SYSTEM * pSystem);
+	virtual ~FmodSound(void);
 
 	virtual bool    Load( const std::string & musicFileName );
 	virtual void    Free();
 
 	virtual bool    IsLoaded() const    {   return m_pSound != 0;   }
 	virtual bool    IsPlaying() {
-		FMOD_BOOL isplaying;
-		FMOD_Channel_IsPlaying(m_pChannel, &isplaying);
-		return isplaying != 0;
+		int	playing;
+		FMOD_Channel_IsPlaying(m_pChannel, &playing);
+		return playing != 0;
 	}
 
 	virtual bool    IsPaused()  {
-		FMOD_BOOL paused;
+		int paused;
 		FMOD_Channel_GetPaused(m_pChannel, &paused);
 		return paused != 0;
 	}
@@ -39,4 +46,4 @@ public:
 	virtual unsigned int  GetPosition();
 };
 
-#endif // _MUSIC_H
+#endif /* FMODSOUND_H_ */

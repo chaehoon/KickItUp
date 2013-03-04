@@ -7,7 +7,7 @@
 
 #include "Main.h"
 #include "video/Surface.h"
-#include "Common.h"
+#include "Util.h"
 
 #define PATH_LEN    255
 

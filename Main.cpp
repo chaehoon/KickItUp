@@ -19,7 +19,7 @@
 #include "Song.h"
 #include "Select.h"
 #include "Input.h"
-#include "Common.h"
+#include "Util.h"
 #include "video/Surface.h"
 #include "Timer.h"
 #include "sound/Chunk.h"
@@ -683,7 +683,7 @@ void KIU_STAGE(void)
 			temp=+55;
 			tail=0;
 
-			curtime = gMusicSong.GetCurrentPosition();
+			curtime = gMusicSong.GetPosition();
 
 			if(curtime > starttime) 
 			    delta=(Uint32)curtime-starttime;
@@ -727,7 +727,7 @@ void KIU_STAGE(void)
 			k=48;
 			if(SongFlag)
 			{
-				gMusicSong.Halt();
+				gMusicSong.Stop();
 				SongFlag=false;
 			}
 			g_ProgramState=RESULT;
@@ -986,7 +986,7 @@ void KIU_STAGE(void)
 			k=48;
 			if(SongFlag)
 			{
-				gMusicSong.Halt();
+				gMusicSong.Stop();
 				SongFlag=false;
 			}
 			g_ProgramState=RESULT;
@@ -1416,7 +1416,7 @@ void StageTitle(void)
 		Couple = Start1p && Start2p;
 
 		First=0;
-		gSndOpening.Halt();
+		gSndOpening.Stop();
 		PressedKey2p[0]=0;
 
 		// Change ProgramState to SelectSong Stage
@@ -2333,7 +2333,7 @@ void DrawArrow1p(Uint32 cur)
 	}
 
 	if(Judgement1p==PERFECT || Judgement1p==GREAT)	{
-        gSndBeat.Halt();
+        gSndBeat.Stop();
         gSndBeat.Play();
 
 		if(Judgement1p==PERFECT)cPerfect1p++;
@@ -2394,7 +2394,7 @@ void DrawArrow1p(Uint32 cur)
 			{
 				if(SongFlag)
 				{
-					gMusicSong.Halt();
+					gMusicSong.Stop();
 					SongFlag=false;
 				}
 				g_ProgramState=DEAD;
@@ -2406,7 +2406,7 @@ void DrawArrow1p(Uint32 cur)
 			{
 				if(SongFlag)
 				{
-					gMusicSong.Halt();
+					gMusicSong.Stop();
 					SongFlag=false;
 				}
 				g_ProgramState=DEAD;
@@ -3120,7 +3120,7 @@ void DrawArrow2p(Uint32 cur)
 	}
 
 	if(Judgement2p==PERFECT || Judgement2p==GREAT) {
-        gSndBeat.Halt();
+        gSndBeat.Stop();
         gSndBeat.Play();
 
         Combo2p++;
@@ -3181,7 +3181,7 @@ void DrawArrow2p(Uint32 cur)
 			{
 				if(SongFlag)
 				{
-					gMusicSong.Halt();
+					gMusicSong.Stop();
 					SongFlag=false;
 				}
 				g_ProgramState=DEAD;
@@ -3193,7 +3193,7 @@ void DrawArrow2p(Uint32 cur)
 			{
 				if(SongFlag)
 				{
-					gMusicSong.Halt();
+					gMusicSong.Stop();
 					SongFlag=false;
 				}
 				g_ProgramState=DEAD;
@@ -3684,16 +3684,16 @@ void process_Keydown( const SDLKey & keyValue )
             case SELECTSONG:
                 g_ProgramState=GAMETITLE;
                 if(IntroFlag){
-                    gMusicIntro.Halt();
+                    gMusicIntro.Stop();
                     IntroFlag=false;
                 }
-                gSndSelect.Halt();
+                gSndSelect.Stop();
                 First=0;
                 break;
 
             case STAGE1:
                 if(SongFlag) {
-                    gMusicSong.Halt();
+                    gMusicSong.Stop();
                     SongFlag=false;
                 }
                 First=0;
@@ -3701,7 +3701,7 @@ void process_Keydown( const SDLKey & keyValue )
                 break;
             case DOUBLEST:
                 if(SongFlag){
-                    gMusicSong.Halt();
+                    gMusicSong.Stop();
                     SongFlag=false;
                 }
                 First=0;
@@ -3709,7 +3709,7 @@ void process_Keydown( const SDLKey & keyValue )
                 break;
             case COUPLE:
                 if(SongFlag) {
-                    gMusicSong.Halt();
+                    gMusicSong.Stop();
                     SongFlag=false;
                 }
                 First=0;

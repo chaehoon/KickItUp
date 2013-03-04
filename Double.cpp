@@ -14,7 +14,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <algorithm>
-#include "Common.h"
+#include "Util.h"
 #include "Select.h"
 #include "Double.h"
 #include "Main.h"
@@ -1560,7 +1560,7 @@ void DrawArrow_DB(Uint32 cur)
 
 	if(Judgement1p==PERFECT || Judgement1p==GREAT)
 	{
-        gSndBeat.Halt();
+        gSndBeat.Stop();
         gSndBeat.Play();
 
         Combo1p++;
@@ -1665,7 +1665,7 @@ void DrawArrow_DB(Uint32 cur)
 		{
 			if(SongFlag)
 			{
-                gMusicSong.Halt();
+                gMusicSong.Stop();
 				SongFlag=false;
 			}
 			g_ProgramState=DEAD;
@@ -2079,7 +2079,7 @@ void KIU_STAGE_DOUBLE(void)
 			temp=+55;
 			tail=0;
 
-			curtime = gMusicSong.GetCurrentPosition();
+			curtime = gMusicSong.GetPosition();
 
 			if(curtime > starttime) 
 			delta=(Uint32)curtime-starttime;
@@ -2125,7 +2125,7 @@ void KIU_STAGE_DOUBLE(void)
 			k=48;
 			if(SongFlag)
 			{
-                gMusicSong.Halt();
+                gMusicSong.Stop();
 				SongFlag=false;
 			}
 			g_ProgramState=RESULT;

@@ -65,7 +65,7 @@ bool    Chunk::Play( const bool loop /* = false */ )
 	return false;	
 }
 
-void Chunk::Halt()
+void Chunk::Stop()
 {
 	if( m_pChannel ) {
 		FMOD_Channel_Stop(m_pChannel);

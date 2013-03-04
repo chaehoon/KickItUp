@@ -11,7 +11,6 @@
 
 extern  Chunk   gSndDead;
 extern	Surface     DeadScreen;
-extern	Surface		GameOver;
 
 extern	int 	dwGameCount;
 

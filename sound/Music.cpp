@@ -77,14 +77,14 @@ void    Music::Pause()     {
 	// m_pChannel->setPaused( true );
 }
 
-void Music::Halt()
+void Music::Stop()
 {
 	if( m_pChannel )
 		FMOD_Channel_Stop(m_pChannel);
 		// m_pChannel->stop();
 }
 
-unsigned int  Music::GetCurrentPosition()
+unsigned int  Music::GetPosition()
 {
 	unsigned int ms;
 	FMOD_RESULT	ret = FMOD_Channel_GetPosition(m_pChannel, &ms, FMOD_TIMEUNIT_MS);

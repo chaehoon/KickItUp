@@ -21,7 +21,7 @@ public:
 	virtual bool    IsLoaded() const    {   return m_pSound != 0;   }
 
 	virtual bool    Play( const bool loop = false );
-	virtual void    Halt();
+	virtual void    Stop();
 
 };
 
