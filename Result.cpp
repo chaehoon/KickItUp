@@ -4,7 +4,7 @@
 
 */
 
-#include "Surface.h"
+#include "video/Surface.h"
 #include "Main.h"
 #include "Input.h"
 #include <stdio.h>
@@ -105,7 +105,7 @@ void DisplayJudge(int x, int y, char s, Uint32 ColorKey)
 	}
 
     ResultFont.SetAlpha( 150 );
-    ResultFont.BltFast( x, y, gScreen, &sRect );
+    ResultFont.Blit( x, y, gScreen, &sRect );
 }
 
 
@@ -124,7 +124,7 @@ void	DisplayNumber(int x, int y, char *message)
         cRect.w = 30;
         cRect.h = 38;
 
-        gNumberFont.BltFast( x+Loop*30, y, gScreen, &cRect );
+        gNumberFont.Blit( x+Loop*30, y, gScreen, &cRect );
 	}
 }
 
@@ -152,7 +152,7 @@ void Result(void)
 		sRect.h=480;
 
 		for(Count=480;Count>0;Count-=24){
-			ResultBack.BltFast(Count, Count, gScreen, &sRect);
+			ResultBack.Blit(Count, Count, gScreen, &sRect);
 		}
 
 		Judge1p=JudgeAnaly1p();
@@ -166,7 +166,7 @@ void Result(void)
 	if(PressedKey1p[5])if(Phase!=7 && Start1p)Phase=6;
 	if(PressedKey2p[5])if(Phase!=7 && Start2p)Phase=6;
 
-    ResultBack.BltFast( 0, 0, gScreen );
+    ResultBack.Blit( 0, 0, gScreen );
 		
 	if(Phase>=0)
 	{
@@ -185,11 +185,11 @@ void Result(void)
 		}
         if(Phase>0) {
             ResultFont.SetAlpha( 255 );
-            ResultFont.BltFast( 235, 115, gScreen, &sRect );
+            ResultFont.Blit( 235, 115, gScreen, &sRect );
         }
         else {
             ResultFont.SetAlpha( Count );
-            ResultFont.BltFast( 235, 115, gScreen, &sRect );
+            ResultFont.Blit( 235, 115, gScreen, &sRect );
         }
     }
 
@@ -210,11 +210,11 @@ void Result(void)
 		}
         if(Phase>1) {
             ResultFont.SetAlpha( 255 );
-            ResultFont.BltFast( 235, 166, gScreen, &sRect );
+            ResultFont.Blit( 235, 166, gScreen, &sRect );
         }
         else {
             ResultFont.SetAlpha( Count );
-            ResultFont.BltFast( 235, 166, gScreen, &sRect );
+            ResultFont.Blit( 235, 166, gScreen, &sRect );
         }
 	}
 	
@@ -235,11 +235,11 @@ void Result(void)
 		}
         if(Phase>2) {
             ResultFont.SetAlpha( 255 );
-            ResultFont.BltFast( 250, 220, gScreen, &sRect );
+            ResultFont.Blit( 250, 220, gScreen, &sRect );
         }
         else {
             ResultFont.SetAlpha( Count );
-            ResultFont.BltFast( 250, 220, gScreen, &sRect );
+            ResultFont.Blit( 250, 220, gScreen, &sRect );
         }
 	}
 
@@ -265,7 +265,7 @@ void Result(void)
         else {
             ResultFont.SetAlpha( Count );
         }
-        ResultFont.BltFast( 275, 268, gScreen, &sRect );
+        ResultFont.Blit( 275, 268, gScreen, &sRect );
 	}
 
 	if(Phase>=4)
@@ -290,7 +290,7 @@ void Result(void)
         else {
             ResultFont.SetAlpha( Count );
         }
-        ResultFont.BltFast( 263, 323, gScreen, &sRect );
+        ResultFont.Blit( 263, 323, gScreen, &sRect );
 	}
 
 	if(Phase>=5)
@@ -315,7 +315,7 @@ void Result(void)
         else {
             ResultFont.SetAlpha( Count );
         }
-        ResultFont.BltFast( 190, 373, gScreen, &sRect );
+        ResultFont.Blit( 190, 373, gScreen, &sRect );
 	}
 
 	if(Phase==0)

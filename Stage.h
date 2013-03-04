@@ -1,14 +1,12 @@
 #ifndef _STAGE_H
 #define _STAGE_H
 
-#include "Surface.h"
-#include "SurfaceManager.h"
+#include "video/Surface.h"
 
 class Stage
 {
 private:
 	Surface &		m_screen;
-	SurfaceManager	m_SurfaceManger;
 	bool			m_loaded;
 
 public:

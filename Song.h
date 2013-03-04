@@ -6,7 +6,7 @@
 #define	_KICKITUP_SONG_H
 
 #include "Main.h"
-#include "Surface.h"
+#include "video/Surface.h"
 #include "Common.h"
 
 #define PATH_LEN    255

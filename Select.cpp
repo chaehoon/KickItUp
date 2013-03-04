@@ -24,7 +24,7 @@
 #include "Select.h"
 #include "Result.h"
 #include "Song.h"
-#include "Surface.h"
+#include "video/Surface.h"
 #include "Chunk.h"
 
 using std::string;
@@ -583,7 +583,7 @@ void _startStage(int * pSelected, int * pSelectCurrent)
 		gSongTitle.LoadBmp ( "Images/NoTitle.bmp" );
 
 	// draw title image.
-	gSongTitle.BltFast ( 0, 0, gScreen );
+	gSongTitle.Blit ( 0, 0, gScreen );
 
 	// double mode
 	if ( gchGameMode == MODE_DOUBLE ) {
@@ -798,7 +798,7 @@ void _startStage(int * pSelected, int * pSelectCurrent)
 void _drawScreen(const int * pCurrent, const int * pSelected, int * pIMove)
 {
 	// Draw background select image.
-	gSelectBack.BltFast ( 0, 0, gScreen );
+	gSelectBack.Blit ( 0, 0, gScreen );
 
 	curTimer = SDL_GetTicks();
 
@@ -847,8 +847,8 @@ void _drawScreen(const int * pCurrent, const int * pSelected, int * pIMove)
 			const Song & leftSong = CSONG[prevSong.Prev];
 			const Song & rightSong = curSong;
 
-			leftSong.mpDiskImage->BltFast(10+(*pIMove), 50, gScreen, &DiscSize );
-			rightSong.mpDiskImage->BltFast(650+(*pIMove), 50, gScreen, &DiscSize );
+			leftSong.mpDiskImage->Blit(10+(*pIMove), 50, gScreen, &DiscSize );
+			rightSong.mpDiskImage->Blit(650+(*pIMove), 50, gScreen, &DiscSize );
 		}
 	}
 	// change left screen.
@@ -861,12 +861,12 @@ void _drawScreen(const int * pCurrent, const int * pSelected, int * pIMove)
 			const Song & leftSong = curSong;
 			const Song & rightSong = CSONG[nextSong.Next];
 
-			leftSong.mpDiskImage->BltFast(-630+(*pIMove), 50, gScreen, &DiscSize );
-			rightSong.mpDiskImage->BltFast(10+(*pIMove), 50, gScreen, &DiscSize );
+			leftSong.mpDiskImage->Blit(-630+(*pIMove), 50, gScreen, &DiscSize );
+			rightSong.mpDiskImage->Blit(10+(*pIMove), 50, gScreen, &DiscSize );
 		}
 	}
 	else if ( *pIMove==0 ) {
-		curSong.mpDiskImage->BltFast ( Screen.x, Screen.y, gScreen, &DiscSize );
+		curSong.mpDiskImage->Blit ( Screen.x, Screen.y, gScreen, &DiscSize );
 	}
 
 	// selected right song.
@@ -896,8 +896,8 @@ void _drawScreen(const int * pCurrent, const int * pSelected, int * pIMove)
 			const Song & leftSong = prevSong;
 			const Song & rightSong = nextSong;
 
-			leftSong.mpDiskImage->BltFast(330+(*pIMove), 50, gScreen, &DiscSize);
-			rightSong.mpDiskImage->BltFast(970+(*pIMove), 50, gScreen, &DiscSize);
+			leftSong.mpDiskImage->Blit(330+(*pIMove), 50, gScreen, &DiscSize);
+			rightSong.mpDiskImage->Blit(970+(*pIMove), 50, gScreen, &DiscSize);
 		}
 	}
 	// draw right disk image.
@@ -910,20 +910,20 @@ void _drawScreen(const int * pCurrent, const int * pSelected, int * pIMove)
 			const Song & leftSong = nextSong;
 			const Song & rightSong = CSONG[CSONG[nextSong.Next].Next];
 
-			leftSong.mpDiskImage->BltFast(-330+(*pIMove), 50, gScreen, &DiscSize);
-			rightSong.mpDiskImage->BltFast(330+(*pIMove), 50, gScreen, &DiscSize);
+			leftSong.mpDiskImage->Blit(-330+(*pIMove), 50, gScreen, &DiscSize);
+			rightSong.mpDiskImage->Blit(330+(*pIMove), 50, gScreen, &DiscSize);
 
 		}
 	}
 	else if ( *pIMove==0 ) {
-		nextSong.mpDiskImage->BltFast ( Screen.x, Screen.y, gScreen, &DiscSize );
+		nextSong.mpDiskImage->Blit ( Screen.x, Screen.y, gScreen, &DiscSize );
 	}
 
 	// draw shiftleft image.
-	gShiftLeft.BltFast ( 0, 250, gScreen );
+	gShiftLeft.Blit ( 0, 250, gScreen );
 
 	// draw shiftright image.
-	gShiftRight.BltFast ( 320, 250, gScreen );
+	gShiftRight.Blit ( 320, 250, gScreen );
 
 	// print song title to the screen.
 	if ( *pSelected == 7 )
@@ -937,24 +937,24 @@ void _drawScreen(const int * pCurrent, const int * pSelected, int * pIMove)
 
 	// Draw level icon to next to the title image.
 	if ( curSong.HaveDouble && *pIMove==0 )
-		gDoubleIcon.BltFast ( 0,50, gScreen );
+		gDoubleIcon.Blit ( 0,50, gScreen );
 	if ( nextSong.HaveDouble && *pIMove==0 )
-		gDoubleIcon.BltFast ( 320,50, gScreen );
+		gDoubleIcon.Blit ( 320,50, gScreen );
 
 	if ( curSong.HaveCrazy && *pIMove==0 )
-		gCrazyIcon.BltFast ( 0,50, gScreen );
+		gCrazyIcon.Blit ( 0,50, gScreen );
 	if ( nextSong.HaveCrazy && *pIMove==0 )
-		gCrazyIcon.BltFast ( 320,50, gScreen );
+		gCrazyIcon.Blit ( 320,50, gScreen );
 
 	if ( curSong.HaveHard && *pIMove==0 )
-		gHardIcon.BltFast ( 0,50, gScreen );
+		gHardIcon.Blit ( 0,50, gScreen );
 	if ( nextSong.HaveHard && *pIMove==0 )
-		gHardIcon.BltFast ( 320,50, gScreen );
+		gHardIcon.Blit ( 320,50, gScreen );
 
 	if ( curSong.HaveEasy && *pIMove==0 )
-		gEasyIcon.BltFast ( 0,50, gScreen );
+		gEasyIcon.Blit ( 0,50, gScreen );
 	if ( nextSong.HaveEasy && *pIMove==0 )
-		gEasyIcon.BltFast ( 320,50, gScreen );
+		gEasyIcon.Blit ( 320,50, gScreen );
 
 	// Draw to screen "FREE PLAY!"
 	SDL_Rect	sRect;
@@ -963,7 +963,7 @@ void _drawScreen(const int * pCurrent, const int * pSelected, int * pIMove)
 	sRect.w = 220;
 	sRect.h = 69-46;
 	gStateComment.SetAlpha ( 255 );
-	gStateComment.BltFast ( 210, 450, gScreen, &sRect );
+	gStateComment.Blit ( 210, 450, gScreen, &sRect );
 
 	if ( Start1p==false )
 	{
@@ -974,7 +974,7 @@ void _drawScreen(const int * pCurrent, const int * pSelected, int * pIMove)
 		sRect.h = 23;
 
 		gStateComment.SetAlpha ( ALPHA );
-		gStateComment.BltFast ( 10, 450, gScreen, &sRect );
+		gStateComment.Blit ( 10, 450, gScreen, &sRect );
 	}
 
 	if ( Start2p==false )
@@ -986,7 +986,7 @@ void _drawScreen(const int * pCurrent, const int * pSelected, int * pIMove)
 		sRect.h = 23;
 
 		gStateComment.SetAlpha ( ALPHA );
-		gStateComment.BltFast ( 410, 450, gScreen, &sRect );
+		gStateComment.Blit ( 410, 450, gScreen, &sRect );
 	}
 
 	// Alpha
@@ -1144,7 +1144,7 @@ void _drawMode(const int x, const int y, const int Mode)
 			break;
 	}
 
-	gModeIcon.BltFast ( x, y, gScreen, &modeRect );
+	gModeIcon.Blit ( x, y, gScreen, &modeRect );
 }
 
 void DrawModeIcon(const int player)

@@ -20,7 +20,7 @@
 #include "Main.h"
 #include "Input.h"
 #include "Config.h"
-#include "Surface.h"
+#include "video/Surface.h"
 #include "Chunk.h"
 #include "GameMode.h"
 
@@ -90,7 +90,7 @@ void DrawGaugeDB_1p(void)
 	if(CurG<0)CurG=0;
 
 	// g_pDDSBack->BltFast(64,0,GaugeWaku,NULL, DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
-    GaugeWaku.BltFast( 64, 0, gScreen );
+    GaugeWaku.Blit( 64, 0, gScreen );
 	
 	sRect.y=0;
 	sRect.x=0;
@@ -101,7 +101,7 @@ void DrawGaugeDB_1p(void)
 	{
 		if(i>CurG)break;
         //		g_pDDSBack->BltFast(312-(i*6),20,Gauge,&sRect, DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
-        Gauge.BltFast( 312-(i*6), 20, gScreen, &sRect );
+        Gauge.Blit( 312-(i*6), 20, gScreen, &sRect );
 	}
 
 	sRect.y=0;
@@ -113,7 +113,7 @@ void DrawGaugeDB_1p(void)
 	{
 		if(i>CurG)break;
 		// g_pDDSBack->BltFast(312-(i*6),20,Gauge,&sRect, DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
-        Gauge.BltFast( 312-(i*6), 20, gScreen, &sRect );
+        Gauge.Blit( 312-(i*6), 20, gScreen, &sRect );
 	}
 
 	sRect.y=0;
@@ -125,7 +125,7 @@ void DrawGaugeDB_1p(void)
 	{
 		if(i>CurG)break;
 		// g_pDDSBack->BltFast(312-(i*6),20,Gauge,&sRect,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
-        Gauge.BltFast( 312-(i*6), 20, gScreen, &sRect );
+        Gauge.Blit( 312-(i*6), 20, gScreen, &sRect );
 	}
 
 }
@@ -141,7 +141,7 @@ void DrawGaugeDB_2p(void)
 	if(CurG<0)CurG=0;
 
 	// g_pDDSBack->BltFast(322,0,GaugeWaku,NULL,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
-    GaugeWaku.BltFast( 322, 0, gScreen );
+    GaugeWaku.Blit( 322, 0, gScreen );
 	
 	sRect.y=0;
 	sRect.x=0;
@@ -152,7 +152,7 @@ void DrawGaugeDB_2p(void)
 	{
 		if(i>CurG)break;
 		// g_pDDSBack->BltFast(322+(i*6),20,Gauge,&sRect,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
-        Gauge.BltFast( 322+(i*6), 20, gScreen, &sRect );
+        Gauge.Blit( 322+(i*6), 20, gScreen, &sRect );
 	}
 
 	sRect.y=0;
@@ -164,7 +164,7 @@ void DrawGaugeDB_2p(void)
 	{
 		if(i>CurG)break;
 		// g_pDDSBack->BltFast(322+(i*6),20,Gauge,&sRect,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
-        Gauge.BltFast( 322+(i*6), 20, gScreen, &sRect );
+        Gauge.Blit( 322+(i*6), 20, gScreen, &sRect );
 	}
 
 	sRect.y=0;
@@ -176,7 +176,7 @@ void DrawGaugeDB_2p(void)
 	{
 		if(i>CurG)break;
 		// g_pDDSBack->BltFast(322+(i*6),20,Gauge,&sRect,DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
-        Gauge.BltFast( 322+(i*6), 20, gScreen, &sRect );
+        Gauge.Blit( 322+(i*6), 20, gScreen, &sRect );
 	}
 
 }
@@ -279,7 +279,7 @@ void DrawJudgeDB(void)
 
 	if(Judgement1p)
 	{
-        JudgeFont.BltFast( destRect.x, destRect.y, gScreen, &rRect );
+        JudgeFont.Blit( destRect.x, destRect.y, gScreen, &rRect );
 
 		/* 콤보 출력부 입니다. */
 		if((Judgement1p==PERFECT || Judgement1p==GREAT) && Combo1p>3)
@@ -295,15 +295,15 @@ void DrawJudgeDB(void)
 				cRect.y=0;
 				cRect.h=65;
 
-				if(dwState>10)  ComboFont.BltFast( 250+Loop*50, 250+dwState*2-dwState*2, gScreen, &cRect );
-				else            ComboFont.BltFast( 250+Loop*50, 250+dwState*2, gScreen, &cRect );
+				if(dwState>10)  ComboFont.Blit( 250+Loop*50, 250+dwState*2-dwState*2, gScreen, &cRect );
+				else            ComboFont.Blit( 250+Loop*50, 250+dwState*2, gScreen, &cRect );
 
 				cRect.x=0;
 				cRect.w=150;
 				cRect.y=65;
 				cRect.h=100-65;
-				if(dwState>10)  ComboFont.BltFast( 250,320+dwState*2-dwState*2, gScreen, &cRect );
-				else            ComboFont.BltFast( 250,320+dwState*2,gScreen, &cRect );
+				if(dwState>10)  ComboFont.Blit( 250,320+dwState*2-dwState*2, gScreen, &cRect );
+				else            ComboFont.Blit( 250,320+dwState*2,gScreen, &cRect );
 			}
 		}
 	}
@@ -1676,13 +1676,13 @@ void DrawArrow_DB(Uint32 cur)
 	if(Start2p)if(Score2p<0)Score2p=0;
 
     if(beat) {
-        gArrow2.BltFast( 64, 50, gScreen );
-        gArrow2.BltFast( 320, 50, gScreen );
+        gArrow2.Blit( 64, 50, gScreen );
+        gArrow2.Blit( 320, 50, gScreen );
 	}
 	else 
 	{
-        gArrow1.BltFast( 64, 50, gScreen );
-        gArrow1.BltFast( 320, 50, gScreen );
+        gArrow1.Blit( 64, 50, gScreen );
+        gArrow1.Blit( 320, 50, gScreen );
 	}
 
 	pArrl1.y=0;
@@ -1788,37 +1788,37 @@ void DrawArrow_DB(Uint32 cur)
 	cArrr9.h=80;
 */
 	if(Crashl1)
-        cArrow1.BltFast( 57, 43, gScreen, &cArrl1 );
+        cArrow1.Blit( 57, 43, gScreen, &cArrl1 );
 	else if(sl1)
-        pArrow1.BltFast( 59, 45, gScreen, &pArrl1 );
+        pArrow1.Blit( 59, 45, gScreen, &pArrl1 );
 
-	if(Crashl7) cArrow7.BltFast( 107, 43, gScreen, &cArrl7 );
-	else if(sl7)pArrow7.BltFast( 109, 45, gScreen, &pArrl7 );
+	if(Crashl7) cArrow7.Blit( 107, 43, gScreen, &cArrl7 );
+	else if(sl7)pArrow7.Blit( 109, 45, gScreen, &pArrl7 );
 	
-	if(Crashl5) cArrow5.BltFast( 157, 43, gScreen, &cArrl5 );
-	else if(sl5)pArrow5.BltFast( 159, 45, gScreen, &pArrl5 );
+	if(Crashl5) cArrow5.Blit( 157, 43, gScreen, &cArrl5 );
+	else if(sl5)pArrow5.Blit( 159, 45, gScreen, &pArrl5 );
 
-	if(Crashl9) cArrow9.BltFast( 207, 43, gScreen, &cArrl9 );
-	else if(sl9)pArrow9.BltFast( 209, 45, gScreen, &pArrl9 );
+	if(Crashl9) cArrow9.Blit( 207, 43, gScreen, &cArrl9 );
+	else if(sl9)pArrow9.Blit( 209, 45, gScreen, &pArrl9 );
 	
-	if(Crashl3) cArrow3.BltFast( 257, 43, gScreen, &cArrl3 );
-	else if(sl3)pArrow3.BltFast( 259, 45, gScreen, &pArrl3 );
+	if(Crashl3) cArrow3.Blit( 257, 43, gScreen, &cArrl3 );
+	else if(sl3)pArrow3.Blit( 259, 45, gScreen, &pArrl3 );
 
 // 2 player
-	if(Crashr1) cArrow1.BltFast( 313, 43, gScreen, &cArrl1 );
-	else if(sr1)pArrow1.BltFast( 315, 45, gScreen, &pArrl1 );
+	if(Crashr1) cArrow1.Blit( 313, 43, gScreen, &cArrl1 );
+	else if(sr1)pArrow1.Blit( 315, 45, gScreen, &pArrl1 );
 	
-	if(Crashr7) cArrow7.BltFast( 363, 43, gScreen, &cArrl7 );
-	else if(sr7)pArrow7.BltFast( 365, 45, gScreen, &pArrl7 );
+	if(Crashr7) cArrow7.Blit( 363, 43, gScreen, &cArrl7 );
+	else if(sr7)pArrow7.Blit( 365, 45, gScreen, &pArrl7 );
 	
-	if(Crashr5) cArrow5.BltFast( 413, 43, gScreen, &cArrl5 );
-	else if(sr5)pArrow5.BltFast( 415, 45, gScreen, &pArrl5 );
+	if(Crashr5) cArrow5.Blit( 413, 43, gScreen, &cArrl5 );
+	else if(sr5)pArrow5.Blit( 415, 45, gScreen, &pArrl5 );
 
-	if(Crashr9) cArrow9.BltFast( 463, 43, gScreen, &cArrl9 );
-	else if(sr9)pArrow9.BltFast( 465, 45, gScreen, &pArrl9 );
+	if(Crashr9) cArrow9.Blit( 463, 43, gScreen, &cArrl9 );
+	else if(sr9)pArrow9.Blit( 465, 45, gScreen, &pArrl9 );
 	
-	if(Crashr3) cArrow3.BltFast( 513, 43, gScreen, &cArrl3 );
-	else if(sr3)pArrow3.BltFast( 515, 45, gScreen, &pArrl3 );
+	if(Crashr3) cArrow3.Blit( 513, 43, gScreen, &cArrl3 );
+	else if(sr3)pArrow3.Blit( 515, 45, gScreen, &pArrl3 );
 }
 
 void KIU_STAGE_DOUBLE(void)
@@ -1840,7 +1840,7 @@ void KIU_STAGE_DOUBLE(void)
 		
 	double bpmpix=PUMP_SPRITE_Y*(bpm/60)/1000;
 
-    gSongBack.BltFast( 0, 0, gScreen );
+    gSongBack.Blit( 0, 0, gScreen );
 
 	DisplayStageCount(dwGameCount);
 
@@ -2016,7 +2016,7 @@ void KIU_STAGE_DOUBLE(void)
 			}
 		}
 
-        gSongBack.BltFast( 0, 0, gScreen );
+        gSongBack.Blit( 0, 0, gScreen );
 
 
 		if(SongFlag==true)

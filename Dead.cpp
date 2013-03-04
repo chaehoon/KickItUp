@@ -59,13 +59,13 @@ void Dead(void)
 		    }
         }
 
-        DeadScreen.BltFast( 0, 0, gScreen, &UpRect );
-        DeadScreen.BltFast( 0, UpRect.y+240, gScreen, &DownRect );
+        DeadScreen.Blit( 0, 0, gScreen, &UpRect );
+        DeadScreen.Blit( 0, UpRect.y+240, gScreen, &DownRect );
 	}
 
 	if(Firs==2)
 	{
-        DeadScreen.BltFast( 0, 0, gScreen, &UpRect );
+        DeadScreen.Blit( 0, 0, gScreen, &UpRect );
 
 		if(2500 < timer.GetTicks() )
 		{

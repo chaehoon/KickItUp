@@ -13,7 +13,7 @@ public:
 	bool SetVideoMode(int width, int height, int bpp, Uint32 flags = SDL_RESIZABLE);
 	bool LoadBmp(std::string filename);
 	void Free()	{	if( mpSurface) SDL_FreeSurface( mpSurface );	mpSurface = 0;}
-	void BltFast( int x, int y, Surface & destination, const SDL_Rect * clip = 0 );
+	void Blit( int x, int y, Surface & destination, const SDL_Rect * clip = 0 );
 	void Flip(void);
 
     bool IsLoaded() const   {   return mpSurface != 0;  }

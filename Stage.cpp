@@ -12,12 +12,11 @@ Stage::~Stage(void)
 
 void	Stage::Release()
 {
-	m_SurfaceManger.Release();
 }
 
 Surface *	Stage::MakeSurface()
 {
-	return m_SurfaceManger.MakeSurface();
+	return 0;
 }
 
 Surface *	Stage::GetScreen()

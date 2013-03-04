@@ -49,7 +49,7 @@ bool Surface::LoadBmp(std::string filename)
 	return false;
 }
 
-void Surface::BltFast( int x, int y, Surface & destination, const SDL_Rect * clip /* = 0 */ )
+void Surface::Blit( int x, int y, Surface & destination, const SDL_Rect * clip /* = 0 */ )
 {
 	//Make a temporary rectangle to hold the offsets
 	SDL_Rect offset;

@@ -1,7 +1,7 @@
 #ifndef	_KICKITUP_MAIN_H
 #define	_KICKITUP_MAIN_H
 
-#include "Surface.h"
+#include "video/Surface.h"
 #include "Music.h"
 #include <stdio.h>
 #include <algorithm>
