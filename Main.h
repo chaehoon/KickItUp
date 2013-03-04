@@ -2,7 +2,7 @@
 #define	_KICKITUP_MAIN_H
 
 #include "video/Surface.h"
-#include "Music.h"
+#include "sound/Music.h"
 #include <stdio.h>
 #include <algorithm>
 #include "GameMode.h"

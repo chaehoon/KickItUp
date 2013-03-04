@@ -6,7 +6,7 @@
 
 #include "Dead.h"
 #include "Main.h"
-#include "Chunk.h"
+#include "sound/Chunk.h"
 #include "Timer.h"
 
 extern  Chunk   gSndDead;

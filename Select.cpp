@@ -25,7 +25,7 @@
 #include "Result.h"
 #include "Song.h"
 #include "video/Surface.h"
-#include "Chunk.h"
+#include "sound/Chunk.h"
 
 using std::string;
 using std::vector;

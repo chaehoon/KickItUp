@@ -21,7 +21,7 @@
 #include "Input.h"
 #include "Config.h"
 #include "video/Surface.h"
-#include "Chunk.h"
+#include "sound/Chunk.h"
 #include "GameMode.h"
 
 using std::max;

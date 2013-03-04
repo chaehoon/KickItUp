@@ -22,8 +22,8 @@
 #include "Common.h"
 #include "video/Surface.h"
 #include "Timer.h"
-#include "Chunk.h"
-#include "Music.h"
+#include "sound/Chunk.h"
+#include "sound/Music.h"
 #include <stdio.h>
 #include <time.h>
 #include <sstream>
