@@ -286,13 +286,15 @@ bool _getFullPathName( const char * fileName, char * outputDir, const size_t siz
 
     char realFileName[64] = {0, };
 
+    int ret = false;
     if(GetRealFileName(fileName, realFileName, sizeof(realFileName))) {
     	snprintf(outputDir, size, "%s/%s", buff, realFileName);
+    	ret = true;
     }
     else {
     	outputDir[0] = '\0';
     }
-    return true;
+    return ret;
 
 }
 
@@ -386,12 +388,17 @@ void Song::_readStep(const char *fileName, KIUStep * pStep)
 	}
 
 	strncpy(SongTitle, pStep->name, sizeof(SongTitle));
-	_getFullPathName("Title.bmp", TitleImgPath, PATH_LEN);
-	_getFullPathName("Back.bmp", BgImgPath, PATH_LEN);
-	_getFullPathName("Song.wav", PlayWavPath, PATH_LEN);
-	_getFullPathName("Song.mp3", PlayMp3Path, PATH_LEN);
-	_getFullPathName("Song.mpg", PlayMpgPath, PATH_LEN);
-	_getFullPathName("Intro.wav", IntroWavPath, PATH_LEN);
-	_getFullPathName("Intro.mp3", IntroMp3Path, PATH_LEN);
+	_getFullPathName("title.bmp", TitleImgPath, PATH_LEN);
+	_getFullPathName("back.bmp", BgImgPath, PATH_LEN);
+
+	if(!_getFullPathName("song.wav", PlayPath, PATH_LEN)) {
+		_getFullPathName("song.mp3", PlayPath, PATH_LEN);
+		// _getFullPathName("song.mpg", PlayMpgPath, PATH_LEN);
+	}
+
+	if(!_getFullPathName("intro.wav", IntroPath, PATH_LEN) ) {
+		_getFullPathName("intro.mp3", IntroPath, PATH_LEN);
+	}
+
     _loadDiskImage();
 }

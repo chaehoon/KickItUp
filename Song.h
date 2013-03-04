@@ -110,17 +110,15 @@ public:
 	bool HaveDouble;
 
 	char TitleImgPath[PATH_LEN+1];
-	char IntroWavPath[PATH_LEN+1];	// intro wav file.
-	char IntroMp3Path[PATH_LEN+1];	// intro mp3 file.
+	char IntroPath[PATH_LEN+1];		// intro wav or mp3 file.
 	
 	char DiscImagePath[PATH_LEN+1];
 	char BgImgPath[PATH_LEN+1];
 	char MSDPath[PATH_LEN+1];
 	
 	char SongTitle[PATH_LEN+1];
-	char PlayWavPath[PATH_LEN+1];
-	char PlayMp3Path[PATH_LEN+1];
-	char PlayMpgPath[PATH_LEN+1];
+	char PlayPath[PATH_LEN+1];
+	// char PlayMpgPath[PATH_LEN+1];
 
 	Song();
 	virtual ~Song();

@@ -36,6 +36,11 @@ public:
 	void Set(const Mode mode);
 	void UnSet(const Mode mode);
 	bool IsSet(const Mode mode) const;
+
+private:
+	void _set(const Mode mode);
+	void _unSet(const Mode mode);
+
 };
 
 #endif /* GAMEMODE_H_ */

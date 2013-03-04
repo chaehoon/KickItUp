@@ -112,8 +112,6 @@ double				Data_Double_y[MAX_DATA+1];//족보 데이터의 Y값을 가지고 있�
 
 
 char				SongName[PATH_LEN+1];
-char				SongName2[PATH_LEN+1];
-char				SongName3[PATH_LEN+1];
 
 char				LogoTitleName[PATH_LEN];
 

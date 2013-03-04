@@ -75,8 +75,6 @@ extern	int					tick;
 extern	Uint32				bunki,bunki2;
 
 extern char					SongName[PATH_LEN+1];
-extern char					SongName2[PATH_LEN+1];
-extern char					SongName3[PATH_LEN+1];
 extern char					Title[PATH_LEN+1];
 extern	int					start1;
 
@@ -251,11 +249,6 @@ void _init()
 	// 선택화면에서 보이는 좌우 음악을 연결 시킨다.
 	_sortSong();
 
-	// paint the background black.
-	gScreen.FillRect ( 0, 0 );
-
-	// Draw BackGround as select image.
-	gSelectBack.BltFast ( 0, 0, gScreen );
 	gSndSelect.Play ( true );
 
 	Couple = false;
@@ -268,14 +261,10 @@ void _init()
  */
 bool _getDirs ( vector<string> & dirs )
 {
-	struct dirent * item;
-	DIR * dp;
+	DIR * dp = opendir ( "." );
 
-	dp = opendir ( "." );
-
-	while ( dp != NULL )
-	{
-		item = readdir ( dp );
+	while ( dp != NULL ) {
+		struct dirent * item = readdir ( dp );
 		if ( item == NULL )
 			break;
 
@@ -310,16 +299,16 @@ bool _getDirs ( vector<string> & dirs )
 void _sortSong()
 {
 	for(int i=0;;i++ ) {
-		if ( i!=0 )
+		if ( i != 0 )
 			CSONG[i].Prev=i-1;
 
 		CSONG[i].Next=i+1;
 
 		if ( CSONG[i].getStep1().bpm1 == 0 && CSONG[i].getStep2().bpm1 == 0 ) {
-			CSONG[i].Prev=0;
+			CSONG[i].Prev = 0;
 			i--;
-			CSONG[i].Next=0;
-			CSONG[0].Prev=i;
+			CSONG[i].Next = 0;
+			CSONG[0].Prev = i;
 			break;
 		}
 	}
@@ -356,7 +345,7 @@ void _setHiddenMode(const int player, const int mode)
 
 	if ( IntroFlag ) {
 		gMusicIntro.Halt();
-		IntroFlag=false;
+		IntroFlag = false;
 	}
 
 	GameMode & gameMode = gMode[player];
@@ -365,55 +354,41 @@ void _setHiddenMode(const int player, const int mode)
 	switch ( mode ) {
 		case HMODE_SUDDENR:
 			gameMode.Set(GameMode::eMODE_SUDDENR);
-			gameMode.UnSet(GameMode::eMODE_VANISH);
-			gSndMode.Play();
 			break;
 		case HMODE_RANDOMS:
 			gameMode.Set(GameMode::eMODE_RAMDOMS);
 			speed.reset(1);
-			gSndMode.Play();
 			break;
 		case HMODE_2X:
 			speed.reset(2);
-			gSndMode.Play();
 			break;
 		case HMODE_4X:
 			speed.reset(4);
-			gSndMode.Play();
 			break;
 		case HMODE_8X:
 			speed.reset(8);
-			gSndMode.Play();
 			break;
 		case HMODE_MIRROR:
 			gameMode.Set(GameMode::eMODE_MIRROR);
-			gSndMode.Play();
 			break;
 		case HMODE_NONSTEP:
 			gameMode.Set(GameMode::eMODE_NONSTOP);
-			gSndMode.Play();
 			break;
 		case HMODE_SYNCHRO:
 			gameMode.Set(GameMode::eMODE_SYNCHRO);
-			gSndMode.Play();
 			break;
 		case HMODE_UNION:
 			gameMode.Set(GameMode::eMODE_UNION);
-			gSndMode.Play();
 			break;
 		case HMODE_RANDOM:
 			gameMode.Set(GameMode::eMODE_RAMDOM);
-			gSndMode.Play();
 			break;
 		case HMODE_4DMIX:
 			speed.setRandom();
 			gameMode.Set(GameMode::eMODE_MIX);
-			gSndMode.Play();
 			break;
 		case HMODE_VANISH:
 			gameMode.Set(GameMode::eMODE_VANISH);
-			gameMode.UnSet(GameMode::eMODE_SUDDENR);
-			gSndMode.Play();
 			break;
 		case HMODE_CANCEL:
 			gSndCancel.Play();
@@ -423,6 +398,11 @@ void _setHiddenMode(const int player, const int mode)
 		default:
 			break;
 	}
+
+	if(mode != HMODE_CANCEL) {
+		gSndMode.Play();
+	}
+
 }
 
 /**
@@ -500,14 +480,9 @@ void _moveToLeftSong(int * pCurrent, int * pSelected, int * pSelectCurrent)
 		// start New intro music.
 		Song & curSong = CSONG[*pCurrent];
 		gMusicIntro.Halt();
-		if ( access ( curSong.IntroWavPath,04 ) ==0 ) {
+		if ( access ( curSong.IntroPath,04 ) ==0 ) {
 			IntroFlag=true;
-			gMusicIntro.Load ( curSong.IntroWavPath );
-			gMusicIntro.Play ( true );
-		}
-		else if ( access ( curSong.IntroMp3Path,04 ) ==0 ) {
-			IntroFlag=true;
-			gMusicIntro.Load ( curSong.IntroMp3Path );
+			gMusicIntro.Load ( curSong.IntroPath );
 			gMusicIntro.Play ( true );
 		}
 
@@ -545,14 +520,9 @@ void _moveToRightSong(int * pCurrent, int * pSelected, int * pSelectCurrent)
 		// selected song intro sound start.
 		Song & curSong = CSONG[*pCurrent];
 		Song & nextSong = CSONG[curSong.Next];
-		if ( access ( nextSong.IntroWavPath,04 ) ==0 ) {
+		if ( access ( nextSong.IntroPath,04 ) ==0 ) {
 			IntroFlag=true;
-			gMusicIntro.Load ( nextSong.IntroWavPath );
-			gMusicIntro.Play ( true );
-		}
-		else if ( access ( nextSong.IntroMp3Path,04 ) ==0 ) {
-			IntroFlag=true;
-			gMusicIntro.Load ( nextSong.IntroMp3Path );
+			gMusicIntro.Load ( nextSong.IntroPath );
 			gMusicIntro.Play ( true );
 		}
 
@@ -760,9 +730,7 @@ void _startStage(int * pSelected, int * pSelectCurrent)
 		break;
 	}
 
-	strcpy ( SongName,  selectedSong.PlayWavPath );
-	strcpy ( SongName2, selectedSong.PlayMp3Path );
-	strcpy ( SongName3, selectedSong.PlayMpgPath );
+	strcpy ( SongName,  selectedSong.PlayPath );
 	strcpy ( Title,     selectedSong.SongTitle );
 
 	Judgement1p=NONE;
@@ -788,10 +756,6 @@ void _startStage(int * pSelected, int * pSelectCurrent)
 	if ( access ( SongName,04 ) ==0 )	{
 		SongFlag=true;
 		gMusicSong.Load ( SongName );
-	}
-	else if ( access ( SongName2,04 ) ==0 )	{
-		SongFlag=true;
-		gMusicSong.Load ( SongName2 );
 	}
 	else
 		SongFlag=false;
