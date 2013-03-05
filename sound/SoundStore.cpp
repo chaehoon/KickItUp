@@ -23,7 +23,7 @@ SoundStore::~SoundStore(void) {
 // 사운드를 요청함.
 Sound * SoundStore::Order(const std::string & name ) {
 	// 생성된 값이 있는지 조사.
-	Sound * pSnd  = Find( name );
+	Sound * pSnd  = _find( name );
 
 	// 생성된 값이 없으면 생성.
 	if( pSnd == 0 ) {
@@ -47,7 +47,7 @@ void	SoundStore::Destroy() {
 }
 
 // 해당 사운드를 찾는다.
-Sound *	SoundStore::Find( const std::string & name ) {
+Sound *	SoundStore::_find( const std::string & name ) {
 	SoundIter	i = m_SoundList.find( name );
 	if( i != m_SoundList.end() )
 		return i->second;

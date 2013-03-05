@@ -29,13 +29,15 @@ public:
 	virtual void	Destroy();			///< 정리 작업.
 
 	Sound * Order( const std::string & name );					///< 사운드를 요청.
-	Sound *	Find( const std::string & name );					///< 기존 사운드를 찾음.
 
 	virtual bool	Process( unsigned long )	{	return true; }	/// Sound System Update.
 
 protected:
 	SoundStore(void);				///< 생성자.
 	virtual	Sound *	create() = 0;	/// Sound Create.
+
+private:
+	Sound *	_find( const std::string & name );					///< 기존 사운드를 찾음.
 };
 
 extern SoundStore *	g_pSoundStore;
