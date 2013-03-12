@@ -1849,7 +1849,7 @@ void KIU_STAGE_DOUBLE(void)
 			sSpeed = gSpeed[0];
 			sGameMode = gMode[0];
 		} else if(Start2p)	{
-			sSpeed = gSpeed[2];
+			sSpeed = gSpeed[1];
 			sGameMode = gMode[1];
 		}
 
