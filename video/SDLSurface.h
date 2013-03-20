@@ -8,7 +8,7 @@
 #ifndef SDLSURFACE_H_
 #define SDLSURFACE_H_
 
-#include "../common/common.h"
+#include "../common.h"
 #include <string>
 
 class Surface;

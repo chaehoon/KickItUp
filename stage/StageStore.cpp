@@ -6,7 +6,7 @@
  */
 
 #include "StageStore.h"
-#include "../common/common.h"
+#include "../common.h"
 #include "Stage.h"
 
 StageStore::StageStore() : _curPlayCnt( 4 ),

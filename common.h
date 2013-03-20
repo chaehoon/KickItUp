@@ -3,8 +3,8 @@
 
 #include <SDL/SDL.h>
 #include <cassert>
-#include "../video/Coord.h"
-#include "../video/Dim.h"
+#include "./video/Coord.h"
+#include "./video/Dim.h"
 
 enum	ePlayMode {
     ePM_None = 0,

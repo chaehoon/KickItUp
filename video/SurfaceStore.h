@@ -8,7 +8,7 @@
 #ifndef SURFACESTORE_H_
 #define SURFACESTORE_H_
 
-#include "../common/common.h"
+#include "../common.h"
 #include <map>
 #include <string>
 

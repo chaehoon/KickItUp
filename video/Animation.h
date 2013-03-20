@@ -8,7 +8,7 @@
 #ifndef ANIMATION_H_
 #define ANIMATION_H_
 
-#include "../common/common.h"
+#include "../common.h"
 
 class Surface;
 class Animation {

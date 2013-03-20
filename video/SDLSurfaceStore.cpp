@@ -44,11 +44,11 @@ void	SDLSurfaceStore::Destroy()
 }
 
 // create sdl surface.
-//Surface *	SDLSurfaceStore::create()
-//{
-//	Surface * pSurface = new SDLSurface( _pSurface );
-//	return pSurface;
-//}
+Surface *	SDLSurfaceStore::create()
+{
+	Surface * pSurface = new SDLSurface( _pSurface );
+	return pSurface;
+}
 
 // flip the main surface.
 bool	SDLSurfaceStore::Process( unsigned long delta )

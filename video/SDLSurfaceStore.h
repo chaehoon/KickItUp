@@ -8,7 +8,7 @@
 #ifndef SDLSURFACESTORE_H_
 #define SDLSURFACESTORE_H_
 
-#include "../common/common.h"
+#include "../common.h"
 #include "SurfaceStore.h"
 
 class Surface;
@@ -28,7 +28,7 @@ public:
 	virtual bool	Process( unsigned long delta);	///< Update.
 
 protected:
-	// virtual Surface *	create();
+	virtual Surface *	create();
 };
 
 
