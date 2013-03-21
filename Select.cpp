@@ -24,7 +24,7 @@
 #include "Select.h"
 #include "Result.h"
 #include "Song.h"
-#include "video/Surface.h"
+#include "video/SDLSurface.h"
 #include "sound/Chunk.h"
 
 using std::string;
@@ -56,18 +56,18 @@ using std::vector;
 
 extern Song					CSONG[512];
 
-extern Surface gSongBack;
-extern Surface gSongTitle;
-extern Surface gSelectBack;
-extern Surface gStateComment;
-extern Surface gShiftLeft;
-extern Surface gShiftRight;
-extern Surface	gModeIcon;
+extern SDLSurface gSongBack;
+extern SDLSurface gSongTitle;
+extern SDLSurface gSelectBack;
+extern SDLSurface gStateComment;
+extern SDLSurface gShiftLeft;
+extern SDLSurface gShiftRight;
+extern SDLSurface	gModeIcon;
 
-extern	Surface	gDoubleIcon;
-extern	Surface	gCrazyIcon;
-extern	Surface	gHardIcon;
-extern	Surface	gEasyIcon;
+extern	SDLSurface	gDoubleIcon;
+extern	SDLSurface	gCrazyIcon;
+extern	SDLSurface	gHardIcon;
+extern	SDLSurface	gEasyIcon;
 
 extern double				bpm,bpm2,bpm3;
 extern int					start,start2,start3;
@@ -565,22 +565,22 @@ void _startStage(int * pSelected, int * pSelectCurrent)
 	gSndCancel.Play();
 
 	// selected song background setting.
-	gSongBack.LoadBmp ( selectedSong.BgImgPath );
+	gSongBack.Load ( selectedSong.BgImgPath );
 
 	// selected song title setting.
-	gSongTitle.LoadBmp ( selectedSong.TitleImgPath );
+	gSongTitle.Load ( selectedSong.TitleImgPath );
 
 	// if background is not set then background set title image.
 	if ( !gSongBack.IsLoaded() )
 	{
 		if ( gSongTitle.IsLoaded() )
-			gSongBack.LoadBmp ( selectedSong.TitleImgPath );
+			gSongBack.Load ( selectedSong.TitleImgPath );
 		else
-			gSongBack.LoadBmp ( "Images/Back.bmp" );
+			gSongBack.Load ( "Images/Back.bmp" );
 	}
 
 	if ( !gSongTitle.IsLoaded() )
-		gSongTitle.LoadBmp ( "Images/NoTitle.bmp" );
+		gSongTitle.Load ( "Images/NoTitle.bmp" );
 
 	// draw title image.
 	gSongTitle.Blit ( 0, 0, gScreen );

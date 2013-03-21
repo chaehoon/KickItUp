@@ -10,7 +10,7 @@
 #include "Timer.h"
 
 extern  Chunk   gSndDead;
-extern	Surface     DeadScreen;
+extern	SDLSurface     DeadScreen;
 
 extern	int 	dwGameCount;
 

@@ -1,7 +1,7 @@
 #ifndef	_KICKITUP_MAIN_H
 #define	_KICKITUP_MAIN_H
 
-#include "video/Surface.h"
+#include "video/SDLSurface.h"
 #include "sound/Music.h"
 #include <stdio.h>
 #include <algorithm>
@@ -115,8 +115,8 @@ public:
 	}
 };
 
-extern Surface gSelectBack;
-extern Surface gScreen;
+extern SDLSurface gSelectBack;
+extern SDLSurface gScreen;
 
 extern	bool	SongFlag;
 
@@ -196,7 +196,7 @@ void			DrawJudge2p(void);
 void			DrawScore1p(void);
 void			DrawScore2p(void);
 void			DisplayMessage(int x, int y, const char *message);
-bool			ClpBlt(int x ,int y ,Surface & surface, const SDL_Rect & srect);
+bool			ClpBlt(int x ,int y ,SDLSurface & surface, const SDL_Rect & srect);
 void			StageTitle(void);
 void			UpdateFrame(void);
 bool			KLoadImage(void);

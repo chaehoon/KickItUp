@@ -11,7 +11,7 @@
 
 #define PATH_LEN    255
 
-extern Surface  gNoDISC;
+extern SDLSurface  gNoDISC;
 
 /** KickItUp Step Info
  */
@@ -97,8 +97,8 @@ public:
 	 */
 	void ReadDouble(const char *fileName);
 
-    Surface *   mpDiskImage;
-    Surface     mThisSongDiskImage;
+	SDLSurface *   mpDiskImage;
+    SDLSurface     mThisSongDiskImage;
 
 	Uint32	Next;
 	Uint32	Prev;

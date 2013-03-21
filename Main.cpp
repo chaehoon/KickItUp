@@ -20,7 +20,7 @@
 #include "Select.h"
 #include "Input.h"
 #include "Util.h"
-#include "video/Surface.h"
+#include "video/SDLSurface.h"
 #include "Timer.h"
 #include "sound/Chunk.h"
 #include "sound/Music.h"
@@ -37,48 +37,48 @@ char	TITLE[PATH_LEN];
 
 FMOD_SYSTEM  *	gpSystem;
 
-Surface gScreen;
-Surface	gGameTitle;
-Surface gStateComment;
-Surface gSmallFont;
-Surface gSelectBack;
-Surface gSongBack;
-Surface gSongTitle;
-Surface gNumberFont;
-Surface gNoDISC;
-Surface gShiftLeft;
-Surface gShiftRight;
-Surface	gModeIcon;
-Surface gDoubleIcon;
-Surface gCrazyIcon;
-Surface gEasyIcon;
-Surface gHardIcon;
-Surface	gStageCount;
-Surface gArrow1;
-Surface gArrow2;
+SDLSurface gScreen;
+SDLSurface	gGameTitle;
+SDLSurface gStateComment;
+SDLSurface gSmallFont;
+SDLSurface gSelectBack;
+SDLSurface gSongBack;
+SDLSurface gSongTitle;
+SDLSurface gNumberFont;
+SDLSurface gNoDISC;
+SDLSurface gShiftLeft;
+SDLSurface gShiftRight;
+SDLSurface	gModeIcon;
+SDLSurface gDoubleIcon;
+SDLSurface gCrazyIcon;
+SDLSurface gEasyIcon;
+SDLSurface gHardIcon;
+SDLSurface	gStageCount;
+SDLSurface gArrow1;
+SDLSurface gArrow2;
 
-Surface gWArrow;
+SDLSurface gWArrow;
 
-Surface	pArrow1;
-Surface	pArrow3;
-Surface	pArrow5;
-Surface	pArrow7;
-Surface	pArrow9;
+SDLSurface	pArrow1;
+SDLSurface	pArrow3;
+SDLSurface	pArrow5;
+SDLSurface	pArrow7;
+SDLSurface	pArrow9;
 
-Surface	cArrow1;
-Surface	cArrow3;
-Surface	cArrow5;
-Surface	cArrow7;
-Surface	cArrow9;
-Surface	JudgeFont;
-Surface ComboFont;
-Surface	GaugeWaku;
-Surface Gauge;
-Surface DeadScreen;
-Surface GameOver;
-Surface Score;
-Surface	ResultFont;
-Surface	ResultBack;
+SDLSurface	cArrow1;
+SDLSurface	cArrow3;
+SDLSurface	cArrow5;
+SDLSurface	cArrow7;
+SDLSurface	cArrow9;
+SDLSurface	JudgeFont;
+SDLSurface ComboFont;
+SDLSurface	GaugeWaku;
+SDLSurface Gauge;
+SDLSurface DeadScreen;
+SDLSurface GameOver;
+SDLSurface Score;
+SDLSurface	ResultFont;
+SDLSurface	ResultBack;
 
 
 Chunk	gSndOpening;
@@ -1291,7 +1291,7 @@ void DisplayMessage(int x, int y, const char * message)
 }
 
 			
-bool ClpBlt(int x ,int y ,Surface & surface, const SDL_Rect & srect)
+bool ClpBlt(int x ,int y ,SDLSurface & surface, const SDL_Rect & srect)
 {
     SDL_Rect sRect;
 

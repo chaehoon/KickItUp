@@ -21,12 +21,14 @@ using namespace std;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-Song::Song() : 	Next(0), Prev(0),
+Song::Song() : 	mThisSongDiskImage(0),
+		Next(0), Prev(0),
 	HaveCrazy(false),
 	HaveHard(false),
 	HaveEasy(false),
 	HaveCouple(false),
-	HaveDouble(false)
+	HaveDouble(false),
+
 {
     mpDiskImage = & mThisSongDiskImage;
 }
