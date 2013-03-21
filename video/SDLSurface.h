@@ -9,11 +9,10 @@
 #define SDLSURFACE_H_
 
 #include "../common.h"
+#include "Surface.h"
 #include <string>
 
-class Surface;
-
-class SDLSurface {
+class SDLSurface :	public Surface {
 private:
 	SDL_Surface *	_pMainSurface;		///< main screen surface.
 	SDL_Surface *	_pSurface;			///< surface.

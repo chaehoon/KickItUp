@@ -18,7 +18,7 @@ bool Surface::SetVideoMode(int width, int height, int bpp, Uint32 flags /* = SDL
 }
 
 
-bool Surface::LoadBmp(std::string filename)
+bool Surface::Load(std::string filename)
 {
     Free();
 

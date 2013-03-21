@@ -3343,203 +3343,203 @@ bool KLoadImage(void)
 {
 	// Loading image here
 	
-	if( !gGameTitle.LoadBmp( "images/title.bmp" ) )
+	if( !gGameTitle.Load( "images/title.bmp" ) )
 		return false;
 	
-	if( !gStateComment.LoadBmp( "images/c_font.bmp" ) )
+	if( !gStateComment.Load( "images/c_font.bmp" ) )
 		return false;
 	gStateComment.SetColorKey();
 	
-	if( !gSmallFont.LoadBmp( "images/s_font.bmp" ) )
+	if( !gSmallFont.Load( "images/s_font.bmp" ) )
 		return false;
 	gSmallFont.SetColorKey();
 	
-	if( !gSelectBack.LoadBmp( "images/select_back.bmp" ) )
+	if( !gSelectBack.Load( "images/select_back.bmp" ) )
 	return false;
 	
 	DisplayMessage(0,0,"Loading Image");
 	
-	if( !JudgeFont.LoadBmp( "images/judgement.bmp" ) ) {
+	if( !JudgeFont.Load( "images/judgement.bmp" ) ) {
 		MsgBox("Cannot Load judgement Font.","ERROR",0);
 		return false;
 	}
 	JudgeFont.SetColorKey();
 	
-	if( !gNumberFont.LoadBmp( "images/number.bmp" ) ) {
+	if( !gNumberFont.Load( "images/number.bmp" ) ) {
 		MsgBox("Cannot Load number Font.","ERROR",0);
 		return false;
 	}
 	gNumberFont.SetColorKey();
 	
-	if( !ComboFont.LoadBmp( "images/combo.bmp" ) ) {
+	if( !ComboFont.Load( "images/combo.bmp" ) ) {
 		MsgBox("Cannot Load combo Font.","ERROR",0);
 		return false;
 	}
 	ComboFont.SetColorKey();
 	
-	if( !gNoDISC.LoadBmp( "images/no_disc.bmp" ) ) {
+	if( !gNoDISC.Load( "images/no_disc.bmp" ) ) {
 		MsgBox("Cannot Load nodisc.bmp",0,0);
 		return false;
 	}
 	gNoDISC.SetColorKey();
 	
-	if( !gShiftLeft.LoadBmp( "images/shift_l.bmp" ) ) {
+	if( !gShiftLeft.Load( "images/shift_l.bmp" ) ) {
 		MsgBox("Cannot Load shift_l.bmp",0,0);
 		return false;
 	}
 	gShiftLeft.SetColorKey();
 	
-	if( !gShiftRight.LoadBmp( "images/shift_r.bmp" ) ) {
+	if( !gShiftRight.Load( "images/shift_r.bmp" ) ) {
 		MsgBox("Cannot Load shift_r.bmp",0,0);
 		return false;
 	}
 	gShiftRight.SetColorKey();
 	
-	if( !GaugeWaku.LoadBmp( "images/gauge_waku.bmp" ) ) {
+	if( !GaugeWaku.Load( "images/gauge_waku.bmp" ) ) {
 		MsgBox("Cannot Load gauge_waku.bmp",0,0);
 		return false;
 	}
 	GaugeWaku.SetColorKey();
 	
-	if( !Gauge.LoadBmp( "images/gauge.bmp" ) ) {
+	if( !Gauge.Load( "images/gauge.bmp" ) ) {
 		MsgBox("Cannot Load gauge.bmp",0,0);
 		return false;
 	}
 	Gauge.SetColorKey();
 	
-	if( !gArrow1.LoadBmp( "images/arrow1.bmp" ) ) {
+	if( !gArrow1.Load( "images/arrow1.bmp" ) ) {
 		MsgBox("Cannot Load arrow1.bmp",0,0);
 		return false;
 	}
 	gArrow1.SetColorKey();
 	
-	if( !gArrow2.LoadBmp( "images/arrow2.bmp" ) ) {
+	if( !gArrow2.Load( "images/arrow2.bmp" ) ) {
 		MsgBox("Cannot Load Arrow2.bmp",0,0);
 		return false;
 	}
 	gArrow2.SetColorKey();
 	
-	if( !gWArrow.LoadBmp( "images/arrow.bmp" ) ) {
+	if( !gWArrow.Load( "images/arrow.bmp" ) ) {
 		MsgBox("Cannot Load arrow.bmp",0,0);
 		return false;
 	}
 	gWArrow.SetColorKey();
 	
-	if( !pArrow1.LoadBmp( "images/p_arrow1.bmp" ) ) {
+	if( !pArrow1.Load( "images/p_arrow1.bmp" ) ) {
 		MsgBox("Cannot Load p_arrow1.bmp",0,0);
 		return false;
 	}
 	pArrow1.SetColorKey();
 	
-	if( !pArrow3.LoadBmp( "images/p_arrow3.bmp" ) ) {
+	if( !pArrow3.Load( "images/p_arrow3.bmp" ) ) {
 		MsgBox("Cannot Load p_arrow3.bmp",0,0);
 		return false;
 	}
 	pArrow3.SetColorKey();
 	
-	if( !pArrow5.LoadBmp( "images/p_arrow5.bmp" ) ) {
+	if( !pArrow5.Load( "images/p_arrow5.bmp" ) ) {
 		MsgBox("Cannot Load p_arrow5.bmp",0,0);
 		return false;
 	}
 	pArrow5.SetColorKey();
 	
-	if( !pArrow7.LoadBmp( "images/p_arrow7.bmp" ) ) {
+	if( !pArrow7.Load( "images/p_arrow7.bmp" ) ) {
 		MsgBox("Cannot Load p_arrow7.bmp",0,0);
 		return false;
 	}
 	pArrow7.SetColorKey();
 	
-	if( !pArrow9.LoadBmp( "images/p_arrow9.bmp" ) ) {
+	if( !pArrow9.Load( "images/p_arrow9.bmp" ) ) {
 		MsgBox("Cannot Load p_arrow9.bmp",0,0);
 		return false;
 	}
 	pArrow9.SetColorKey();
 	
-	if( !cArrow1.LoadBmp( "images/c_arrow1.bmp" ) ) {
+	if( !cArrow1.Load( "images/c_arrow1.bmp" ) ) {
 		MsgBox("Cannot Load c_arrow.bmp",0,0);
 		return false;
 	}
 	cArrow1.SetColorKey();
 	
-	if( !cArrow3.LoadBmp( "images/c_arrow3.bmp" ) ) {
+	if( !cArrow3.Load( "images/c_arrow3.bmp" ) ) {
 		MsgBox("Cannot Load c_arrow3.bmp",0,0);
 		return false;
 	}
 	cArrow3.SetColorKey();
 	
-	if( !cArrow5.LoadBmp( "images/c_arrow5.bmp" ) ) {
+	if( !cArrow5.Load( "images/c_arrow5.bmp" ) ) {
 		MsgBox("Cannot Load c_arrow5.bmp",0,0);
 		return false;
 	}
 	cArrow5.SetColorKey();
 	
-	if( !cArrow7.LoadBmp( "images/c_arrow7.bmp" ) ) {
+	if( !cArrow7.Load( "images/c_arrow7.bmp" ) ) {
 		MsgBox("Cannot Load c_arrow7.bmp",0,0);
 		return false;
 	}
 	cArrow7.SetColorKey();
 	
-	if( !cArrow9.LoadBmp( "images/c_arrow9.bmp" ) ) {
+	if( !cArrow9.Load( "images/c_arrow9.bmp" ) ) {
 	MsgBox("Cannot Load c_arrow9.bmp",0,0);
 	return false;
 	}
 	cArrow9.SetColorKey();
 	
 	
-	if( !gModeIcon.LoadBmp( "images/mode_icon.bmp" ) ) {
+	if( !gModeIcon.Load( "images/mode_icon.bmp" ) ) {
 		MsgBox("Cannot Load mode_Icon.bmp",0,0);
 		return false;
 	}
 	gModeIcon.SetColorKey();
 	
-	if( !ResultFont.LoadBmp( "images/res_font.bmp" ) ) {
+	if( !ResultFont.Load( "images/res_font.bmp" ) ) {
 		MsgBox("Cannot Load res_font.bmp",0,0);
 		return	false;
 	}
 	ResultFont.SetColorKey();
 	
-	if( !ResultBack.LoadBmp( "images/res_back.bmp" ) ) {
+	if( !ResultBack.Load( "images/res_back.bmp" ) ) {
 		MsgBox("Cannot Load res_back.bmp",0,0);
 		return false;
 	}
-	if( !gStageCount.LoadBmp( "images/stage_count.bmp" ) ) {
+	if( !gStageCount.Load( "images/stage_count.bmp" ) ) {
 		MsgBox("Cannot Load stage_count.bmp",0,0);
 		return false;
 	}
 	gStageCount.SetColorKey();
 	
-	if( !DeadScreen.LoadBmp( "images/dead.bmp" ) ) {
+	if( !DeadScreen.Load( "images/dead.bmp" ) ) {
 		MsgBox("Cannot Load dead.bmp",0,0);
 		return false;
 	}
 	
-	if( !GameOver.LoadBmp( "images/game_over.bmp" ) ) {
+	if( !GameOver.Load( "images/game_over.bmp" ) ) {
 		MsgBox("Cannot Load game_over.bmp",0,0);
 		return false;
 	 }
 	
-	 if( !Score.LoadBmp( "images/score.bmp" ) ) {
+	 if( !Score.Load( "images/score.bmp" ) ) {
 		MsgBox("Cannot Load score.bmp",0,0);
 		return false;
 	}
 	Score.SetColorKey();
 
-	if( !gDoubleIcon.LoadBmp("images/double_icon.bmp") ) {
+	if( !gDoubleIcon.Load("images/double_icon.bmp") ) {
 		MsgBox( "Cannot Load double_icon.bmp", 0, 0 );
 	}
 	gDoubleIcon.SetColorKey();
 
-	if( !gCrazyIcon.LoadBmp("images/crazy_icon.bmp") )  {
+	if( !gCrazyIcon.Load("images/crazy_icon.bmp") )  {
 		MsgBox( "Cannot Load crazy_icon.bmp", 0, 0 );
 	}
     	gCrazyIcon.SetColorKey();
 
-    	if( !gEasyIcon.LoadBmp("images/easy_icon.bmp") ) {
+    	if( !gEasyIcon.Load("images/easy_icon.bmp") ) {
 		MsgBox( "Cannot Load crazy_icon.bmp", 0, 0 );
 	}
     	gEasyIcon.SetColorKey();
 
-	if( !gHardIcon.LoadBmp("images/hard_icon.bmp") ) {
+	if( !gHardIcon.Load("images/hard_icon.bmp") ) {
 		MsgBox( "Cannot Load hard_icon.bmp", 0, 0 );
 	}
     	gHardIcon.SetColorKey();

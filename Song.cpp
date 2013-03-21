@@ -366,7 +366,7 @@ void Song::ReadDouble(const char *fileName)
  */
 void Song::_loadDiskImage()
 {
-    if( mThisSongDiskImage.LoadBmp( "Disc.bmp" ) ) {
+    if( mThisSongDiskImage.Load( "Disc.bmp" ) ) {
         mThisSongDiskImage.SetColorKey();
         mpDiskImage = &mThisSongDiskImage;
     }
