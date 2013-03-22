@@ -44,31 +44,31 @@ private:
     Surface *   m_pGaugeWaku;
     Surface *   m_pGauge;
     Surface *   m_pStepArrows;      // arrows.
-    SDL_Rect    m_rtArrows[5][6];   // È­»ìÇ¥ Á¶°¢.
+    SDL_Rect    m_rtArrows[5][6];   // í™”ì‚´í‘œ ì¡°ê°.
     Song *      m_pSelectedSong;
-    Animation   m_aniPushArrows[5];     // È­»ìÇ¥ ¹öÆ°À» ´©¸¦¶§ ¹öÆ°ÀÇ ¾Ö´Ï¸ŞÀÌ¼Ç.
-    Animation   m_AniStepArraws[5];     // Step È­»ìÇ¥.
-    Animation   m_aniCrashArrows[5];          // Crash È¿°ú ¾Ö´Ï¸ŞÀÌ¼Ç.
+    Animation   m_aniPushArrows[5];     // í™”ì‚´í‘œ ë²„íŠ¼ì„ ëˆ„ë¥¼ë•Œ ë²„íŠ¼ì˜ ì• ë‹ˆë©”ì´ì…˜.
+    Animation   m_AniStepArraws[5];     // Step í™”ì‚´í‘œ.
+    Animation   m_aniCrashArrows[5];          // Crash íš¨ê³¼ ì• ë‹ˆë©”ì´ì…˜.
 
     int         m_start[3];
     int         m_tick;
     double      m_bpm;
-    double      m_stepGapTime;                  ///< 1step ½Ã°£(ms).
+    double      m_stepGapTime;                  ///< 1step ì‹œê°„(ms).
 
-    int         m_y;                            ///< È­»ìÇ¥¸¦ Ãâ·ÂÇÒ y ±âÁØ.
-    int         m_playingTime;                  ///< ÇöÀç Àç»ıÁßÀÎ À½¾Ç ½Ã°£.
-    int         m_nStepIdx;                     ///< ÇöÀç ½ºÅÇ index
-    double      m_dStepIdx;                     ///< ÇöÀç ½ºÅÇ index - ¼¼¹ĞÇÑ.
+    int         m_y;                            ///< í™”ì‚´í‘œë¥¼ ì¶œë ¥í•  y ê¸°ì¤€.
+    int         m_playingTime;                  ///< í˜„ì¬ ì¬ìƒì¤‘ì¸ ìŒì•… ì‹œê°„.
+    int         m_nStepIdx;                     ///< í˜„ì¬ ìŠ¤íƒ­ index
+    double      m_dStepIdx;                     ///< í˜„ì¬ ìŠ¤íƒ­ index - ì„¸ë°€í•œ.
 
-    double      m_stepSpeed;                    ///< ¹è¼Ó
-    double      m_distancePerStep;              ///< 1 Step´ç StepÈ­»ìÇ¥°¡ ¿òÁ÷ÀÌ´Â °Å¸®(Pixel)
-    int         m_addedStep;                    ///< È­¸é À§±îÁö Step Arrow°¡ Ãß°¡µÇ´Â step°³¼ö
+    double      m_stepSpeed;                    ///< ë°°ì†
+    double      m_distancePerStep;              ///< 1 Stepë‹¹ Stepí™”ì‚´í‘œê°€ ì›€ì§ì´ëŠ” ê±°ë¦¬(Pixel)
+    int         m_addedStep;                    ///< í™”ë©´ ìœ„ê¹Œì§€ Step Arrowê°€ ì¶”ê°€ë˜ëŠ” stepê°œìˆ˜
 
-    vector<bool>    m_buttonState;              ///< ¹öÆ°ÀÌ ´­·¯Áø »óÅÂ.
-    int         m_judgedIdx;                    ///< ÆÇÁ¤ÀÌ ¿Ï·áµÈ index
-    vector<bool>    m_showStep;                 ///< ½ºÅÇÀ» È­¸é¿¡ »Ñ¸°°ÍÀÎÁö ¾Æ´ÑÁö.
-    int         m_pointTimeZone[ePointZone_Max];    ///< ÆÇÁ¤ Á¡¼ö½Ã°£
-    int         m_judgePoint[ePointZone_Max];   ///< °¢°¢ÀÇ ÆÇÁ¤ °³¼ö.
+    vector<bool>    m_buttonState;              ///< ë²„íŠ¼ì´ ëˆŒëŸ¬ì§„ ìƒíƒœ.
+    int         m_judgedIdx;                    ///< íŒì •ì´ ì™„ë£Œëœ index
+    vector<bool>    m_showStep;                 ///< ìŠ¤íƒ­ì„ í™”ë©´ì— ë¿Œë¦°ê²ƒì¸ì§€ ì•„ë‹Œì§€.
+    int         m_pointTimeZone[ePointZone_Max];    ///< íŒì • ì ìˆ˜ì‹œê°„
+    int         m_judgePoint[ePointZone_Max];   ///< ê°ê°ì˜ íŒì • ê°œìˆ˜.
 
 public:
     StageNormal( Context & context );
@@ -94,9 +94,9 @@ private:
     int     _getTimeByIndex( int stepIndex ) const;
     void    _drawBackArrow( unsigned int playTime ) const;
     void    _drawGauge() const;
-    void    _judge();                           // ÆÇÁ¤.
-    bool    _isPress( const char * btnStr ) const;    // ÇØ´ç ¹öÆ°ÀÌ ´­·¯ Á³´ÂÁö °Ë»ç.
-    ePointZone _getPoint( const double baseStepIndex, const int toJudgeStepIndex ) const;   // Á¡¼öÆÇÁ¤
+    void    _judge();                           // íŒì •.
+    bool    _isPress( const char * btnStr ) const;    // í•´ë‹¹ ë²„íŠ¼ì´ ëˆŒëŸ¬ ì¡ŒëŠ”ì§€ ê²€ì‚¬.
+    ePointZone _getPoint( const double baseStepIndex, const int toJudgeStepIndex ) const;   // ì ìˆ˜íŒì •
 };
 
 #endif // _KICKITUP_STAGENORMAL_H

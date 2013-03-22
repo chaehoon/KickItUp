@@ -1,15 +1,15 @@
 #include "SongMgr.h"
-#include <sstream>
 #include <SDL/SDL.h>
+#include <iostream>
+#include <sstream>
+#include <cstring>
+#include <strings.h>
+#include <dirent.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <vector>
 
-#ifdef _WIN32
-#	include <Windows.h>
-#	include <io.h>
-#else // _WIN32
-#	include <sys/types.h>
-#	include <dirent.h>
-#	include <strings.h>
-#endif // _WIN32
+using std::vector;
 
 SongMgr g_SongMgr;
 
@@ -25,57 +25,67 @@ SongMgr::~SongMgr(void)
     m_songList.clear();
 }
 
-#ifdef _WIN32
+
+
+/**
+ * í˜„ì¬ ë””ë ‰í† ë¦¬ ë¦¬ìŠ¤íŠ¸ë¥¼ ì–»ëŠ”ë‹¤.
+ * @param	dirs	ë””ë ‰í† ë¦¬ ë¦¬ìŠ¤íŠ¸.
+ * @return	ë””ë ‰í† ë¦¬ ë¦¬ìŠ¤íŠ¸ê°€ ìˆëŠ”ì§€ ì—†ëŠ”ì§€.
+ */
+bool SongMgr::_getDirs ( vector<string> & dirs )
+{
+	DIR * dp = opendir ( "." );
+
+	while ( dp != NULL ) {
+		struct dirent * item = readdir ( dp );
+		if ( item == NULL )
+			break;
+
+		if ( item->d_name[0] == '.' )
+			continue;
+
+		// is dir?
+		struct stat stat_p;
+		if ( stat ( item->d_name, &stat_p ) == -1 )
+			continue;
+		if ( !S_ISDIR ( stat_p.st_mode ) )
+			continue;
+
+		string	dirname ( item->d_name );
+		dirs.push_back ( dirname );
+	}
+	closedir ( dp );
+
+	if ( dirs.empty() ) {
+		std::cerr << "GetDirs() - directory or file is not found\n";
+		return false;
+	}
+	return true;
+}
+
+
 bool SongMgr::Load( const string & dirName )
 {
-	HANDLE	hFind;
-	int		count = 0;
-	WIN32_FIND_DATA	findFileData;
+	string songDir;
+	if ( !_getRealFileName( dirName, &songDir ) )
+		return false;
 
-	string	path;
-
-	hFind = FindFirstFile( "*.*", &findFileData );
-	path = findFileData.cFileName;
-
-	// find "song" directory.
-	if( stricmp( path.c_str(), dirName.c_str() ) != 0 ) {
-		while( FindNextFile( hFind, &findFileData) ) {
-			if( stricmp( findFileData.cFileName, dirName.c_str() ) == 0 ) {
-				path = findFileData.cFileName;
-				break;
-			}
-		}
+	chdir ( songDir.c_str() );
+	vector<string> dirs;
+	if ( !_getDirs ( dirs ) ) {
+		return false;
 	}
 
-	// Is it directory ?
-	if( findFileData.dwFileAttributes != FILE_ATTRIBUTE_DIRECTORY )
-		goto error_return;
+	for ( vector<string>::iterator i = dirs.begin() ; i != dirs.end(); ++i ){
+		string dirName = *i;
+		chdir ( dirName.c_str() );
+		_readStepFile();
+		chdir ( ".." );
+	}
 
-	FindClose( hFind );
-	SetCurrentDirectory( path.c_str() );
-	hFind = FindFirstFile( "*.*", &findFileData );
-
-    // read song list.
-	do {
-		if( findFileData.cFileName[0] != '.' && findFileData.dwFileAttributes == FILE_ATTRIBUTE_DIRECTORY ) {
-			SetCurrentDirectory( findFileData.cFileName );
-
-			_readStepFile();
-
-			SetCurrentDirectory( "..\\" );
-		}
-	} while( FindNextFile( hFind, &findFileData ) );
-
-	SetCurrentDirectory( "..\\" );
-	FindClose( hFind );
+	chdir ( ".." );
 	return true;
-
-error_return:
-	SetCurrentDirectory( "..\\" );
-	FindClose( hFind );
-	return false;
 }
-#endif // _WIN32
 
 
 void SongMgr::TurnLeft()
@@ -96,7 +106,7 @@ void SongMgr::TurnRight()
     SetSelectSong( 0 );
 }
 
-// Step FileÀ» ÀĞ¾îµéÀÓ.
+// Step Fileì„ ì½ì–´ë“¤ì„.
 bool SongMgr::_readStepFile()
 {
 	for( int i = ePM_Min ; i < ePM_Max ; ++i ) {
@@ -109,7 +119,7 @@ bool SongMgr::_readStepFile()
         }
 	}
 
-    // Select Stage¿¡¼­ º¸ÀÏ ¿ŞÂÊ ¿À¸¥ÂÊ °îÀ» ¼±ÅÃ
+    // Select Stageì—ì„œ ë³´ì¼ ì™¼ìª½ ì˜¤ë¥¸ìª½ ê³¡ì„ ì„ íƒ
     m_leftSongIndex = m_rightSongIndex = -1;
 
     if( 0 < m_songList.size() ) {
@@ -119,7 +129,7 @@ bool SongMgr::_readStepFile()
             m_rightSongIndex = 1;
     }
 
-    // ¼±ÅÃµÈ °î ¾øÀ½.
+    // ì„ íƒëœ ê³¡ ì—†ìŒ.
     m_pSongSelect = 0;
 
 	return true;
@@ -129,13 +139,11 @@ bool SongMgr::_readStep( const ePlayMode playmode, Song * pSong )
 {
 	string	strPlayeMode;
 
-	/* ¹ßÆÇ file °³¼ö
-		½ºÅÜ ÆÄÀÏÀº easy_1.ksf, easy_2.ksf, hard_1.ksf, hard_2.ksf µîÀ¸·Î °°Àº Á¾·ùÀÇ °ÔÀÓ¸ğµå¿¡ 2°³¾¿Á¸ÀçÇÑ´Ù.
-		´Ü Double¸ğµå´Â Double.ksf ÇÏ³ª¸¸ ÀÖ´Ù.
+	/* ë°œíŒ file ê°œìˆ˜
+		ìŠ¤í… íŒŒì¼ì€ easy_1.ksf, easy_2.ksf, hard_1.ksf, hard_2.ksf ë“±ìœ¼ë¡œ ê°™ì€ ì¢…ë¥˜ì˜ ê²Œì„ëª¨ë“œì— 2ê°œì”©ì¡´ì¬í•œë‹¤.
+		ë‹¨ Doubleëª¨ë“œëŠ” Double.ksf í•˜ë‚˜ë§Œ ìˆë‹¤.
 	*/
-	int		maxStepFileCount = 2;
-
-	switch( playmode ) {
+	switch( static_cast<int>(playmode) ) {
 	case ePM_Easy:
 		strPlayeMode = "easy_";
 		break;
@@ -147,7 +155,6 @@ bool SongMgr::_readStep( const ePlayMode playmode, Song * pSong )
 		break;
 	case ePM_Double:
 		strPlayeMode = "double";
-		maxStepFileCount = 1;
 		break;
 	}
 
@@ -156,9 +163,10 @@ bool SongMgr::_readStep( const ePlayMode playmode, Song * pSong )
         std::ostringstream	fileName;
         fileName << strPlayeMode << ".ksf";
 
-        if( _access( fileName.str() ) ) {
+        string realFileName;
+        if( _getRealFileName(fileName.str(), &realFileName ) ) {
             pSong->SetPlayMode( playmode );
-            ret = pSong->ReadKsf( 0, fileName.str() );
+            ret = pSong->ReadKsf( 0, realFileName );
         }
     }
     else {
@@ -166,9 +174,10 @@ bool SongMgr::_readStep( const ePlayMode playmode, Song * pSong )
 			std::ostringstream	fileName;
 			fileName << strPlayeMode << i + 1 << ".ksf";
 
-			if( _access( fileName.str() ) ) {
+			string realFileName;
+			if( _getRealFileName(fileName.str(), &realFileName ) ) {
 				pSong->SetPlayMode( playmode );
-				ret = pSong->ReadKsf( i, fileName.str() );
+				ret = pSong->ReadKsf( i, realFileName );
 			}
         }
     }
@@ -178,4 +187,41 @@ bool SongMgr::_readStep( const ePlayMode playmode, Song * pSong )
 bool SongMgr::_access( const string & filename )
 {
 	return ::access( filename.c_str(), 02 ) == 0;
+}
+
+/**
+ * íŒŒì¼ì´ë‚˜ ë””ë ‰í† ë¦¬ëª…ì„ ëŒ€ì†Œë¬¸ì êµ¬ë¶„ì—†ì´ ì°¾ì•„ íŒŒì¼ëª…ì„ ë°˜í™˜í•œë‹¤.
+ *
+ * @param	filename	ì°¾ì„ íŒŒì¼ëª…ì´ë‚˜ ë””ë ‰í† ë¦¬ëª….
+ * @param	buff		ë°˜í™˜í•  ì°¾ì€ íŒŒì¼ëª….
+ * @param	size		buff size.
+ * @return	í•´ë‹¹ íŒŒì¼ì´ë‚˜ ë””ë ‰í† ë¦¬ëª…ì´ ìˆëŠ”ì§€.
+ */
+bool SongMgr::_getRealFileName(const string & filename, string * realname)
+{
+	struct dirent * item;
+
+	DIR * dp = opendir ( "." );
+	bool	bFound = false;
+	if ( dp != NULL ) {
+		while ( true ) {
+			item = readdir ( dp );
+			if ( item == NULL )
+				break;
+
+			if ( strcasecmp ( item->d_name, filename.c_str() ) == 0 ) {
+				*realname = item->d_name;
+				bFound = true;
+				break;
+			}
+		}
+	}
+
+	closedir ( dp );
+
+	if ( !bFound )	{
+		std::cerr << "directory or file is not found :" << filename;
+		return false;
+	}
+	return true;
 }

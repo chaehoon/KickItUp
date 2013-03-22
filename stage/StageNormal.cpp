@@ -28,10 +28,10 @@ StageNormal::~StageNormal(void)
 
 bool StageNormal::Initialize()
 {
-    // ���ุ �Ѵ�.
+    // 예약만 한다.
     m_pBGM = g_pSoundStore->Order( "SelectedSong" );
 
-    // ���ุ ��.
+    // 예약만 함.
     m_pBG = g_pSurfaceStore->Order( "SelectedTitleImg" );
 
     m_pBackArrows[0] = g_pSurfaceStore->Order( "arrows1" );
@@ -56,7 +56,7 @@ bool StageNormal::Initialize()
     m_pGauge->SetColorKey();
 
     for( int i = 0 ; i < eBA_Max ; ++i ) {
-        static const int    PUSHARROW_X_COORD[5] = { 25, 75, 125, 175, 225 };   // ��ư�� ������ ��Ÿ���� AniMation x ��ġ.
+        static const int    PUSHARROW_X_COORD[5] = { 25, 75, 125, 175, 225 };   // 버튼이 눌러질때 나타나는 AniMation x 위치.
 
         stringstream    tmp;
         tmp << "images/p_arrow" << ARRAY_TO_BUTON[i] << ".bmp";
@@ -93,9 +93,9 @@ bool StageNormal::Initialize()
         m_aniCrashArrows[i].setRect( rt );
     }
 
-    // ȭ��ǥ ���� ���� ����.
+    // 화살표 조각 구역 설정.
     for( int i = 0 ; i < 5 ; ++i ) {
-        // arrow.bmp �׸��� arrow1.bmp �׸��� ���߱����� �ӽ� �迭.
+        // arrow.bmp 그림과 arrow1.bmp 그림순서를 맞추기위한 임시 배열.
         static const int arrawArray[5] = {4, 0, 2, 1, 3};
 
         int yIndex = arrawArray[i];
@@ -123,7 +123,7 @@ void StageNormal::Destroy()
 
 bool StageNormal::Think( unsigned long delta )
 {
-    // ����.
+    // 판정.
     _judge();
 
     if( m_pBGM->IsPlaying() == false )
@@ -136,10 +136,10 @@ bool StageNormal::Think( unsigned long delta )
     m_dStepIdx = _getIndexByTime( m_playingTime );
     m_nStepIdx = static_cast<int>( m_dStepIdx ) + 1;
 
-    // ���� y�� - back arrow ������ ���� ���� �Ǿ��ִ�.
+    // 기준 y값 - back arrow 위에서 끝이 나게 되어있다.
     m_y = static_cast<int>(BACK_ARROW_Y + (m_nStepIdx - m_dStepIdx) * m_distancePerStep );
     
-    // ȭ�� ��ü�� ����ϱ� ���� �߰��Ǵ� Step������ŭ ȭ�鿡�� ���ش�. 0.5�� ���������� ��� 1����� 0.5����̴�.
+    // 화면 전체에 출력하기 위해 추가되는 Step개수만큼 화면에서 빼준다. 0.5를 곱한이유는 사실 1배속이 0.5배속이다.
     m_y -= static_cast<int>(BACK_ARROW_Y * m_addedStep * m_stepSpeed * 0.5);
 
     using std::fill;
@@ -193,7 +193,7 @@ bool StageNormal::Render( unsigned long delta )
         }
 	}
 
-    // ���� ��� ȭ���� ���.
+    // 판정 관련 화면을 출력.
     _drawGauge();
 
     return true;
@@ -230,23 +230,23 @@ void StageNormal::GetIn()
     m_pBGM->Load( m_pSelectedSong->GetSongPath() );
     m_pBGM->Play();
 
-    // 1step �ð�(ms)
+    // 1step 시간(ms)
     m_stepGapTime = 60000.0/(m_bpm * m_tick);
 
-    // ���� �ð�.
+    // 판정 시간.
     for( int i = ePointZone_Min ; i < ePointZone_Miss ; ++i ) {
         m_pointTimeZone[i] = static_cast<int>(m_stepGapTime / BACK_ARROW_Y * (i+1) * 10);
     }
 
-    m_distancePerStep = BACK_ARROW_Y * m_stepSpeed * 0.5;  // 0.5�� ���� ������ 1����� ���α׷��� 0.5����̱� �����̴�.
+    m_distancePerStep = BACK_ARROW_Y * m_stepSpeed * 0.5;  // 0.5를 곱한 이유는 1배속이 프로그램상 0.5배속이기 때문이다.
 
-    // �߰��Ǵ� step������ ������ �� ������ �ʴ� ���ǰ����������� ���� ���г� ������ �����̴�. -60 ~ 55pixel ��ġ���� step����.
+    // 추가되는 step개수는 가려서 잘 보이지 않는 스탭개수에서부터 스탭 백패널 까지의 개수이다. -60 ~ 55pixel 위치까지 step개수.
     m_addedStep = static_cast<int>((STEP_ARROW_SIZE + BACK_ARROW_Y) / m_distancePerStep);
 
     m_judgedIdx = 0;
     m_playingTime = 0;
 
-    // ���� ���� �ʱ�ȭ
+    // 판정 개수 초기화
     std::fill( &m_judgePoint[0], &m_judgePoint[ePointZone_Max], 0 );
 }
 
@@ -260,8 +260,6 @@ void StageNormal::GetOut()
 
 bool StageNormal::InputHandleMessage( const eInputName name, const eInputState is )
 {
-    bool	ret = true;
-
     if( is != eIS_PRESS )
         return false;
 
@@ -279,13 +277,13 @@ bool StageNormal::InputHandleMessage( const eInputName name, const eInputState i
     return true;
 }
 
-/// ���� ���������� ����(SelectStage�� �����Ѵ�.)
+/// 이전 스테이지로 변경(SelectStage로 변경한다.)
 void StageNormal::GoPreStage()
 {
     m_context.SetState( m_context.GetStateSelect() );
 }
 
-/// ���� ���������� ����(TitleStage�� �����Ѵ�.-�ӽ�)
+/// 다음 스테이지로 변경(TitleStage로 변경한다.-임시)
 void StageNormal::GoNextStage()
 {
     // m_context.SetState( m_context.GetStateResult() );
@@ -298,7 +296,7 @@ void StageNormal::_drawBackGround( unsigned int playTime ) const
     m_pBG->Blit( 0 , 0 );
 }
 
-/// ������� �����͸� ȭ�鿡 �Ѹ���.
+/// 판정관련 데이터를 화면에 뿌린다.
 void StageNormal::_drawGauge() const
 {
     m_pGaugeWaku->Blit( 32, 0 );
@@ -308,12 +306,10 @@ void StageNormal::_drawGauge() const
     m_pGauge->Blit( 352, 20 );
 }
 
-// ȭ��ǥ ���гθ� �׸���.
+// 화살표 백패널를 그린다.
 void StageNormal::_drawBackArrow( unsigned int playTime ) const
 {
-    static int  preStep = 0;
-
-    // ���г��� ��¦���� ��� �� tick ���� 60ms�ð����� ��¦���� �ش�.
+    // 백패널의 반짝임을 계산 각 tick 마다 60ms시간만끔 반짝임을 준다.
     long tmp = playTime % static_cast<long>(m_bpm*m_tick);
     if( 0 < tmp && tmp < 60 ) {
         m_pBackArrows[1]->Blit( 32, 50 );
@@ -325,7 +321,7 @@ void StageNormal::_drawBackArrow( unsigned int playTime ) const
     }
 }
 
-// ���ǽð����� ���� index���� ã�´�.
+// 음악시간으로 현재 index값을 찾는다.
 double StageNormal::_getIndexByTime( unsigned int playTime ) const
 {
 	if( playTime <= 0)
@@ -333,7 +329,7 @@ double StageNormal::_getIndexByTime( unsigned int playTime ) const
     return playTime / m_stepGapTime;
 }
 
-// ���ǽð����� ���� index���� ã�´�.
+// 음악시간으로 현재 index값을 찾는다.
 int StageNormal::_getTimeByIndex( int stepIndex ) const
 {
     if( m_playingTime <= 0)
@@ -347,26 +343,26 @@ void StageNormal::_judge()
     if( m_playingTime == 0 )
         return;
 
-    // 1. �˻��� index������ ���Ѵ�.
+    // 1. 검사할 index구간을 구한다.
     int judgeStartIdx = m_judgedIdx;
     int judgeEndIdx = static_cast<int>( _getIndexByTime( m_playingTime + m_pointTimeZone[ePointZone_Bad] ) );
     
-    // �����Ұ��� ������ ��.
+    // 판정할것이 없으면 끝.
     if( judgeEndIdx <= judgeStartIdx)
         return;
 
     int lastJudgeIdx = m_judgedIdx;
 
-    // �˻��� index�� ������ ����
+    // 검사할 index의 구간을 판정
     for( int i = judgeStartIdx ; i <= judgeEndIdx ; ++i ) {
-        // �˻��� index�� ������ step�� �ִ��� �˻��Ѵ�.
-        // ������ step�� ������
+        // 검사할 index에 판정할 step이 있는지 검사한다.
+        // 판정한 step이 있으면
         const char * currentStep = m_pSelectedSong->m_ksf[0].GetStep( i );
         if( strncmp( currentStep, "00000", 5 ) != 0 ) {
-            // �ش� ��ư�� �������°�?
-            // �ش� ��ư�� ������ ������.
+            // 해당 버튼이 눌러졌는가?
+            // 해당 버튼이 눌러져 있으면.
             if( _isPress( currentStep ) ) {
-                // �ð��� ��� �������Ѵ�.
+                // 시간에 따라 판정을한다.
                 ePointZone point = _getPoint( m_dStepIdx, i );
                 
                 ++m_judgePoint[point];
@@ -381,9 +377,9 @@ void StageNormal::_judge()
                     }
                 }
             }
-            // �ش� ��ư�� ������ ���� ������
+            // 해당 버튼이 눌러져 있지 않으면
             else {
-                // MISS����
+                // MISS판정
                 m_showStep[i] = true;
             }
         }
@@ -396,7 +392,7 @@ void StageNormal::_judge()
     m_judgedIdx = max( lastJudgedStepByTime, lastJudgeIdx );    
 }
 
-// �ش� ��ư�� ���� ������ �˻�.
+// 해당 버튼이 눌러 졌는지 검사.
 bool StageNormal::_isPress( const char * btnStr ) const
 {
     bool ret = false;
@@ -416,9 +412,9 @@ bool StageNormal::_isPress( const char * btnStr ) const
 }
 
 
-/** @brief  index ������ ������ �����Ѵ�.
-    @param  baseStepIndex       ���� ���� StepIndex
-    @param  toJudgeStepIndex    ������ stepIndex
+/** @brief  index 값으로 점수를 판정한다.
+    @param  baseStepIndex       판정 기준 StepIndex
+    @param  toJudgeStepIndex    판정할 stepIndex
 */
 StageNormal::ePointZone
 StageNormal::_getPoint( const double baseStepIndex, const int toJudgeStepIndex ) const

@@ -21,20 +21,20 @@ using namespace std;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-Song::Song() : 	mThisSongDiskImage(0),
-		Next(0), Prev(0),
+Song::Song() : Next(0), Prev(0),
 	HaveCrazy(false),
 	HaveHard(false),
 	HaveEasy(false),
 	HaveCouple(false),
-	HaveDouble(false),
-
+	HaveDouble(false)
 {
-    mpDiskImage = & mThisSongDiskImage;
 }
 
 Song::~Song()
 {
+	if(mpDiskImage != &gNoDISC) {
+		delete mpDiskImage;
+	}
 }
 
 /**
@@ -368,11 +368,12 @@ void Song::ReadDouble(const char *fileName)
  */
 void Song::_loadDiskImage()
 {
-    if( mThisSongDiskImage.Load( "Disc.bmp" ) ) {
-        mThisSongDiskImage.SetColorKey();
-        mpDiskImage = &mThisSongDiskImage;
+	mpDiskImage = new SDLSurface(0);
+    if( mpDiskImage->Load( "Disc.bmp" ) ) {
+    	mpDiskImage->SetColorKey();
     }
     else {
+    	delete mpDiskImage;
         mpDiskImage = & gNoDISC;
     }
 }

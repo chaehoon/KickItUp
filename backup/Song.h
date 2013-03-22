@@ -98,7 +98,6 @@ public:
 	void ReadDouble(const char *fileName);
 
 	SDLSurface *   mpDiskImage;
-    SDLSurface     mThisSongDiskImage;
 
 	Uint32	Next;
 	Uint32	Prev;

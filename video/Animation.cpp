@@ -1,24 +1,17 @@
-/*
- * Animation.cpp
- *
- *  Created on: 2013. 3. 4.
- *      Author: chaehoon-win
- */
-
 #include "Animation.h"
 #include "Surface.h"
 
 Animation::Animation()  :
-    _ticks( 0 ),
-    _currentFrame( 0 ),
-    _frameInc( 1 ),
-    _frameRate( 0 ),   // Milliseconds
-    _oldTime( 0 ),
-    _maxFrames( 0 ),
-    _oscillate( false ),
-    _bPause( false ),
-    _pSurface( 0 ),
-    _coord()
+    m_ticks( 0 ),
+    m_currentFrame( 0 ),
+    m_frameInc( 1 ),
+    m_frameRate( 0 ),   // Milliseconds
+    m_oldTime( 0 ),
+    m_maxFrames( 0 ),
+    m_oscillate( false ),
+    m_bPause( false ),
+    m_pSurface( 0 ),
+    m_coord()
 {
 }
 
@@ -28,42 +21,42 @@ Animation::~Animation()
 
 void Animation::OnAnimate( const unsigned long delta )
 {
-    if( _bPause )
+    if( m_bPause )
         return;
 
-    _ticks += delta;
+    m_ticks += delta;
 
-    if( _ticks < _oldTime + _frameRate ) {
+    if( m_ticks < m_oldTime + m_frameRate ) {
         return;
     }
 
-    _oldTime = _ticks;
+    m_oldTime = m_ticks;
 
-    _currentFrame += _frameInc;
+    m_currentFrame += m_frameInc;
 
-    // Animationì„ ê³„ì†í• ì§€ íŒë‹¨.
-    if( _bLoop == false ) {
-        if( _maxFrames - 1 <= _currentFrame ) {
+    // AnimationÀ» °è¼ÓÇÒÁö ÆÇ´Ü.
+    if( m_bLoop == false ) {
+        if( m_maxFrames - 1 <= m_currentFrame ) {
             return;
         }
     }
 
 
-    if( _oscillate ) {
-        if( 0 < _frameInc ) {
-            if( _maxFrames - 1 <= _currentFrame ) {
-                _frameInc = -_frameInc;
+    if( m_oscillate ) {
+        if( 0 < m_frameInc ) {
+            if( m_maxFrames - 1 <= m_currentFrame ) {
+                m_frameInc = -m_frameInc;
             }
         }
         else {
-            if( _currentFrame <= 0 ) {
-                _frameInc = -_frameInc;
+            if( m_currentFrame <= 0 ) {
+                m_frameInc = -m_frameInc;
             }
         }
     }
     else {
-        if( _maxFrames - 1 <= _currentFrame ) {
-            _currentFrame = 0;
+        if( m_maxFrames - 1 <= m_currentFrame ) {
+            m_currentFrame = 0;
         }
     }
 }
@@ -71,23 +64,23 @@ void Animation::OnAnimate( const unsigned long delta )
 
 void Animation::setCurrentFrame( const int frame )
 {
-    if( frame < 0 || _maxFrames <= frame )
+    if( frame < 0 || m_maxFrames <= frame )
         return;
-    _currentFrame = frame;
+    m_currentFrame = frame;
 }
 
-// Animation í”„ë ˆìž„ì´ ëë‚¬ëŠ”ì§€ íŒë‹¨.
+// Animation ÇÁ·¹ÀÓÀÌ ³¡³µ´ÂÁö ÆÇ´Ü.
 bool Animation::isLoopEnd() const
 {
-    return _currentFrame == _maxFrames;
+    return m_currentFrame == m_maxFrames;
 }
 
 void Animation::OnRender()
 {
     SDL_Rect    rt;
-    rt.x = _rect.w * getCurrentFrame();
-    rt.y = _rect.y;
-    rt.w = _rect.w;
-    rt.h = _rect.h;
-    // m_pSurface->Blit( m_coord.getX(), m_coord.getY(), &rt );
+    rt.x = m_rect.w * getCurrentFrame();
+    rt.y = m_rect.y;
+    rt.w = m_rect.w;
+    rt.h = m_rect.h;
+    m_pSurface->Blit( m_coord.getX(), m_coord.getY(), &rt );
 }

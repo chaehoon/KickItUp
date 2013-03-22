@@ -1,74 +1,68 @@
-/*
- * Animation.h
- *
- *  Created on: 2013. 3. 4.
- *      Author: chaehoon-win
- */
-
-#ifndef ANIMATION_H_
-#define ANIMATION_H_
+#ifndef _KICKITUP_ANIMATION_H
+#define _KICKITUP_ANIMATION_H
 
 #include "../common.h"
 
 class Surface;
 class Animation {
-public:
-	Animation();
-	virtual ~Animation();
+private:
+    unsigned long m_ticks;
+    int     m_currentFrame;
+    int     m_frameInc;
 
-	virtual void    OnAnimate( const unsigned long delta );
-	virtual void    OnRender();
+    int     m_frameRate; //Milliseconds
+    unsigned long m_oldTime;
 
-    void    setFrameRate( const int rate )    {   _frameRate = rate; }
-    int     getFrameRate() const  {   return _frameRate; }
+    int     m_maxFrames;
+    bool    m_oscillate;
+    bool    m_bLoop;        // æ÷¥œ∏ﬁ¿Ãº«¿ª ∞Ëº” «“∞Õ¿Œ¡ˆ ∆«¥‹.
+    bool    m_bPause;       // ¿œΩ√ ¡§¡ˆ ø©∫Œ.
+    
+    Surface *   m_pSurface; // æ÷¥œ∏ﬁ¿Ãº« Surface
+    SDL_Rect    m_rect;     // ±◊∏≤¿« º”º∫.
 
+    Coord       m_coord;    // »≠∏Èø° √‚∑¬«“ ¿ßƒ°
+
+public: // Get Set «‘ºˆ.
+    void    setFrameRate( const int rate )    {   m_frameRate = rate; }
+    int     getFrameRate() const  {   return m_frameRate; }
+    
     void    setCurrentFrame( const int frame );
-    int     getCurrentFrame() const { return _currentFrame;  }
+    int     getCurrentFrame() const { return m_currentFrame;  }
+    
+    void    setMaxFrames( const int maxFrame ) {  m_maxFrames = maxFrame; }
+    int     getMaxFrames() const   {   return m_maxFrames; }
+    
+    void    setOscillate( const bool oscillate ) { m_oscillate = oscillate;   }
+    bool    getOscillate() const  {   return m_oscillate; }
+    
+    void    setLoop( const bool bLoop )   {   m_bLoop = bLoop; }
+    bool    getLoop() const       {   return m_bLoop; }
 
-    void    setMaxFrames( const int maxFrame ) {  _maxFrames = maxFrame; }
-    int     getMaxFrames() const   {   return _maxFrames; }
+    void    setSurface( Surface * pSurface )  {   m_pSurface = pSurface;  }
+    Surface *   getSurface() const  {   return m_pSurface;  }
 
-    void    setOscillate( const bool oscillate ) { _oscillate = oscillate;   }
-    bool    getOscillate() const  {   return _oscillate; }
+    void    setRect( const SDL_Rect & rect )    {   m_rect = rect;  }
 
-    void    setLoop( const bool bLoop )   {   _bLoop = bLoop; }
-    bool    getLoop() const       {   return _bLoop; }
-
-    void    setSurface( Surface * pSurface )  {   _pSurface = pSurface;  }
-    Surface *   getSurface() const  {   return _pSurface;  }
-
-    void    setRect( const SDL_Rect & rect )    {   _rect = rect;  }
-
-    void    setCoord( const Coord & coord )     {   _coord = coord;    }
+    void    setCoord( const Coord & coord )     {   m_coord = coord;    }
     void    setCoord( const short x, const short y ) {
-        _coord.setX( x );
-        _coord.setY( y );
+        m_coord.setX( x );
+        m_coord.setY( y );
     }
-    Coord   getCoord() const                    {   return _coord;     }
+    Coord   getCoord() const                    {   return m_coord;     }
 
-    void    setPause( const bool bPause = true )    {   _bPause = bPause;  }
-    bool    getPause() const                    {   return _bPause;    }
+    void    setPause( const bool bPause = true )    {   m_bPause = bPause;  }
+    bool    getPause() const                    {   return m_bPause;    }
 
     bool    isLoopEnd() const;
 
+public:
+    Animation();
+    virtual ~Animation();
 
-private:
-    unsigned long _ticks;
-    int     _currentFrame;
-    int     _frameInc;
-
-    int     _frameRate; //Milliseconds
-    unsigned long _oldTime;
-
-    int     _maxFrames;
-    bool    _oscillate;
-    bool    _bLoop;        // Ïï†ÎãàÎ©îÏù¥ÏÖòÏùÑ Í≥ÑÏÜç Ìï†Í≤ÉÏù∏ÏßÄ ÌåêÎã®.
-    bool    _bPause;       // ÏùºÏãú Ï†ïÏßÄ Ïó¨Î∂Ä.
-
-    Surface *   _pSurface; // Ïï†ÎãàÎ©îÏù¥ÏÖò Surface
-    SDL_Rect    _rect;     // Í∑∏Î¶ºÏùò ÏÜçÏÑ±.
-
-    Coord       _coord;    // ÌôîÎ©¥Ïóê Ï∂úÎ†•Ìï† ÏúÑÏπò
+    virtual void    OnAnimate( const unsigned long delta );
+    virtual void    OnRender();
 };
 
-#endif /* ANIMATION_H_ */
+#endif // _KICKITUP_ANIMATION_H
+

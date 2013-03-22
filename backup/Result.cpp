@@ -9,9 +9,9 @@
 #include "Input.h"
 #include <stdio.h>
 
-extern	Surface	ResultBack;
-extern	Surface	ResultFont;
-extern	Surface	gNumberFont;
+extern	SDLSurface	ResultBack;
+extern	SDLSurface	ResultFont;
+extern	SDLSurface	gNumberFont;
 
 extern	char First;
 extern	char	Double;

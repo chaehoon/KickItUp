@@ -17,9 +17,9 @@ private:
 
 	SongList	m_songList;
 
-	int			m_leftSongIndex;	// ¿ŞÂÊ ÀÎµ¦½º
-	int			m_rightSongIndex;	// ¿À¸¥ÂÊ ÀÎµ¦½º
-    Song *      m_pSongSelect;      // ¼±ÅÃµÈ ³ë·¡.
+	int			m_leftSongIndex;	// ì™¼ìª½ ì¸ë±ìŠ¤
+	int			m_rightSongIndex;	// ì˜¤ë¥¸ìª½ ì¸ë±ìŠ¤
+    Song *      m_pSongSelect;      // ì„ íƒëœ ë…¸ë˜.
 
 public:
 	SongMgr(void);
@@ -37,9 +37,11 @@ public:
     void    TurnRight();
 
 private:
-	bool	_readStepFile();		// Step FileÀ» ÀĞ¾îµéÀÓ.
+	bool	_readStepFile();		// Step Fileì„ ì½ì–´ë“¤ì„.
 	bool	_readStep( const ePlayMode playmode, Song * pSong );
 	bool	_access( const string & filename );
+	bool 	_getDirs ( vector<string> & dirs );
+	bool	_getRealFileName(const string & filename, string * realname);
 };
 
 extern SongMgr g_SongMgr;
