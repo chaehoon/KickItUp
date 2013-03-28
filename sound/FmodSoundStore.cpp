@@ -33,7 +33,7 @@ bool	FmodSoundStore::Initialize()
 		return false;
 	}
 
-	if( _isErr( FMOD_System_Init(m_system, 10, FMOD_INIT_NORMAL, 0) ) )
+	if( _isErr( FMOD_System_Init(m_system, 32, FMOD_INIT_NORMAL, 0) ) )
 		return false;
 
 	return true;

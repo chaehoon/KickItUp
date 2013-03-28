@@ -6,6 +6,7 @@
  */
 
 #include "SDLSurface.h"
+#include "../Util/File.h"
 
 SDLSurface::SDLSurface( SDL_Surface * pMainSurface )	: _pMainSurface( pMainSurface ) ,
 	_pSurface( 0 )
@@ -18,6 +19,7 @@ SDLSurface::~SDLSurface(void)
 
 bool SDLSurface::Load( const std::string & fileName )
 {
+
 	Free();
 
 	//Temporary storage for the image that's loaded

@@ -9,7 +9,10 @@
 
 #include "Sound.h"
 #include <algorithm>
+#include <cctype>
 #include <functional>
+
+using namespace std;
 
 SoundStore *	g_pSoundStore = 0;
 
@@ -22,14 +25,19 @@ SoundStore::~SoundStore(void) {
 
 // 사운드를 요청함.
 Sound * SoundStore::Order(const std::string & name ) {
+
+	// make to lower
+	string lowerName;
+	transform(name.begin(), name.end(), lowerName.begin(), ::tolower);
+
 	// 생성된 값이 있는지 조사.
-	Sound * pSnd  = _find( name );
+	Sound * pSnd  = _find( lowerName );
 
 	// 생성된 값이 없으면 생성.
 	if( pSnd == 0 ) {
 		pSnd = create();
 		if( pSnd )
-			m_SoundList.insert( SoundList::value_type( name, pSnd ) );
+			m_SoundList.insert( SoundList::value_type( lowerName, pSnd ) );
 	}
 	return pSnd;
 }

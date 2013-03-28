@@ -112,8 +112,9 @@ bool KickItUp::Process( unsigned long delta )
 {
 	g_Input.Update( delta );
 	g_pSoundStore->Process( delta );
-	m_pContext->Process( delta );
-	return g_pSurfaceStore->Process( delta );
+	// m_pContext->Process( delta );
+	//return g_pSurfaceStore->Process( delta );
+	return true;
 }
 
 bool KickItUp::_loadImage()

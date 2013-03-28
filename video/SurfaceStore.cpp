@@ -8,8 +8,10 @@
 #include "SurfaceStore.h"
 #include "Surface.h"
 #include <sstream>
+#include <algorithm>
+#include <cctype>
 
-using std::ostringstream;
+using namespace std;
 
 SurfaceStore *   g_pSurfaceStore = 0;
 
@@ -36,8 +38,12 @@ Surface * SurfaceStore::Order()
 // Order New Surface.
 Surface * SurfaceStore::Order( const std::string & name )
 {
+	// make to lower
+	string lowerName;
+	transform(name.begin(), name.end(), lowerName.begin(), ::tolower);
+
 	// Find old Surface.
-	Surface * pSurface  = Find( name );
+	Surface * pSurface  = Find( lowerName );
 
 	if( pSurface == 0 ) {
 		// crate new Surface.
@@ -46,7 +52,7 @@ Surface * SurfaceStore::Order( const std::string & name )
 		assert( pSurface != 0 );
 
 		if( pSurface )
-			_surfaceList.insert( SurfaceList::value_type( name, pSurface ) );
+			_surfaceList.insert( SurfaceList::value_type( lowerName, pSurface ) );
 	}
 	return pSurface;
 }
