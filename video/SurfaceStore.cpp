@@ -40,6 +40,7 @@ Surface * SurfaceStore::Order( const std::string & name )
 {
 	// make to lower
 	string lowerName;
+	lowerName.resize(name.size());
 	transform(name.begin(), name.end(), lowerName.begin(), ::tolower);
 
 	// Find old Surface.

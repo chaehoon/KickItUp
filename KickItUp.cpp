@@ -7,7 +7,9 @@
 #include "stage/Context.h"
 #include "input/InputManager.h"
 #include "data/SongMgr.h"
+#include "sound/Sound.h"
 
+Sound * s_snd;
 KickItUp::KickItUp(void)	:   m_bQuit( false )
 {
 }
@@ -33,7 +35,7 @@ bool KickItUp::Initialize()
 	if( !g_pSoundStore->Initialize() )
 		return false;
 
-	// Initialize Input.
+    // Initialize Input.
 	g_Input.Initialize();
 
 	// TODO: load config.
@@ -112,19 +114,19 @@ bool KickItUp::Process( unsigned long delta )
 {
 	g_Input.Update( delta );
 	g_pSoundStore->Process( delta );
-	// m_pContext->Process( delta );
-	//return g_pSurfaceStore->Process( delta );
-	return true;
+	m_pContext->Process( delta );
+
+	return g_pSurfaceStore->Process( delta );
 }
 
 bool KickItUp::_loadImage()
 {
-    // no_disc �̹����� �̸� �޸𸮿� �ε��Ѵ�.
+    // no_disc
     Surface * pNoDiskImg = g_pSurfaceStore->Order( "no_disc" );
     pNoDiskImg->Load( "images/no_disc.bmp" );
     pNoDiskImg->SetColorKey();
 
-    // back.bmp�� �̸� �޸𸮿� �ε� �Ѵ�.
+    // back.bmp
     Surface * pBack = g_pSurfaceStore->Order( "bgImage" );
     pBack->Load( "images/back.bmp" );
     pBack->SetColorKey();

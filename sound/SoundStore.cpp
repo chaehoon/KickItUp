@@ -28,6 +28,7 @@ Sound * SoundStore::Order(const std::string & name ) {
 
 	// make to lower
 	string lowerName;
+	lowerName.resize(name.size());
 	transform(name.begin(), name.end(), lowerName.begin(), ::tolower);
 
 	// 생성된 값이 있는지 조사.

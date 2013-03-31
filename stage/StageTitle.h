@@ -27,6 +27,7 @@ public:
 
 	virtual bool 		Initialize();
 	virtual void 		Destroy();
+	virtual bool		Think( unsigned long delta )	{	return true;	}
     virtual bool        Render( unsigned long delta );
 
 	virtual void		GetIn();

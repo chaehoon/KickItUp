@@ -24,15 +24,13 @@ public:
 	virtual void		GetIn() = 0;	// get in the stage.
 	virtual void		GetOut() = 0;	// get out the stage.
 
-private:
-	virtual bool		_think( unsigned long delta )		{	return true;	}	// 화면에 출력하기전 어떤 내용을 계산하는 함수.
-	virtual bool		_render( unsigned long delta )		{	return true;	}	// 화면에 출력.
+protected:
+	virtual bool		Think( unsigned long delta ) = 0;	// 화면에 출력하기전 어떤 내용을 계산하는 함수.
+	virtual bool		Render( unsigned long delta ) = 0;	// 화면에 출력.
 
-	bool 		_process( unsigned long delta );
 };
 
-// 처리함수.
-inline	bool	Stage::_process( unsigned long delta )
+inline bool Stage::Process(unsigned long delta )
 {
     if( GetQuitStage() ) {
         GoToNextStage();
@@ -40,19 +38,14 @@ inline	bool	Stage::_process( unsigned long delta )
     }
 
 	// 선 작업 후
-	if( _think( delta ) == false )
+	if( Think( delta ) == false )
 		return false;
 
 	// 화면에 출력
-	if( _render( delta ) == false )
+	if( Render( delta ) == false )
 		return false;
 
 	return true;
-}
-
-inline bool Stage::Process(unsigned long delta )
-{
-	return _process(delta);
 }
 
 #endif // _STAGE_H

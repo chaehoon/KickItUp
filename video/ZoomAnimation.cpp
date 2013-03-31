@@ -34,6 +34,9 @@ void    ZoomAnimation::OnAnimate( const unsigned long delta )
 void    ZoomAnimation::OnRender()
 {
     std::auto_ptr<Surface> pSurface( getSurface()->ZoomSurface( m_curZoom ) );
+    if(pSurface.get() == 0) {
+    	return;
+    }
 
     Dim destDim = pSurface->GetDim();
     Dim srcDim = getSurface()->GetDim();

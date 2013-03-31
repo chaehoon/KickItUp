@@ -6,6 +6,7 @@
 class SoundStore;
 class SurfaceStore;
 class Context;
+class Surface;
 
 /// @file	KickItUp.h
 /// @brief	KickItUp class.

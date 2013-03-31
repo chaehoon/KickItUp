@@ -57,11 +57,11 @@ bool StageSelect::Initialize()
     m_pMove = g_pSoundStore->Order( "move" );
     m_pMove->Load( "wave/move.wav" );
 
-    // intro sound ÇÒ´ç¸¸ ÇÔ.
+    // intro sound ï¿½Ò´ç¸¸ ï¿½ï¿½.
     m_pSoundIntro = g_pSoundStore->Order( "intro" );
 
 	m_pStateComment = g_pSurfaceStore->Order( "c_font" );
-	assert( m_pStateComment );	// ÀÌ¹Ì Å¸ÀÌÆ² ½ºÅ×ÀÌÁö¿¡¼­ ·ÎµåÇßÀ¸¹Ç·Î LoadÇÏÁö ¾ÊÀ½.
+	assert( m_pStateComment );	// ï¿½Ì¹ï¿½ Å¸ï¿½ï¿½Æ² ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Îµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç·ï¿½ Loadï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½.
 
     for( int i = 0 ; i < 4 ; ++i ) {
         m_buttonAni[i].setZoom( 1.0f, 1.5f );
@@ -87,13 +87,13 @@ void StageSelect::Destroy()
 {
 }
 
-// È­¸é¿¡ Ãâ·ÂÇÏ±âÀü ¼± ÀÛ¾÷µéÀ» Ã³¸®ÇÑ´Ù.
+// È­ï¿½é¿¡ ï¿½ï¿½ï¿½ï¿½Ï±ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½Û¾ï¿½ï¿½ï¿½ï¿½ï¿½ Ã³ï¿½ï¿½ï¿½Ñ´ï¿½.
 bool StageSelect::Think(unsigned long delta )
 {
-	// È÷µç ¸ðµå Ã¼Å©.
+	// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ Ã¼Å©.
     _checkHiddenMode();
 
-    // ¼±ÅÃµÈ ³ë·¡ ±ôºýÀÓ.
+    // ï¿½ï¿½ï¿½Ãµï¿½ ï¿½ë·¡ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.
     if( m_pSongSelect )
         m_pSongSelect->GetDiscImg()->SetAlpha( g_pSurfaceStore->GetFlashAlphaValue() );
 
@@ -104,13 +104,12 @@ bool StageSelect::Think(unsigned long delta )
 	return true;
 }
 
-// È­¸é¿¡ °á°ú¹°À» Ãâ·ÂÇÑ´Ù.
+// È­ï¿½é¿¡ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ñ´ï¿½.
 bool StageSelect::Render(unsigned long delta )
 {
     // Draw BackGound.
     m_pBG->Blit( 0, 0 );
 
-    /*
     // Draw left top
     if( m_pSongLeft ) {
         m_pSongLeft->GetDiscImg()->Blit( 10, 50 );
@@ -128,7 +127,6 @@ bool StageSelect::Render(unsigned long delta )
 
 	// Draw other right select song button.
 	m_pShiftRight->Blit( 320, 250 );
-    */
 
     for( int i = 0 ; i < 4 ; ++i ) {
         m_buttonAni[i].OnRender();
@@ -173,15 +171,15 @@ void StageSelect::GetIn()
 {
 	g_Input.RegisterObserver( "StageSelect", this );
 
-    // LeftSong ¾ò±â.
+    // LeftSong ï¿½ï¿½ï¿½.
     m_pSongLeft = g_SongMgr.GetLeftSong();
 
-    // RightSong ¾ò±â.
+    // RightSong ï¿½ï¿½ï¿½.
     m_pSongRight = g_SongMgr.GetRightSong();
 
     _resetSelectSong();
 
-	// Ä¡Æ®Å° ÃÊ±âÈ­
+	// Ä¡Æ®Å° ï¿½Ê±ï¿½È­
 	m_chatkeys[0].clear();
 	m_chatkeys[1].clear();
 }
@@ -216,7 +214,7 @@ bool StageSelect::InputHandleMessage( const eInputName name, const eInputState i
 		g_GameConfig.SetStart( eP_2 );
 		break;
 
-	// ÀÌÀü ³ë·¡·Î ÀÌµ¿
+	// ï¿½ï¿½ï¿½ï¿½ ï¿½ë·¡ï¿½ï¿½ ï¿½Ìµï¿½
 	case eIN_ARROW_1P_BOTTOM_LEFT:
         if( g_GameConfig.IsStarted( eP_1 ) )
             _turnLeft();
@@ -226,7 +224,7 @@ bool StageSelect::InputHandleMessage( const eInputName name, const eInputState i
             _turnLeft();
 		break;
 
-	// ´ÙÀ½ ³ë·¡·Î ÀÌµ¿
+	// ï¿½ï¿½ï¿½ï¿½ ï¿½ë·¡ï¿½ï¿½ ï¿½Ìµï¿½
 	case eIN_ARROW_1P_BOTTOM_RIGHT:
         if( g_GameConfig.IsStarted( eP_1 ) )
             _turnRight();
@@ -237,7 +235,7 @@ bool StageSelect::InputHandleMessage( const eInputName name, const eInputState i
             _turnRight();
 		break;
 
-	// ¿ÞÂÊ ³ë·¡ ¼±ÅÃ
+	// ï¿½ï¿½ï¿½ï¿½ ï¿½ë·¡ ï¿½ï¿½ï¿½ï¿½
 	case eIN_ARROW_1P_TOP_LEFT:
         if( g_GameConfig.IsStarted( eP_1 ) )
             _selectSong( 0 );
@@ -248,7 +246,7 @@ bool StageSelect::InputHandleMessage( const eInputName name, const eInputState i
             _selectSong( 0 );
        break;
 
-	// ¿À¸¥ÂÊ ³ë·¡ ¼±ÅÃ
+	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ë·¡ ï¿½ï¿½ï¿½ï¿½
 	case eIN_ARROW_1P_TOP_RIGHT:
         if( g_GameConfig.IsStarted( eP_1 ) )
             _selectSong( 1 );
@@ -291,11 +289,11 @@ void StageSelect::GoPreStage()
 // goto next stage.
 void StageSelect::GoNextStage()
 {
-	// ´õºí¸ðµåÀÎÁö ½Ì±Û¸ðµåÀÎÁö ÆÇº°ÇÏ¿© ´ÙÀ½À¸·Î gogo
+	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ì±Û¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Çºï¿½ï¿½Ï¿ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ gogo
 	m_context.SetState( m_context.GetStateNormal() );
 }
 
-// ¿ÞÂÊ È­¸éÀ¸·Î.
+// ï¿½ï¿½ï¿½ï¿½ È­ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.
 void StageSelect::_turnLeft()
 {
     g_SongMgr.TurnLeft();
@@ -303,7 +301,7 @@ void StageSelect::_turnLeft()
     m_pMove->Play();
 }
 
-// ¿À¸¥ÂÊ È­¸éÀ¸·Î.
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ È­ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.
 void StageSelect::_turnRight()
 {
     g_SongMgr.TurnRight();
@@ -320,8 +318,7 @@ void StageSelect::_resetSelectSong()
     m_pSoundIntro->Free();
     m_pSongLeft = g_SongMgr.GetLeftSong();
     m_pSongRight = g_SongMgr.GetRightSong();
-    if( m_pBGM->IsPlaying() == false )
-        m_pBGM->Play( true );
+    m_pBGM->Play( true );
 
     for( int i = 0 ; i < 2 ; ++i ) {
         m_buttonAni[i].setCurZoom( 1.0f );
@@ -342,7 +339,7 @@ void StageSelect::_selectSong( const int direction )
         pNewSelectedSong = g_SongMgr.GetRightSong();
     }
 
-    // ÀÌ¹Ì ¼±ÅÃµÇ¾î ÀÖÀ¸¸é ´ÙÀ½ ½ºÅ×ÀÌÁö·Î.
+    // ï¿½Ì¹ï¿½ ï¿½ï¿½ï¿½ÃµÇ¾ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.
     if( m_pSongSelect == pNewSelectedSong ) {
         GoNextStage();
         return;

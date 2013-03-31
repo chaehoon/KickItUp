@@ -27,6 +27,7 @@ public:
 
 	virtual bool    IsLoaded() const    {   return m_pSound != 0;   }
 	virtual bool    IsPlaying() {
+		// TODO: bugfix
 		int	playing;
 		FMOD_Channel_IsPlaying(m_pChannel, &playing);
 		return playing != 0;

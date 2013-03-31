@@ -82,30 +82,30 @@ bool StageTitle::Render( unsigned long delta )
 	return true;
 }
 
-// Å¸ÀÌÆ² ½ºÅ×ÀÌÁö ÀÔÀå.
+// Å¸ï¿½ï¿½Æ² ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½.
 void StageTitle::GetIn()
 {
-	// ÇÃ·¹ÀÌ¾î 1p, 2p Ãë¼Ò.
+	// ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ 1p, 2p ï¿½ï¿½ï¿½.
 	g_GameConfig.SetStart( eP_1, false );
 	g_GameConfig.SetStart( eP_2, false );
 
 	g_Input.RegisterObserver( "StageTitle", this );
 	
-	// µð¹ö±ë½Ã ¼Ò¸®°¡ ¸Þ¾Æ¸® Ä¡´Â°ÍÀ» ¹æÁöÇÏ±â À§ÇØ Á¦ÀÏ µÚ·Î.
+	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ò¸ï¿½ï¿½ï¿½ ï¿½Þ¾Æ¸ï¿½ Ä¡ï¿½Â°ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï±ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ú·ï¿½.
 	m_pOpening->Play( true );
 }
 
-// Å¸ÀÌÆ² ½ºÅ×ÀÌÁö ÅðÀå.
+// Å¸ï¿½ï¿½Æ² ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½.
 void StageTitle::GetOut()
 {
-	// µð¹ö±ë½Ã ¼Ò¸®°¡ ¸Þ¾Æ¸® Ä¡´Â°ÍÀ» ¹æÁöÇÏ±â À§ÇØ Á¦ÀÏ ¾ÕÀ¸·Î.
+	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ò¸ï¿½ï¿½ï¿½ ï¿½Þ¾Æ¸ï¿½ Ä¡ï¿½Â°ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï±ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.
 	m_pOpening->Stop();
 
 	g_Input.DeleteObserver( "StageTitle" );
 
 }
 
-// Å°º¸µå ÀÔ·Â Ã³¸®.
+// Å°ï¿½ï¿½ï¿½ï¿½ ï¿½Ô·ï¿½ Ã³ï¿½ï¿½.
 bool StageTitle::InputHandleMessage( const eInputName name, const eInputState is )
 {
 	bool	ret = true;
@@ -116,21 +116,21 @@ bool StageTitle::InputHandleMessage( const eInputName name, const eInputState is
 	switch( name )
 	{
 	case eIN_BACK:
-		// ÇÃ·¹ÀÌ¾î°¡ ½ÃÀÛ»óÅÂÀÌ¸é ½ÃÀÛ»óÅÂ Ãë¼Ò
+		// ï¿½Ã·ï¿½ï¿½Ì¾î°¡ ï¿½ï¿½ï¿½Û»ï¿½ï¿½ï¿½ï¿½Ì¸ï¿½ ï¿½ï¿½ï¿½Û»ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
 		if( g_GameConfig.IsStarted( eP_1) || 
 			g_GameConfig.IsStarted( eP_2) )	{ 
-			// ÇÃ·¹ÀÌ¾î 1p, 2p Ãë¼Ò.
+			// ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ 1p, 2p ï¿½ï¿½ï¿½.
 			g_GameConfig.SetStart( eP_1, false );
 			g_GameConfig.SetStart( eP_2, false );
 		}
-		// ÇÃ·¹ÀÌ¾î°¡ ½ÃÀÛ»óÅÂ°¡ ¾Æ´Ï¸é ÇÁ·Î±×·¥ Á¾·á.
+		// ï¿½Ã·ï¿½ï¿½Ì¾î°¡ ï¿½ï¿½ï¿½Û»ï¿½ï¿½Â°ï¿½ ï¿½Æ´Ï¸ï¿½ ï¿½ï¿½ï¿½Î±×·ï¿½ ï¿½ï¿½ï¿½ï¿½.
 		else {
 			GoPreStage();
 		}
 		break;
 
 	case eIN_ARROW_1P_MIDLE:
-		// 1ÇÃ·¹ÀÌ¾î ¼±ÅÃ.
+		// 1ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ ï¿½ï¿½ï¿½ï¿½.
 		if( g_GameConfig.IsStarted( eP_1 ) )
 			GoNextStage();
 		else
@@ -138,7 +138,7 @@ bool StageTitle::InputHandleMessage( const eInputName name, const eInputState is
 		break;
 
 	case eIN_ARROW_2P_MIDLE:
-		// 1ÇÃ·¹ÀÌ¾î ¼±ÅÃ.
+		// 1ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ ï¿½ï¿½ï¿½ï¿½.
 		if( g_GameConfig.IsStarted( eP_2 ) )
 			GoNextStage();
 		else
@@ -152,13 +152,13 @@ bool StageTitle::InputHandleMessage( const eInputName name, const eInputState is
 	return ret;
 }
 
-// ´ÙÀ½ ¼±ÅÃ ½ºÅ×ÀÌÁö·Î ÀÌµ¿.
+// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ìµï¿½.
 void StageTitle::GoNextStage()
 {
 	m_context.SetState( m_context.GetStateSelect() );
 }
 
-// ÀÌÀü½ºÅ×ÀÌÁö·Î ÀÌµ¿( ÇÁ·Î±×·¥ Á¾·á )
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ìµï¿½( ï¿½ï¿½ï¿½Î±×·ï¿½ ï¿½ï¿½ï¿½ï¿½ )
 void StageTitle::GoPreStage()
 {
 	m_context.GetKickItUp().SetQuit( true );
