@@ -27,6 +27,11 @@ private:
 	unsigned int	mMode;
 	int				mSpeed;		// 배속
 
+	struct	st_ModeStr {
+		char	str[16];
+		Mode	mode;
+	};
+
 public:
 	GameMode();
 	virtual ~GameMode();
@@ -36,6 +41,7 @@ public:
 	void Set(const Mode mode);
 	void UnSet(const Mode mode);
 	bool IsSet(const Mode mode) const;
+	Mode str2Mode(const char * str) const;
 
 private:
 	void _set(const Mode mode);

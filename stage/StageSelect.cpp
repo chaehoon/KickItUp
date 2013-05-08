@@ -9,6 +9,8 @@
 #include "../GameConfig.h"
 #include "../Data/SongMgr.h"
 
+#include <algorithm>
+
 StageSelect::StageSelect( Context & context )	:
 	m_context( context ),
     m_pSongLeft( 0 ),
@@ -364,10 +366,32 @@ void StageSelect::_selectSong( const int direction )
     m_buttonAni[direction].setPause( false );
 }
 
+
 void StageSelect::_checkHiddenMode()
 {
     // TODO:
-    if( m_chatkeys[0].size() == 8 ) {
+	for(int i = 0 ; i < eP_Max ; ++i) {
+		deque<eInputName> & chatkeys = m_chatkeys[i];
+	    if( chatkeys.size() == 8 ) {
+	    	char strKeyHistory[16] = {0, };
+	    	std::copy(chatkeys.begin(), chatkeys.end(), strKeyHistory);
 
-    }
+	    	// 2x Mode
+	    	if ( strcmp ( strKeyHistory,"55755595" ) == 0 ) {
+	    		g_GameConfig.SetSpeed((ePlayer)i, 2);
+	    	}
+	    	// 4x Mode
+	    	else if ( strcmp ( strKeyHistory,"55355755" ) == 0 ) {
+	    		g_GameConfig.SetSpeed((ePlayer)i, 4);
+	    	}
+	    	// 8x Mode
+	    	else if ( strcmp ( strKeyHistory,"55153555" ) ==0 ) {
+	    		g_GameConfig.SetSpeed((ePlayer)i, 8);
+	    	}
+
+	    }
+	}
 }
+
+
+
